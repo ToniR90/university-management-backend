@@ -1,4 +1,4 @@
-package com.orientation.backend.shared.infraestructure.config;
+package com.orientation.backend.shared.infrastructure.config;
 
 
 import org.springframework.context.annotation.Bean;
