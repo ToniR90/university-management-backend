@@ -10,7 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
  */
 @SpringBootTest
 @ActiveProfiles("test")
-class ApplicationContextTest {  // ✅ Cambié 'public class' a 'class' (convención JUnit 5)
+class ApplicationContextTest {
 
     /**
      * Verifies that the Spring context loads without errors.
