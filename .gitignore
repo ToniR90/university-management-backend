@@ -1,0 +1,90 @@
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.settings/
+.project
+.classpath
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# Spring Boot
+spring.log
+
+# Environment variables
+.env
+.env.local
+
+# Docker volumes (opcional)
+postgres-data/
+pgadmin-data/
+
+# Compiled source
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.com
+
+# Packages
+*.jar
+*.war
+*.ear
+*.zip
+*.tar
+*.rar
+*.7z
+*.gz
+*.rpm
+*.iso
+
+# Logs and databases
+*.log
+*.tlog
+*.db
+*.sql
+*.sqlite
+
+# Build and output directories
+build/
+dist/
+out/
+tmp/
+logs/
+coverage/
+test-output/
+node_modules/
+cmake-build-debug/
+
+# Metadata and config
+.metadata/
+.plugins/
+.JETEmitters/
+.recommenders
+.vagrant
+.gradle/
+.angular/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+.lock
+
+# Version control
+.svn/
+CVS/
