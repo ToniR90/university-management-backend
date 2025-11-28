@@ -5,7 +5,7 @@ spring:
   application:
     name: student-management-system
 
-profiles:
+  profiles:
     active: dev
 
   datasource:

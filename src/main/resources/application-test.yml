@@ -1,34 +1,18 @@
-server:
-  port: 8080
+# Test profile - Overrides for testing environment
 
 spring:
-  application:
-    name: student-management-system
-
-  datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/students_db}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
-    driver-class-name: org.postgresql.Driver
-
   jpa:
-    hibernate:
-      ddl-auto: validate  # Important: Flyway handles schema
     show-sql: false
-    properties:
-      hibernate:
-        format_sql: true
 
-  flyway:
-    enabled: true
-    baseline-on-migrate: true
-    locations: classpath:db/migration
+# Minimal logging for tests
+logging:
+  level:
+    root: WARN
+    com.orientation.backend: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
 
 management:
-  endpoints:
-    web:
-      exposure:
-        include: health
   endpoint:
     health:
-      show-details: always
+      show-details: never
