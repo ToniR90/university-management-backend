@@ -13,10 +13,19 @@ spring:
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      # Connection testing settings
+      connection-test-query: SELECT 1
+
+      # Auto-commit behavior
+      auto-commit: true
+
+      # Pool name (for monitoring)
+      pool-name: StudentManagement_DB_Pool
 
   jpa:
     hibernate:
-      ddl-auto: validate  # Important: Flyway handles schema
+      ddl-auto: validate  # Important: Flyway handles schema, jpa just validates
 
   flyway:
     enabled: true
