@@ -1,0 +1,32 @@
+# Test profile - Overrides for testing environment
+
+spring:
+  jpa:
+    show-sql: false
+
+  datasource:
+    hikari:
+      # Pool sizing for tests
+      maximum-pool-size: 5
+      minimum-idle: 2
+
+      # Timeout settings for tests
+      idle-timeout: 60000
+      max-lifetime: 600000
+      connection-timeout: 20000
+
+      # Leak detection threshold
+      leak-detection-threshold: 0
+
+# Minimal logging for tests
+logging:
+  level:
+    root: WARN
+    com.orientation.backend: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+
+management:
+  endpoint:
+    health:
+      show-details: never
