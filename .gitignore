@@ -51,8 +51,15 @@ pgadmin-data/
 *.log
 *.tlog
 *.db
-*.sql
+# *.sql  Flyway migrations must be committed
 *.sqlite
+
+# Database dumps/exports (specific files, NOT migrations)
+backup-*.sql
+dump-*.sql
+*-backup.sql
+*-dump.sql
+*.dump
 
 # Build and output directories
 build/
