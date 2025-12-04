@@ -18,6 +18,10 @@ public enum CurrentYear {
         this.displayName = displayName;
     }
 
+    public String getDisplayName() {
+        return displayName;
+    }
+
     public boolean isGraduateLevel() {
         return this == MASTER || this == DOCTORATE;
     }

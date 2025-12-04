@@ -18,6 +18,10 @@ public enum RgpdConsentStatus {
         this.displayName = displayName;
     }
 
+    public String getDisplayName() {
+        return displayName;
+    }
+
     public boolean isPending() {
         return this == PENDING;
     }
