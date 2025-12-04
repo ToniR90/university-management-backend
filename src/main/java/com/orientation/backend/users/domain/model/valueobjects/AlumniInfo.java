@@ -44,24 +44,22 @@ public final class AlumniInfo {
 
     // Consistency validation
     private static void validateConsistency(boolean isAlumni, AlumniType type, Integer graduationYear) {
-        // TODO: Validar consistencia
-
         if (!isAlumni) {
-            // Si no es alumni, type y year deben ser null
-            // if (type != null || graduationYear != null) {
-            //     throw new IllegalArgumentException("Non-alumni cannot have type or graduation year");
-            // }
+            // Non-alumni: type and year must be null
+            if (type != null || graduationYear != null) {
+                throw new IllegalArgumentException("No es pot determinar un any de graduació ni tipus d'alumni si no ho és");
+            }
         } else {
-            // Si es alumni, type y year deben estar presentes
-            // TODO: Validar que type no sea null
+            // Alumni: type and year must be present
+            if (type == null || graduationYear == null) {
+                throw new IllegalArgumentException("Falten per determinar el tipus d'alumni o l'any de graduació");
+            }
 
-            // TODO: Validar que graduationYear no sea null
-
-            // TODO: Validar año (>= 1900, <= año actual)
-            // int currentYear = Year.now().getValue();
-            // if (graduationYear < MIN_GRADUATION_YEAR || graduationYear > currentYear) {
-            //     throw new IllegalArgumentException("Invalid graduation year: " + graduationYear);
-            // }
+            // Validate year range
+            int currentYear = Year.now().getValue();
+            if (graduationYear < MIN_GRADUATION_YEAR || graduationYear > currentYear) {
+                throw new IllegalArgumentException("L'any de graduació no és correcte: " + graduationYear);
+            }
         }
     }
 
@@ -78,9 +76,27 @@ public final class AlumniInfo {
         return Optional.ofNullable(graduationYear);
     }
 
-    // TODO: Generate equals & hashCode (Select ALL three fields)
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AlumniInfo that)) return false;
+        return isAlumni == that.isAlumni &&
+                Objects.equals(type, that.type) &&
+                Objects.equals(graduationYear, that.graduationYear);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(isAlumni, type, graduationYear);
+    }
 
-    // TODO: Generate toString
-
+    @Override
+    public String toString() {
+        if (!isAlumni) {
+            return "L'usuari no és alumni";
+        }
+        return "Alumni info: " + "\n" +
+                "Tipus: " + type + "\n" +
+                "Any de graduació: " + graduationYear;
+    }
 }
