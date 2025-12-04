@@ -12,6 +12,7 @@ import java.util.Objects;
  *
  * Immutable and self-validated.
  */
+
 public final class FullName {
 
     private static final int MAX_LENGTH = 100;
@@ -22,9 +23,9 @@ public final class FullName {
 
     // Private constructor
     private FullName(String name, String firstSurname, String secondSurname) {
-        this.name = validateRequired(name, "Name");
-        this.firstSurname = validateRequired(firstSurname, "First surname");
-        this.secondSurname = validateOptional(secondSurname, "Second surname");
+        this.name = validateRequired(name, "Nom");
+        this.firstSurname = validateRequired(firstSurname, "Primer cognom");
+        this.secondSurname = validateOptional(secondSurname, "Segon cognom");
     }
 
     // Factory method
@@ -34,32 +35,26 @@ public final class FullName {
 
     // Validate required field
     private static String validateRequired(String value, String fieldName) {
-        // TODO: Validar que no sea null
+        Objects.requireNonNull(value, fieldName + " no pot ser nul");
 
-        // TODO: Trim
         String trimmed = value.trim();
 
-        // TODO: Validar que no esté vacío
-        // if (trimmed.isEmpty()) {
-        //     throw new IllegalArgumentException(fieldName + " cannot be empty");
-        // }
+        if (trimmed.isEmpty()) {
+            throw new IllegalArgumentException(fieldName + " no pot estar buit");
+        }
 
-        // TODO: Validar longitud máxima
-        // if (trimmed.length() > MAX_LENGTH) {
-        //     throw new IllegalArgumentException(fieldName + " exceeds maximum length of " + MAX_LENGTH);
-        // }
+        if (trimmed.length() > MAX_LENGTH) {
+            throw new IllegalArgumentException(fieldName + " supera la longitud màxima de " + MAX_LENGTH);
+        }
 
         return trimmed;
     }
 
     // Validate optional field
     private static String validateOptional(String value, String fieldName) {
-        // TODO: Si es null, devolver null
         if (value == null) {
             return null;
         }
-
-        // TODO: Si no es null, validar igual que required
         return validateRequired(value, fieldName);
     }
 
@@ -78,19 +73,28 @@ public final class FullName {
 
     // Utility method
     public String getFullName() {
-        // TODO: Construir nombre completo
-        // Si secondSurname es null: "Name FirstSurname"
-        // Si no: "Name FirstSurname SecondSurname"
-
         if (secondSurname == null) {
             return name + " " + firstSurname;
         }
         return name + " " + firstSurname + " " + secondSurname;
     }
 
-    // TODO: Generate equals & hashCode (Select ALL three fields: name, firstSurname, secondSurname)
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof FullName fullName)) return false;
+        return Objects.equals(name, fullName.name) &&
+                Objects.equals(firstSurname, fullName.firstSurname) &&
+                Objects.equals(secondSurname, fullName.secondSurname);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, firstSurname, secondSurname);
+    }
 
-    // TODO: Generate toString
-
+    @Override
+    public String toString() {
+        return getFullName();
+    }
 }
