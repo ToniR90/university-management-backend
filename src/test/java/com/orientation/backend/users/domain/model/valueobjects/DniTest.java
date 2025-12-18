@@ -174,6 +174,10 @@ class DniTest {
 
     @Test
     void shouldHaveSameHashCodeForSameValue() {
+        Dni dni1 = Dni.of("12345678Z");
+        Dni dni2 = Dni.of("12345678Z");
+
+        assertEquals(dni1.hashCode(), dni2.hashCode());
     }
 
     @Test
