@@ -53,6 +53,11 @@ class DniTest {
 
     @Test
     void shouldCreateValidNieWithZ() {
+        Dni dni = Dni.of(("Z1234567R"));
+
+        assertEquals(("Z1234567R"), dni.getValue());
+        assertTrue(dni.isNie());
+        assertFalse(dni.isDni());
     }
 
     // ========== Normalize ==========
