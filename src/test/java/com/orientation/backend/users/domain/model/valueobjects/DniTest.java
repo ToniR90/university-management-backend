@@ -71,6 +71,9 @@ class DniTest {
 
     @Test
     void shouldTrimWhitespace() {
+        Dni dni = Dni.of(("   12345678Z   "));
+
+        assertEquals(("12345678Z"), dni.getValue());
     }
 
     @Test
