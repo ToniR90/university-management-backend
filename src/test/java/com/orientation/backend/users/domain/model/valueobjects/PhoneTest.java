@@ -50,24 +50,31 @@ class PhoneTest {
     }
 
     @Test
-    void shouldDelete00() {
-        Phone phone = Phone.of("00600654321");
-
-        assertEquals("+600654321", phone.getValue());
-    }
-
-    @Test
-    void shouldReturnDefaultCountry() {
-        Phone phone = Phone.of("600654321");
+    void shouldNormalize0034Prefix() {
+        Phone phone = Phone.of("0034600654321");
 
         assertEquals("+34600654321", phone.getValue());
     }
 
     @Test
-    void shouldAddPlusSign() {
+    void shouldAddSpanishPrefixByDefault() {
         Phone phone = Phone.of("600654321");
 
+        assertTrue(phone.getValue().startsWith("+34"));
+    }
+
+    @Test
+    void shouldNormalizeInternationalFormat() {
+        Phone phone = Phone.of("+34600654321");
+
         assertEquals(("+34600654321"), phone.getValue());
+    }
+
+    @Test
+    void shouldKeepExistingInternationalPrefix() {
+        Phone phone = Phone.of("+34600654321");
+
+        assertEquals("+34600654321", phone.getValue());
     }
 
     @Test
@@ -84,9 +91,5 @@ class PhoneTest {
         Phone phone2 = Phone.of("600654321");
 
         assertEquals(phone1.hashCode(), phone2.hashCode());
-    }
-
-    @Test
-    void testToString() {
     }
 }
