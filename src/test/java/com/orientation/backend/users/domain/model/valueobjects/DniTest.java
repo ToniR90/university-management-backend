@@ -129,7 +129,9 @@ class DniTest {
 
     @Test
     void shouldThrowExceptionForOnlyNumbers() {
-
+        assertThrows(IllegalArgumentException.class, () -> {
+            Dni.of("123456789");
+        });
     }
 
     @Test
