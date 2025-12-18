@@ -9,6 +9,12 @@ class DniTest {
 
     @Test
     void shouldCreateValidDni() {
+        Dni dni = Dni.of("12345678Z");
+
+        assertNotNull(dni);
+        assertEquals(("12345678Z"), dni.getValue());
+        assertTrue(dni.isDni());
+        assertFalse(dni.isNie());
     }
 
     @Test
