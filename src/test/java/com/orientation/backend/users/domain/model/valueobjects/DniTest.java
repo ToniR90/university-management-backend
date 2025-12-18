@@ -64,6 +64,9 @@ class DniTest {
 
     @Test
     void shouldNormalizeDniToUppercase() {
+        Dni dni = Dni.of("12345678z");
+
+        assertEquals(("12345678Z"), dni.getValue());
     }
 
     @Test
