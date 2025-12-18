@@ -136,6 +136,9 @@ class DniTest {
 
     @Test
     void shouldThrowExceptionForOnlyLetters() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Dni.of("ABCDEFGH");
+        });
     }
 
     @Test
