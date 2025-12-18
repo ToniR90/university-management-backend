@@ -157,6 +157,9 @@ class DniTest {
 
     @Test
     void shouldThrowExceptionForInvalidNieLetter() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Dni.of("Z1234567W");
+        });
     }
 
     // ========== Equals & HashCode ==========
