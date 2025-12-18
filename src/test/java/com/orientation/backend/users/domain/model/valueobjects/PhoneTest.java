@@ -43,7 +43,7 @@ class PhoneTest {
     }
 
     @Test
-    void shouldDeleteEmptySpace() {
+    void shouldRemoveDashes() {
         Phone phone = Phone.of("600-65-43-21");
 
         assertEquals("+34600654321", phone.getValue());
@@ -64,10 +64,10 @@ class PhoneTest {
     }
 
     @Test
-    void shouldNormalizeInternationalFormat() {
-        Phone phone = Phone.of("+34600654321");
+    void shouldKeepNonSpanishInternationalPrefix() {
+        Phone phone = Phone.of("+33612345678");
 
-        assertEquals(("+34600654321"), phone.getValue());
+        assertEquals("+33612345678", phone.getValue());
     }
 
     @Test
@@ -78,7 +78,7 @@ class PhoneTest {
     }
 
     @Test
-    void shouldBeEqualsByValue() {
+    void shouldBeEqualByValue() {
         Phone phone1 = Phone.of("600654321");
         Phone phone2 = Phone.of("600654321");
 
@@ -86,7 +86,7 @@ class PhoneTest {
     }
 
     @Test
-    void shouldBeEqualsByHashCode() {
+    void shouldHaveSameHashCodeForSameValue() {
         Phone phone1 = Phone.of("600654321");
         Phone phone2 = Phone.of("600654321");
 
