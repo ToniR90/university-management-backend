@@ -94,6 +94,9 @@ class DniTest {
 
     @Test
     void shouldThrowExceptionForNull() {
+        assertThrows(NullPointerException.class, () -> {
+            Dni.of(null);
+        });
     }
 
     @Test
