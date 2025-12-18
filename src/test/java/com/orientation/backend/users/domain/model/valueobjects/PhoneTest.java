@@ -29,6 +29,13 @@ class PhoneTest {
     }
 
     @Test
+    void shouldThrowExceptionForLetter() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Phone.of("600abc321");
+        });
+    }
+
+    @Test
     void shouldTrimWhitespace() {
         Phone phone = Phone.of("600 65 43 21");
 
