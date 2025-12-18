@@ -7,7 +7,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class PhoneTest {
 
     @Test
-    void of() {
+    void shouldCreateValidPhone() {
+        Phone phone = Phone.of("600654321");
+
+        assertNotNull(phone);
+        assertEquals("+34600654321", phone.getValue());
     }
 
     @Test

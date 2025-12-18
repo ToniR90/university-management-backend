@@ -59,7 +59,7 @@ public final class Phone {
         // 2. Delete empty spaces, "-"
         cleaned = cleaned.replaceAll("[\\s()\\-]", "");
 
-        // 3. Convertir 00 a +
+        // 3. Convert 00 a +
         if (cleaned.startsWith("00")) {
             cleaned = "+" + cleaned.substring(2);
         }
