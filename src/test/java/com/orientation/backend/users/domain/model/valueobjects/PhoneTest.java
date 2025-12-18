@@ -51,12 +51,16 @@ class PhoneTest {
 
     @Test
     void shouldDelete00() {
+        Phone phone = Phone.of("00600654321");
 
+        assertEquals("+600654321", phone.getValue());
     }
 
     @Test
     void shouldReturnDefaultCountry() {
+        Phone phone = Phone.of("600654321");
 
+        assertEquals("+34600654321", phone.getValue());
     }
 
     @Test
