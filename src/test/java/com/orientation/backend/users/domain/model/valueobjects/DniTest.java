@@ -143,6 +143,9 @@ class DniTest {
 
     @Test
     void shouldThrowExceptionForInvalidDniLetter() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Dni.of("12345678Y");
+        });
     }
 
     @Test
