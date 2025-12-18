@@ -71,50 +71,22 @@ class PhoneTest {
     }
 
     @Test
-    void shouldReturnPlus() {
+    void shouldBeEqualsByValue() {
+        Phone phone1 = Phone.of("600654321");
+        Phone phone2 = Phone.of("600654321");
 
+        assertEquals(phone1, phone2);
     }
 
     @Test
-    void getCountryCode() {
-    }
+    void shouldBeEqualsByHashCode() {
+        Phone phone1 = Phone.of("600654321");
+        Phone phone2 = Phone.of("600654321");
 
-    @Test
-    void testEquals() {
-    }
-
-    @Test
-    void testHashCode() {
+        assertEquals(phone1.hashCode(), phone2.hashCode());
     }
 
     @Test
     void testToString() {
     }
 }
-
-/*
-private static String normalize(String phone) {
-        // 1. Trim
-        String cleaned = phone.trim();
-
-        // 2. Delete empty spaces, "-"
-        cleaned = cleaned.replaceAll("[\\s()\\-]", "");
-
-        // 3. Convert 00 a +
-        if (cleaned.startsWith("00")) {
-            cleaned = "+" + cleaned.substring(2);
-        }
-
-        // 4. If there's no prefixes, default is Spain
-        if (!cleaned.startsWith("+") && cleaned.matches("^[6789]\\d{8}$")) {
-            cleaned = DEFAULT_COUNTRY_CODE + cleaned;
-        }
-
-        // 5. If there's no "+", but there's numbers
-        if (!cleaned.startsWith("+") && cleaned.matches("^\\d+$")) {
-            cleaned = DEFAULT_COUNTRY_CODE + cleaned;
-        }
-
-        return cleaned;
-    }
- */
