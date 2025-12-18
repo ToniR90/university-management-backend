@@ -185,6 +185,6 @@ class DniTest {
         Dni dni1 = Dni.of("00000000T");
         Dni dni2 = Dni.of("99999999R");
 
-        assertNotEquals(dni1.hashCode(), dni2.hashCode());
+        assertNotEquals(dni1, dni2);
     }
 }
