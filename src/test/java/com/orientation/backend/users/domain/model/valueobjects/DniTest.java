@@ -85,6 +85,9 @@ class DniTest {
 
     @Test
     void shouldRemoveDashes() {
+        Dni dni = Dni.of(("123-456-78-Z"));
+
+        assertEquals(("12345678Z"), dni.getValue());
     }
 
     // ========== Exceptions ==========
