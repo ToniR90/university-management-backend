@@ -22,6 +22,13 @@ class PhoneTest {
     }
 
     @Test
+    void shouldThrowExceptionForShort() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Phone.of("600");
+        });
+    }
+
+    @Test
     void shouldTrimWhitespace() {
         Phone phone = Phone.of("600 65 43 21");
 
@@ -35,7 +42,20 @@ class PhoneTest {
         assertEquals("+34600654321", phone.getValue());
     }
 
+    @Test
+    void shouldDelete00() {
 
+    }
+
+    @Test
+    void shouldReturnDefaultCountry() {
+
+    }
+
+    @Test
+    void shouldReturnPlus() {
+
+    }
 
     @Test
     void getCountryCode() {
