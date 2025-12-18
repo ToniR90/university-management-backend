@@ -101,6 +101,9 @@ class DniTest {
 
     @Test
     void shouldThrowExceptionForEmpty() {
+       assertThrows(IllegalArgumentException.class, () -> {
+           Dni.of((""));
+       });
     }
 
     @Test
