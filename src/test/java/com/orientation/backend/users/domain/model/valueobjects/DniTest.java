@@ -19,10 +19,16 @@ class DniTest {
 
     @Test
     void shouldCreateValidDniWithLeadingZeros() {
+        Dni dni = Dni.of("00000000T");
+
+        assertEquals(("00000000T"), dni.getValue());
     }
 
     @Test
     void shouldCreateValidDniWithHighNumber() {
+        Dni dni = Dni.of("99999999R");
+
+        assertEquals(("99999999R"), dni.getValue());
     }
 
     // ========== NIE ==========
