@@ -64,6 +64,13 @@ class PhoneTest {
     }
 
     @Test
+    void shouldAddPlusSign() {
+        Phone phone = Phone.of("600654321");
+
+        assertEquals(("+34600654321"), phone.getValue());
+    }
+
+    @Test
     void shouldReturnPlus() {
 
     }
