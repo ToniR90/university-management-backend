@@ -166,6 +166,10 @@ class DniTest {
 
     @Test
     void shouldBeEqualByValue() {
+        Dni dni1 = Dni.of("12345678Z");
+        Dni dni2 = Dni.of("12345678Z");
+
+        assertEquals(dni1, dni2);
     }
 
     @Test
