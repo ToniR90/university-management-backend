@@ -35,6 +35,11 @@ class DniTest {
 
     @Test
     void shouldCreateValidNieWithX() {
+        Dni dni = Dni.of("X1234567L");
+
+        assertEquals(("X1234567L"), dni.getValue());
+        assertTrue(dni.isNie());
+        assertFalse(dni.isDni());
     }
 
     @Test
