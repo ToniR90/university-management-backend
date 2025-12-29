@@ -83,18 +83,26 @@ class FullNameTest {
 
     @Test
     void shouldAllowNullSecondSurname() {
+        FullName fullName = FullName.of("Dante", "Alighiero", null);
 
+        assertNotNull(fullName);
     }
 
     @Test
     void shouldGetFullNameStringWithoutSecondSurname() {
+        FullName fullName = FullName.of("Dante", "Alighiero", null);
 
+        assertNotNull(fullName);
+        assertEquals("Dante Alighiero", fullName.getFullName());
     }
 
-    // Equals & HashCode
+    // ========== Equals & HashCode ==========
     @Test
     void shouldBeEqualByValue() {
+        FullName fullName1 = FullName.of("Dante", "Alighiero", "Alighieri");
+        FullName fullName2 = FullName.of("Dante", "Alighiero", "Alighieri");
 
+        assertEquals(fullName1, fullName2);
     }
 
     @Test
