@@ -9,7 +9,12 @@ class RgpdConsentTest {
     // ========== Validation ==========
     @Test
     void shouldCreatePending() {
+        RgpdConsent rgpdConsent = RgpdConsent.pending();
 
+        assertNotNull(rgpdConsent);
+        assertTrue(rgpdConsent.getStatus().isPending());
+        assertTrue(rgpdConsent.getSignedDate().isEmpty());
+        assertTrue(rgpdConsent.getSignedYear().isEmpty());
     }
 
     @Test
