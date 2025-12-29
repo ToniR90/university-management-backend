@@ -53,7 +53,10 @@ class AlumniInfoTest {
 
     @Test
     void shouldAcceptYear1900() {
+        AlumniInfo alumniInfo = AlumniInfo.createAlumni(AlumniType.MASTER, 1900);
 
+        assertTrue(alumniInfo.getGraduationYear().isPresent());
+        assertEquals(1900, alumniInfo.getGraduationYear().get());
     }
 
     @Test
