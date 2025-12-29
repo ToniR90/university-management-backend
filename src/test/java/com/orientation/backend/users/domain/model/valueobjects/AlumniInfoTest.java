@@ -32,7 +32,9 @@ class AlumniInfoTest {
 
     @Test
     void shouldThrowExceptionWhenAlumniMissingYear() {
-
+        assertThrows(IllegalArgumentException.class, () -> {
+            AlumniInfo.createAlumni(AlumniType.ERASMUS, null);
+        });
     }
 
     @Test
