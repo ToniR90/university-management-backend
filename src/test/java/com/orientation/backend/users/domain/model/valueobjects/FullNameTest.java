@@ -61,19 +61,21 @@ class FullNameTest {
     }
 
     @Test
-    void shouldThrowExceptionForNullFirstName() {
+    void shouldThrowExceptionForNullFirstSurname() {
         assertThrows(NullPointerException.class, () -> {
             FullName.of("Dante", null, "Alighieri");
         });
     }
 
     @Test
-    void shouldThrowExceptionForEmptyFirstName() {
-
+    void shouldThrowExceptionForEmptyFirstSurname() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            FullName.of("Dante", "", "Alighieri");
+        });
     }
 
     @Test
-    void shouldThrowExceptionForBlankFirstName() {
+    void shouldThrowExceptionForBlankFirstSurame() {
 
     }
 
