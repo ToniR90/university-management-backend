@@ -89,6 +89,9 @@ class RgpdConsentTest {
 
     @Test
     void shouldHaveSameHashCodeForSameValue() {
+        RgpdConsent rgpdConsent1 = RgpdConsent.alreadySigned(2020);
+        RgpdConsent rgpdConsent2 = RgpdConsent.alreadySigned(2020);
 
+        assertEquals(rgpdConsent1.hashCode(), rgpdConsent2.hashCode());
     }
 }
