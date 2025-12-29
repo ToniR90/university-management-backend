@@ -1,5 +1,6 @@
 package com.orientation.backend.users.domain.model.valueobjects;
 
+import com.orientation.backend.users.domain.model.enums.AlumniType;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,13 +17,17 @@ class AlumniInfoTest {
 
     @Test
     void shouldCreateAlumni() {
+        AlumniInfo alumniInfo = AlumniInfo.createAlumni(AlumniType.DOCTORATE, 1901);
 
+        assertTrue(alumniInfo.isAlumni());
     }
 
     // ========== Exceptions ==========
     @Test
     void shouldThrowExceptionWhenAlumniMissingType() {
-
+        assertThrows(IllegalArgumentException.class, () -> {
+            AlumniInfo.createAlumni(null, 1901);
+        });
     }
 
     @Test
