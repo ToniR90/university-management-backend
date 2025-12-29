@@ -71,7 +71,10 @@ class AlumniInfoTest {
 
     @Test
     void shouldAcceptYear2000() {
+        AlumniInfo alumniInfo = AlumniInfo.createAlumni(AlumniType.ERASMUS, 2000);
 
+        assertTrue(alumniInfo.getGraduationYear().isPresent());
+        assertEquals(2000, alumniInfo.getGraduationYear().get());
     }
 
     // ========== Equals & HashCode ==========
