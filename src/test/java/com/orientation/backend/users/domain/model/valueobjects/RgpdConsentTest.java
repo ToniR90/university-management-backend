@@ -1,5 +1,6 @@
 package com.orientation.backend.users.domain.model.valueobjects;
 
+import com.orientation.backend.users.domain.model.enums.RgpdConsentStatus;
 import org.junit.jupiter.api.Test;
 
 import java.time.Year;
@@ -14,7 +15,7 @@ class RgpdConsentTest {
         RgpdConsent rgpdConsent = RgpdConsent.pending();
 
         assertNotNull(rgpdConsent);
-        assertTrue(rgpdConsent.getStatus().isPending());
+        assertEquals(RgpdConsentStatus.PENDING, rgpdConsent.getStatus());
         assertTrue(rgpdConsent.getSignedDate().isEmpty());
         assertTrue(rgpdConsent.getSignedYear().isEmpty());
     }
@@ -24,7 +25,10 @@ class RgpdConsentTest {
         RgpdConsent rgpdConsent = RgpdConsent.alreadySigned(2020);
 
         assertNotNull(rgpdConsent);
-        assertTrue(rgpdConsent.getStatus().isSigned());
+        assertEquals(RgpdConsentStatus.ALREADY_SIGNED, rgpdConsent.getStatus());
+        assertTrue(rgpdConsent.getSignedYear().isPresent());
+        assertEquals(2020, rgpdConsent.getSignedYear().get());
+        assertTrue(rgpdConsent.getSignedDate().isEmpty());
     }
 
     @Test
@@ -32,8 +36,9 @@ class RgpdConsentTest {
         RgpdConsent rgpdConsent = RgpdConsent.signedInPerson();
 
         assertNotNull(rgpdConsent);
-        assertTrue(rgpdConsent.getStatus().isSigned());
-        assertNotNull(rgpdConsent.getSignedDate());
+        assertEquals(RgpdConsentStatus.SIGNED_IN_PERSON, rgpdConsent.getStatus());
+        assertTrue(rgpdConsent.getSignedDate().isPresent());
+        assertTrue(rgpdConsent.getSignedYear().isEmpty());
     }
 
     @Test
@@ -41,8 +46,9 @@ class RgpdConsentTest {
         RgpdConsent rgpdConsent = RgpdConsent.signedOnline();
 
         assertNotNull(rgpdConsent);
-        assertTrue(rgpdConsent.getStatus().isSigned());
-        assertNotNull(rgpdConsent.getSignedDate());
+        assertEquals(RgpdConsentStatus.SIGNED_ONLINE, rgpdConsent.getStatus());
+        assertTrue(rgpdConsent.getSignedDate().isPresent());
+        assertTrue(rgpdConsent.getSignedYear().isEmpty());
     }
 
     // ===== Exception ==========
