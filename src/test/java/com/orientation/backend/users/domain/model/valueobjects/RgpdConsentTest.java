@@ -19,7 +19,10 @@ class RgpdConsentTest {
 
     @Test
     void shouldCreateAlreadySigned() {
+        RgpdConsent rgpdConsent = RgpdConsent.alreadySigned(2020);
 
+        assertNotNull(rgpdConsent);
+        assertTrue(rgpdConsent.getStatus().isSigned());
     }
 
     @Test
