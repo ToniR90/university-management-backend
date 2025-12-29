@@ -39,7 +39,9 @@ class AlumniInfoTest {
 
     @Test
     void shouldThrowExceptionForYearBefore1900() {
-
+        assertThrows(IllegalArgumentException.class, () -> {
+            AlumniInfo.createAlumni(AlumniType.MASTER, 1899);
+        });
     }
 
     @Test
