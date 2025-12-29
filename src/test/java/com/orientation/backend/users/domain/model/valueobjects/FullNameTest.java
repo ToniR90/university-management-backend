@@ -15,12 +15,16 @@ class FullNameTest {
        assertEquals("Dante", fullName.getName());
        assertEquals("Alighiero", fullName.getFirstSurname());
        assertEquals("Alighieri", fullName.getSecondSurname());
-
    }
 
    @Test
     void shouldCreateFullNameWithoutSecondSurname() {
+       FullName fullName = FullName.of("Dante", "Alighiero", null);
 
+       assertNotNull(fullName);
+       assertEquals("Dante", fullName.getName());
+       assertEquals("Alighiero", fullName.getFirstSurname());
+       assertNull(fullName.getSecondSurname());
    }
 
    // Normalize Test
