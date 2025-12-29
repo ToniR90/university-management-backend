@@ -15,6 +15,8 @@ class AlumniInfoTest {
         AlumniInfo alumniInfo = AlumniInfo.notAlumni();
 
         assertFalse(alumniInfo.isAlumni());
+        assertTrue(alumniInfo.getGraduationYear().isEmpty());
+        assertTrue(alumniInfo.getType().isEmpty());
     }
 
     @Test
@@ -22,6 +24,10 @@ class AlumniInfoTest {
         AlumniInfo alumniInfo = AlumniInfo.createAlumni(AlumniType.DOCTORATE, 1901);
 
         assertTrue(alumniInfo.isAlumni());
+        assertTrue(alumniInfo.getType().isPresent());
+        assertEquals(AlumniType.DOCTORATE, alumniInfo.getType().get());
+        assertTrue(alumniInfo.getGraduationYear().isPresent());
+        assertEquals(1901, alumniInfo.getGraduationYear().get());
     }
 
     // ========== Exceptions ==========
@@ -94,6 +100,4 @@ class AlumniInfoTest {
 
         assertEquals(alumniInfo1.hashCode(), alumniInfo2.hashCode());
     }
-
-
 }
