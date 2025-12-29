@@ -81,7 +81,10 @@ class RgpdConsentTest {
     // ========== Equals & HashCode ==========
     @Test
     void shouldBeEqualByValue() {
+        RgpdConsent rgpdConsent1 = RgpdConsent.alreadySigned(2020);
+        RgpdConsent rgpdConsent2 = RgpdConsent.alreadySigned(2020);
 
+        assertEquals(rgpdConsent1, rgpdConsent2);
     }
 
     @Test
