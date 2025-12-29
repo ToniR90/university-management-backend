@@ -43,7 +43,8 @@ class FullNameTest {
        assertNotNull(fullName);
        assertEquals("Dante", fullName.getName());
        assertEquals("Alighiero", fullName.getFirstSurname());
-       assertEquals("Alighieri", fullName.getSecondSurname());
+       assertTrue(fullName.getSecondSurname().isPresent());
+       assertEquals("Alighieri", fullName.getSecondSurname().get());
    }
 
    // ========== Exception Test ==========
