@@ -1,6 +1,7 @@
 package com.orientation.backend.users.domain.model.valueobjects;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Value Object representing a person's full name.
@@ -67,8 +68,8 @@ public final class FullName {
         return firstSurname;
     }
 
-    public String getSecondSurname() {
-        return secondSurname;
+    public Optional<String> getSecondSurname() {
+        return Optional.ofNullable(secondSurname);
     }
 
     // Utility method

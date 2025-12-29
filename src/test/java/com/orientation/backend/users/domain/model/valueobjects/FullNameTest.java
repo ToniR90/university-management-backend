@@ -24,7 +24,14 @@ class FullNameTest {
        assertNotNull(fullName);
        assertEquals("Dante", fullName.getName());
        assertEquals("Alighiero", fullName.getFirstSurname());
-       assertNull(fullName.getSecondSurname());
+       assertTrue(fullName.getSecondSurname().isEmpty());
+   }
+
+   @Test
+   void shouldGetFullNameString() {
+       FullName fullName = FullName.of("Dante", "Alighiero", "Alighieri");
+
+       assertEquals("Dante Alighiero Alighieri" , fullName.getFullName());
    }
 
    // ========== Normalize Test ==========
@@ -75,7 +82,7 @@ class FullNameTest {
     }
 
     @Test
-    void shouldThrowExceptionForBlankFirstSurame() {
+    void shouldThrowExceptionForBlankFirstSurname() {
         assertThrows(IllegalArgumentException.class, () -> {
             FullName.of("Dante", " ", "Alighieri");
         });
