@@ -30,7 +30,13 @@ class FullNameTest {
    // Normalize Test
    @Test
     void shouldTrimAllFields() {
+       FullName fullName = FullName.of("    Dante    ", "     Alighiero    ", "    Alighieri   ");
 
+
+       assertNotNull(fullName);
+       assertEquals("Dante", fullName.getName());
+       assertEquals("Alighiero", fullName.getFirstSurname());
+       assertEquals("Alighieri", fullName.getSecondSurname());
    }
 
    // Exception Test
