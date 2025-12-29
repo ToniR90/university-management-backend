@@ -62,7 +62,9 @@ class FullNameTest {
 
     @Test
     void shouldThrowExceptionForNullFirstName() {
-
+        assertThrows(NullPointerException.class, () -> {
+            FullName.of("Dante", null, "Alighieri");
+        });
     }
 
     @Test
