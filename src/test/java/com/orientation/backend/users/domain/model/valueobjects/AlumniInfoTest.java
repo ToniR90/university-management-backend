@@ -46,7 +46,9 @@ class AlumniInfoTest {
 
     @Test
     void shouldThrowExceptionForFutureYear() {
-
+        assertThrows(IllegalArgumentException.class, () -> {
+            AlumniInfo.createAlumni(AlumniType.MASTER, 3000);
+        });
     }
 
     @Test
