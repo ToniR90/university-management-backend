@@ -3,6 +3,8 @@ package com.orientation.backend.users.domain.model.valueobjects;
 import com.orientation.backend.users.domain.model.enums.AlumniType;
 import org.junit.jupiter.api.Test;
 
+import java.time.Year;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class AlumniInfoTest {
@@ -61,7 +63,10 @@ class AlumniInfoTest {
 
     @Test
     void shouldAcceptCurrentYear() {
+        AlumniInfo alumniInfo = AlumniInfo.createAlumni(AlumniType.ERASMUS, Year.now().getValue());
 
+        assertTrue(alumniInfo.getGraduationYear().isPresent());
+        assertEquals(Year.now().getValue(), alumniInfo.getGraduationYear().get());
     }
 
     @Test
