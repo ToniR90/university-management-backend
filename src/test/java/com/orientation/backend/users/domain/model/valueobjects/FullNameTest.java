@@ -9,6 +9,12 @@ class FullNameTest {
     // Validation Tests
    @Test
     void shouldCreateFullNameWithAllFields() {
+       FullName fullName = FullName.of("Dante", "Alighiero", "Alighieri");
+
+       assertNotNull(fullName);
+       assertEquals("Dante", fullName.getName());
+       assertEquals("Alighiero", fullName.getFirstSurname());
+       assertEquals("Alighieri", fullName.getSecondSurname());
 
    }
 
@@ -70,6 +76,7 @@ class FullNameTest {
 
     }
 
+    @Test
     void shouldHaveSameHashCodeForSameValue() {
 
     }
