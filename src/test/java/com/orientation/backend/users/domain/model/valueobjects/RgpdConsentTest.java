@@ -46,7 +46,9 @@ class RgpdConsentTest {
     // ===== Exception ==========
     @Test
     void shouldThrowExceptionForYearBefore2018() {
-
+        assertThrows(IllegalArgumentException.class, () -> {
+            RgpdConsent.alreadySigned(2000);
+        });
     }
 
     @Test
