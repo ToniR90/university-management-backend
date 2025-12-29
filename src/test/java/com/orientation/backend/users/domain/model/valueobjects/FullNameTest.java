@@ -107,7 +107,10 @@ class FullNameTest {
 
     @Test
     void shouldHaveSameHashCodeForSameValue() {
+        FullName fullName1 = FullName.of("Dante", "Alighiero", "Alighieri");
+        FullName fullName2 = FullName.of("Dante", "Alighiero", "Alighieri");
 
+        assertEquals(fullName1.hashCode(), fullName2.hashCode());
     }
 
 
