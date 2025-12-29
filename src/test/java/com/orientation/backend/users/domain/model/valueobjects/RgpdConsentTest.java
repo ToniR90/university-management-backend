@@ -6,43 +6,56 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RgpdConsentTest {
 
+    // ========== Validation ==========
     @Test
-    void pending() {
+    void shouldCreatePending() {
+
     }
 
     @Test
-    void alreadySigned() {
+    void shouldCreateAlreadySigned() {
+
     }
 
     @Test
-    void signedInPerson() {
+    void shouldCreateSignedInPerson() {
+
     }
 
     @Test
-    void signedOnline() {
+    void shouldCreateSignedOnline() {
+
+    }
+
+    // ===== Exception ==========
+    @Test
+    void shouldThrowExceptionForYearBefore2018() {
+
     }
 
     @Test
-    void getStatus() {
+    void shouldThrowExceptionForFutureYear() {
+
     }
 
     @Test
-    void getSignedYear() {
+    void shouldAcceptYear2018() {
+
     }
 
     @Test
-    void getSignedDate() {
+    void shouldAcceptCurrentYear() {
+
+    }
+
+    // ========== Equals & HashCode ==========
+    @Test
+    void shouldBeEqualByValue() {
+
     }
 
     @Test
-    void testEquals() {
-    }
+    void shouldHaveSameHashCodeForSameValue() {
 
-    @Test
-    void testHashCode() {
-    }
-
-    @Test
-    void testToString() {
     }
 }
