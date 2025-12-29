@@ -36,7 +36,11 @@ class RgpdConsentTest {
 
     @Test
     void shouldCreateSignedOnline() {
+        RgpdConsent rgpdConsent = RgpdConsent.signedOnline();
 
+        assertNotNull(rgpdConsent);
+        assertTrue(rgpdConsent.getStatus().isSigned());
+        assertNotNull(rgpdConsent.getSignedDate());
     }
 
     // ===== Exception ==========
