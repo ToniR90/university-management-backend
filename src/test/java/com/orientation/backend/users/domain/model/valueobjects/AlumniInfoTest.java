@@ -9,7 +9,9 @@ class AlumniInfoTest {
     // ========== Validation ==========
     @Test
     void shouldCreateNotAlumni() {
+        AlumniInfo alumniInfo = AlumniInfo.notAlumni();
 
+        assertFalse(alumniInfo.isAlumni());
     }
 
     @Test
