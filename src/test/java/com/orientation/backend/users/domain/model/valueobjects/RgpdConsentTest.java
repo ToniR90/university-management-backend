@@ -27,7 +27,11 @@ class RgpdConsentTest {
 
     @Test
     void shouldCreateSignedInPerson() {
+        RgpdConsent rgpdConsent = RgpdConsent.signedInPerson();
 
+        assertNotNull(rgpdConsent);
+        assertTrue(rgpdConsent.getStatus().isSigned());
+        assertNotNull(rgpdConsent.getSignedDate());
     }
 
     @Test
