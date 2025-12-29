@@ -2,6 +2,8 @@ package com.orientation.backend.users.domain.model.valueobjects;
 
 import org.junit.jupiter.api.Test;
 
+import java.time.Year;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class RgpdConsentTest {
@@ -69,7 +71,11 @@ class RgpdConsentTest {
 
     @Test
     void shouldAcceptCurrentYear() {
+        RgpdConsent rgpdConsent = RgpdConsent.alreadySigned(Year.now().getValue());
 
+        assertNotNull(rgpdConsent);
+        assertTrue(rgpdConsent.getSignedYear().isPresent());
+        assertEquals(Year.now().getValue(), rgpdConsent.getSignedYear().get());
     }
 
     // ========== Equals & HashCode ==========
