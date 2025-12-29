@@ -60,7 +60,11 @@ class RgpdConsentTest {
 
     @Test
     void shouldAcceptYear2018() {
+        RgpdConsent rgpdConsent = RgpdConsent.alreadySigned(2018);
 
+        assertNotNull(rgpdConsent);
+        assertTrue(rgpdConsent.getSignedYear().isPresent());
+        assertEquals(2018, rgpdConsent.getSignedYear().get());
     }
 
     @Test
