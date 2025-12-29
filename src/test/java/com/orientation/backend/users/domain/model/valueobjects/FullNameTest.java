@@ -48,7 +48,9 @@ class FullNameTest {
 
     @Test
     void shouldThrowExceptionForEmptyName() {
-
+       assertThrows(IllegalArgumentException.class, () -> {
+           FullName.of("", "Alighiero", "Alighieri");
+       });
     }
 
     @Test
