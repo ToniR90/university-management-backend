@@ -6,35 +6,73 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FullNameTest {
 
+    // Validation Tests
+   @Test
+    void shouldCreateFullNameWithAllFields() {
+
+   }
+
+   @Test
+    void shouldCreateFullNameWithoutSecondSurname() {
+
+   }
+
+   // Normalize Test
+   @Test
+    void shouldTrimAllFields() {
+
+   }
+
+   // Exception Test
     @Test
-    void of() {
+    void shouldThrowExceptionForNullName() {
+
     }
 
     @Test
-    void getName() {
+    void shouldThrowExceptionForEmptyName() {
+
     }
 
     @Test
-    void getFirstSurname() {
+    void shouldThrowExceptionForBlankName(){
+
     }
 
     @Test
-    void getSecondSurname() {
+    void shouldThrowExceptionForNullFirstName() {
+
     }
 
     @Test
-    void getFullName() {
+    void shouldThrowExceptionForEmptyFirstName() {
+
     }
 
     @Test
-    void testEquals() {
+    void shouldThrowExceptionForBlankFirstName() {
+
     }
 
     @Test
-    void testHashCode() {
+    void shouldAllowNullSecondSurname() {
+
     }
 
     @Test
-    void testToString() {
+    void shouldGetFullNameStringWithoutSecondSurname() {
+
     }
+
+    // Equals & HashCode
+    @Test
+    void shouldBeEqualByValue() {
+
+    }
+
+    void shouldHaveSameHashCodeForSameValue() {
+
+    }
+
+
 }
