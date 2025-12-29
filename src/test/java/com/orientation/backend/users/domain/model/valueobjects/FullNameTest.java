@@ -76,7 +76,9 @@ class FullNameTest {
 
     @Test
     void shouldThrowExceptionForBlankFirstSurame() {
-
+        assertThrows(IllegalArgumentException.class, () -> {
+            FullName.of("Dante", " ", "Alighieri");
+        });
     }
 
     @Test
