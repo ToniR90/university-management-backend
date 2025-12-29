@@ -6,35 +6,64 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AlumniInfoTest {
 
+    // ========== Validation ==========
     @Test
-    void notAlumni() {
+    void shouldCreateNotAlumni() {
+
     }
 
     @Test
-    void createAlumni() {
+    void shouldCreateAlumni() {
+
+    }
+
+    // ========== Exceptions ==========
+    @Test
+    void shouldThrowExceptionWhenAlumniMissingType() {
+
     }
 
     @Test
-    void isAlumni() {
+    void shouldThrowExceptionWhenAlumniMissingYear() {
+
     }
 
     @Test
-    void getType() {
+    void shouldThrowExceptionForYearBefore1900() {
+
     }
 
     @Test
-    void getGraduationYear() {
+    void shouldThrowExceptionForFutureYear() {
+
     }
 
     @Test
-    void testEquals() {
+    void shouldAcceptYear1900() {
+
     }
 
     @Test
-    void testHashCode() {
+    void shouldAcceptCurrentYear() {
+
     }
 
     @Test
-    void testToString() {
+    void shouldAcceptYear2000() {
+
     }
+
+    // ========== Equals & HashCode ==========
+
+    @Test
+    void shouldBeEqualByValue() {
+
+    }
+
+    @Test
+    void shouldHaveSameHashCodeForSameValue() {
+
+    }
+
+
 }
