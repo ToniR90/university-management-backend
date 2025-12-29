@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FullNameTest {
 
-    // Validation Tests
+    // ========== Validation Tests ==========
    @Test
     void shouldCreateFullNameWithAllFields() {
        FullName fullName = FullName.of("Dante", "Alighiero", "Alighieri");
@@ -27,11 +27,10 @@ class FullNameTest {
        assertNull(fullName.getSecondSurname());
    }
 
-   // Normalize Test
+   // ========== Normalize Test ==========
    @Test
     void shouldTrimAllFields() {
        FullName fullName = FullName.of("    Dante    ", "     Alighiero    ", "    Alighieri   ");
-
 
        assertNotNull(fullName);
        assertEquals("Dante", fullName.getName());
@@ -39,10 +38,12 @@ class FullNameTest {
        assertEquals("Alighieri", fullName.getSecondSurname());
    }
 
-   // Exception Test
+   // ========== Exception Test ==========
     @Test
     void shouldThrowExceptionForNullName() {
-
+        assertThrows(NullPointerException.class, () -> {
+           FullName.of(null, "Alighiero", "Alighieri");
+        });
     }
 
     @Test
