@@ -89,7 +89,10 @@ class AlumniInfoTest {
 
     @Test
     void shouldHaveSameHashCodeForSameValue() {
+        AlumniInfo alumniInfo1 = AlumniInfo.createAlumni(AlumniType.ERASMUS, 1950);
+        AlumniInfo alumniInfo2 = AlumniInfo.createAlumni(AlumniType.ERASMUS, 1950);
 
+        assertEquals(alumniInfo1.hashCode(), alumniInfo2.hashCode());
     }
 
 
