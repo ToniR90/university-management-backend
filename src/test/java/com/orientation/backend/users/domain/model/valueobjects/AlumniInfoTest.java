@@ -81,7 +81,10 @@ class AlumniInfoTest {
 
     @Test
     void shouldBeEqualByValue() {
+        AlumniInfo alumniInfo1 = AlumniInfo.createAlumni(AlumniType.ERASMUS, 1950);
+        AlumniInfo alumniInfo2 = AlumniInfo.createAlumni(AlumniType.ERASMUS, 1950);
 
+        assertEquals(alumniInfo1, alumniInfo2);
     }
 
     @Test
