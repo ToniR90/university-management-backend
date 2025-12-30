@@ -6,135 +6,170 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class StudentTest {
 
+
+    // ========== Builder Tests ==========
     @Test
-    void builder() {
+    void shouldCreateStudentWithBuilder() {
+
     }
 
     @Test
-    void addEmail() {
+    void shouldCreateStudentWithDefaults() {
+
     }
 
     @Test
-    void updateEmail() {
+    void shouldThrowExceptionForNullDni() {
+
     }
 
     @Test
-    void removeEmail() {
+    void
+     shouldThrowExceptionForNullFullName() {
+
     }
 
     @Test
-    void addPhone() {
+    void shouldThrowExceptionForNullDegree() {
+
+    }
+
+    // ========== Email Management ==========
+    @Test
+    void shouldAddEmail() {
+
     }
 
     @Test
-    void updatePhone() {
+    void shoulThrowExceptionWhenAddingEmailTwice() {
+
     }
 
     @Test
-    void removePhone() {
+    void shouldUpdateEmail() {
+
     }
 
     @Test
-    void updateContactInfo() {
+    void shouldThrowExceptionWhenUpdatingNonExistenEmail() {
+
     }
 
     @Test
-    void giveRgpdConsentInPerson() {
+    void shouldRemoveEmail() {
+
     }
 
     @Test
-    void giveRgpdConsentOnline() {
+    void shouldThrowExceptionWhenRemovingNonExistenEmail() {
+
+    }
+
+    // ========== Phone Management ==========
+    @Test
+    void shouldAddPhone() {
+
     }
 
     @Test
-    void registerPreviousRgpdConsent() {
+    void shouldThrowExceptionWhenAddingPhoneTwice() {
+
     }
 
     @Test
-    void markAsAlumni() {
+    void shouldUpdatePhone() {
+
     }
 
     @Test
-    void markAsNonAlumni() {
+    void shouldRemovePhone() {
+
+    }
+
+    // ========== Contact Info Atomic ==========
+    @Test
+    void shouldUpdateContactInfoAtomically() {
+
     }
 
     @Test
-    void registerDiscoveryChannel() {
+    void shouldAllowNullInUpdateContactInfo() {
+
+    }
+
+    // ========== RGPD Management ==========
+    @Test
+    void shouldGiveRgpdConsentInPerson() {
+
     }
 
     @Test
-    void registerContactMethod() {
+    void shouldGiveRgpdConsentOnline() {
+
     }
 
     @Test
-    void updateCounselorNotes() {
+    void shouldRegisterPreviousRgpdConsent() {
+
+    }
+
+    // ========== Alumni Management ==========
+    @Test
+    void shouldMarkAsAlumni() {
+
     }
 
     @Test
-    void getId() {
+    void shouldMarkAsNonAlumni() {
+
+    }
+
+    // ========== Discovery & Contact Tracking ==========
+    @Test
+    void shouldRegisterDiscoveryChannel() {
+
     }
 
     @Test
-    void getDni() {
+    void shouldRegisterContactMethod() {
+
+    }
+
+    // ========== Notes Management ==========
+    @Test
+    void shouldUpdateCounselorNotes() {
+
     }
 
     @Test
-    void getFullName() {
+    void shouldTrimCounselorNotes() {
+
     }
 
     @Test
-    void getEmail() {
+    void shouldAllowNullCounselorNotes() {
+
+    }
+
+    // ========== Metadata ==========
+    @Test
+    void shouldUpdateUpdateAtWhenModifying() {
+
+    }
+
+    // ========== Equals & HashCode ==========
+    @Test
+    void shouldBeEqualById() {
+
     }
 
     @Test
-    void getPhone() {
+    void shouldBeEqualByDniWhenNoId() {
+
     }
 
     @Test
-    void getDegree() {
-    }
+    void shouldNotBeEqualWithDifferentId() {
 
-    @Test
-    void getCurrentYear() {
-    }
-
-    @Test
-    void getAlumniInfo() {
-    }
-
-    @Test
-    void getRgpdConsent() {
-    }
-
-    @Test
-    void getHowDidYouKnowUs() {
-    }
-
-    @Test
-    void getHowDidYouContactUs() {
-    }
-
-    @Test
-    void getCounselorNotes() {
-    }
-
-    @Test
-    void getCreatedAt() {
-    }
-
-    @Test
-    void getUpdatedAt() {
-    }
-
-    @Test
-    void testEquals() {
-    }
-
-    @Test
-    void testHashCode() {
-    }
-
-    @Test
-    void testToString() {
     }
 }
