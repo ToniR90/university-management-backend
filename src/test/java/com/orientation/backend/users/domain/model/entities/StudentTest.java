@@ -1,10 +1,22 @@
 package com.orientation.backend.users.domain.model.entities;
 
+import com.orientation.backend.users.domain.model.valueobjects.Dni;
+import com.orientation.backend.users.domain.model.valueobjects.FullName;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class StudentTest {
+
+    private Dni testDni;
+    private FullName testFullName;
+
+    @BeforeEach
+    void setUp() {
+        testDni = Dni.of("12345678Z");
+        testFullName = FullName.of("Dante", "Alighiero", "Alighieri");
+    }
 
 
     // ========== Builder Tests ==========
@@ -34,7 +46,7 @@ class StudentTest {
 
     }
 
-    // ========== Email Management ==========
+    // ========== Email Management Tests ==========
     @Test
     void shouldAddEmail() {
 
@@ -65,7 +77,7 @@ class StudentTest {
 
     }
 
-    // ========== Phone Management ==========
+    // ========== Phone Management Tests ==========
     @Test
     void shouldAddPhone() {
 
@@ -86,7 +98,7 @@ class StudentTest {
 
     }
 
-    // ========== Contact Info Atomic ==========
+    // ========== Contact Info Atomic Tests ==========
     @Test
     void shouldUpdateContactInfoAtomically() {
 
@@ -97,7 +109,7 @@ class StudentTest {
 
     }
 
-    // ========== RGPD Management ==========
+    // ========== RGPD Management Tests ==========
     @Test
     void shouldGiveRgpdConsentInPerson() {
 
@@ -113,7 +125,7 @@ class StudentTest {
 
     }
 
-    // ========== Alumni Management ==========
+    // ========== Alumni Management Tests ==========
     @Test
     void shouldMarkAsAlumni() {
 
@@ -124,7 +136,7 @@ class StudentTest {
 
     }
 
-    // ========== Discovery & Contact Tracking ==========
+    // ========== Discovery & Contact Tracking Tests ==========
     @Test
     void shouldRegisterDiscoveryChannel() {
 
@@ -135,7 +147,7 @@ class StudentTest {
 
     }
 
-    // ========== Notes Management ==========
+    // ========== Notes Management Tests ==========
     @Test
     void shouldUpdateCounselorNotes() {
 
@@ -151,13 +163,13 @@ class StudentTest {
 
     }
 
-    // ========== Metadata ==========
+    // ========== Metadata Tests ==========
     @Test
     void shouldUpdateUpdateAtWhenModifying() {
 
     }
 
-    // ========== Equals & HashCode ==========
+    // ========== Equals & HashCode Tests ==========
     @Test
     void shouldBeEqualById() {
 
