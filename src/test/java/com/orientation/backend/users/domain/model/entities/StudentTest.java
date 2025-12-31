@@ -57,7 +57,14 @@ class StudentTest {
     @Test
     void
      shouldThrowExceptionForNullFullName() {
-
+        assertThrows(NullPointerException.class, () -> {
+            Student student = Student.builder()
+                    .dni(testDni)
+                    .fullName(null)
+                    .degree("Videojocs")
+                    .currentYear(CurrentYear.FIRST)
+                    .build();
+        });
     }
 
     @Test
