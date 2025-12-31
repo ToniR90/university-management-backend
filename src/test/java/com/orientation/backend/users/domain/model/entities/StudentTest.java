@@ -1,6 +1,7 @@
 package com.orientation.backend.users.domain.model.entities;
 
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
+import com.orientation.backend.users.domain.model.enums.RgpdConsentStatus;
 import com.orientation.backend.users.domain.model.valueobjects.Dni;
 import com.orientation.backend.users.domain.model.valueobjects.Email;
 import com.orientation.backend.users.domain.model.valueobjects.FullName;
@@ -36,11 +37,18 @@ class StudentTest {
         Student student = createStudent();
 
         assertNotNull(student);
+        assertEquals(testDni, student.getDni());
+        assertEquals(testFullName, student.getFullName());
+        assertEquals("Videojocs", student.getDegree());
+        assertEquals(CurrentYear.FIRST, student.getCurrentYear());
     }
 
     @Test
     void shouldCreateStudentWithDefaults() {
-        // TODO
+        Student student = createStudent();
+
+        assertFalse(student.getAlumniInfo().isAlumni());
+        assertEquals(RgpdConsentStatus.PENDING, student.getRgpdConsent().getStatus());
     }
 
     @Test
@@ -84,9 +92,12 @@ class StudentTest {
     @Test
     void shouldAddEmail() {
         Student student = createStudent();
-        student.addEmail(Email.of("dante@mail.com"));
+        Email email = Email.of("dante@mail.com");
 
-        assertNotNull(student.getEmail());
+        student.addEmail(email);
+
+        assertTrue(student.getEmail().isPresent());
+        assertEquals(email, student.getEmail().get());
     }
 
     @Test
@@ -104,7 +115,7 @@ class StudentTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenUpdatingNonExistenEmail() {
+    void shouldThrowExceptionWhenUpdatingNonExistentEmail() {
 
     }
 
@@ -114,7 +125,7 @@ class StudentTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenRemovingNonExistenEmail() {
+    void shouldThrowExceptionWhenRemovingNonExistentEmail() {
 
     }
 
