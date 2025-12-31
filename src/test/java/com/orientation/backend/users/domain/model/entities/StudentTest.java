@@ -1,5 +1,6 @@
 package com.orientation.backend.users.domain.model.entities;
 
+import com.orientation.backend.users.domain.model.enums.CurrentYear;
 import com.orientation.backend.users.domain.model.valueobjects.Dni;
 import com.orientation.backend.users.domain.model.valueobjects.FullName;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +17,16 @@ class StudentTest {
     void setUp() {
         testDni = Dni.of("12345678Z");
         testFullName = FullName.of("Dante", "Alighiero", "Alighieri");
+    }
+
+    // ========== Helper Method ==========
+    private Student createStudent() {
+        return Student.builder()
+                .dni(testDni)
+                .fullName(testFullName)
+                .degree("Videojocs")
+                .currentYear(CurrentYear.FIRST)
+                .build();
     }
 
 
