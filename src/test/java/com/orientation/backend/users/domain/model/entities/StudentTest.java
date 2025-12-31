@@ -69,7 +69,14 @@ class StudentTest {
 
     @Test
     void shouldThrowExceptionForNullDegree() {
-
+        assertThrows(NullPointerException.class, () -> {
+            Student student = Student.builder()
+                    .dni(testDni)
+                    .fullName(testFullName)
+                    .degree(null)
+                    .currentYear(CurrentYear.FIRST)
+                    .build();
+        });
     }
 
     // ========== Email Management Tests ==========
