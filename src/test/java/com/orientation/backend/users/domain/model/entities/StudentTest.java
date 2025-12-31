@@ -2,6 +2,7 @@ package com.orientation.backend.users.domain.model.entities;
 
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
 import com.orientation.backend.users.domain.model.valueobjects.Dni;
+import com.orientation.backend.users.domain.model.valueobjects.Email;
 import com.orientation.backend.users.domain.model.valueobjects.FullName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -82,12 +83,19 @@ class StudentTest {
     // ========== Email Management Tests ==========
     @Test
     void shouldAddEmail() {
+        Student student = createStudent();
+        student.addEmail(Email.of("dante@mail.com"));
 
+        assertNotNull(student.getEmail());
     }
 
     @Test
-    void shoulThrowExceptionWhenAddingEmailTwice() {
-
+    void shouldThrowExceptionWhenAddingEmailTwice() {
+        assertThrows(IllegalStateException.class, () -> {
+            Student student = createStudent();
+            student.addEmail(Email.of("dante@mail.com"));
+            student.addEmail(Email.of("dante2@mail.com"));
+        });
     }
 
     @Test
