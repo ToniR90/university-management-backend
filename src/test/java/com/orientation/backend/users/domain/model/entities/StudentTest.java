@@ -29,21 +29,29 @@ class StudentTest {
                 .build();
     }
 
-
     // ========== Builder Tests ==========
     @Test
     void shouldCreateStudentWithBuilder() {
+        Student student = createStudent();
 
+        assertNotNull(student);
     }
 
     @Test
     void shouldCreateStudentWithDefaults() {
-
+        // TODO
     }
 
     @Test
     void shouldThrowExceptionForNullDni() {
-
+        assertThrows(NullPointerException.class, () -> {
+            Student student = Student.builder()
+                    .dni(null)
+                    .fullName(testFullName)
+                    .degree("Videojocs")
+                    .currentYear(CurrentYear.FIRST)
+                    .build();
+        });
     }
 
     @Test
