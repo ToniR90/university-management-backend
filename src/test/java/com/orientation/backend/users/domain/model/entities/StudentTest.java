@@ -148,7 +148,11 @@ class StudentTest {
 
     @Test
     void shouldThrowExceptionWhenRemovingNonExistentEmail() {
+        assertThrows(IllegalStateException.class, () -> {
+            Student student = createStudent();
 
+            student.removeEmail();
+        });
     }
 
     // ========== Phone Management Tests ==========
