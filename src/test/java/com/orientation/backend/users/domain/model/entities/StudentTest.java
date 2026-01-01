@@ -1,5 +1,6 @@
 package com.orientation.backend.users.domain.model.entities;
 
+import com.orientation.backend.users.domain.model.enums.AlumniType;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
 import com.orientation.backend.users.domain.model.enums.RgpdConsentStatus;
 import com.orientation.backend.users.domain.model.valueobjects.Dni;
@@ -262,7 +263,13 @@ class StudentTest {
     // ========== Alumni Management Tests ==========
     @Test
     void shouldMarkAsAlumni() {
+        Student student = createStudent();
 
+        student.markAsAlumni(AlumniType.MASTER, 2020);
+
+        assertTrue(student.getAlumniInfo().isAlumni());
+        assertTrue(student.getAlumniInfo().getType().isPresent());
+        assertEquals(AlumniType.MASTER, student.getAlumniInfo().getType().get());
     }
 
     @Test
