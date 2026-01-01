@@ -326,7 +326,9 @@ class StudentTest {
 
     @Test
     void shouldAllowNullCounselorNotes() {
+        Student student = createStudent();
 
+        assertTrue(student.getCounselorNotes().isEmpty());
     }
 
     // ========== Metadata Tests ==========
