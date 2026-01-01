@@ -133,7 +133,17 @@ class StudentTest {
 
     @Test
     void shouldRemoveEmail() {
+        Student student = createStudent();
+        Email email = Email.of("dante@mail.com");
+        student.addEmail(email);
 
+        assertNotNull(student.getEmail());
+        assertTrue(student.getEmail().isPresent());
+        assertEquals(email, student.getEmail().get());
+
+        student.removeEmail();
+
+        assertTrue(student.getEmail().isEmpty());
     }
 
     @Test
