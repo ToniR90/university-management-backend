@@ -111,7 +111,15 @@ class StudentTest {
 
     @Test
     void shouldUpdateEmail() {
+        Student student = createStudent();
+        Email email = Email.of("dante@mail.com");
+        student.addEmail(email);
+        Email email1 = Email.of("alighiero@mail.com");
+        student.updateEmail(email1);
 
+        assertNotNull(student.getEmail());
+        assertTrue(student.getEmail().isPresent());
+        assertEquals(email1, student.getEmail().get());
     }
 
     @Test
