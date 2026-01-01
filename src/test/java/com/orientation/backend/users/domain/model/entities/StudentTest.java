@@ -348,7 +348,10 @@ class StudentTest {
 
     @Test
     void shouldBeEqualByDniWhenNoId() {
+        Student student = createStudent();
+        Student student1 = createStudent();
 
+        assertEquals(student.getDni(), student1.getDni());
     }
 
     @Test
