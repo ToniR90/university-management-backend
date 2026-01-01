@@ -218,7 +218,10 @@ class StudentTest {
 
     @Test
     void shouldAllowNullInUpdateContactInfo() {
+        Student student = createStudent();
 
+        assertTrue(student.getEmail().isEmpty());
+        assertTrue(student.getPhone().isEmpty());
     }
 
     // ========== RGPD Management Tests ==========
