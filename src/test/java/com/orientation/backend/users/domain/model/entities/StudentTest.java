@@ -202,7 +202,18 @@ class StudentTest {
     // ========== Contact Info Atomic Tests ==========
     @Test
     void shouldUpdateContactInfoAtomically() {
+        Student student = createStudent();
+        Email email = Email.of("dante@mail.com");
+        Email email1 = Email.of("alighiero@mail.com");
+        Phone phone = Phone.of("600123456");
+        Phone phone1 = Phone.of("600654321");
 
+        student.addEmail(email);
+        student.addPhone(phone);
+        student.updateContactInfo(email1, phone1);
+
+        assertEquals(email1, student.getEmail().get());
+        assertEquals(phone1, student.getPhone().get());
     }
 
     @Test
