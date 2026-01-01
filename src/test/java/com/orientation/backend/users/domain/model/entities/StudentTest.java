@@ -252,7 +252,11 @@ class StudentTest {
 
     @Test
     void shouldRegisterPreviousRgpdConsent() {
+        Student student = createStudent();
 
+        student.registerPreviousRgpdConsent(2020);
+
+        assertEquals(RgpdConsentStatus.ALREADY_SIGNED, student.getRgpdConsent().getStatus());
     }
 
     // ========== Alumni Management Tests ==========
