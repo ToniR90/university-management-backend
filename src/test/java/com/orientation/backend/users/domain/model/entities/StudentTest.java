@@ -177,7 +177,15 @@ class StudentTest {
 
     @Test
     void shouldUpdatePhone() {
+        Student student = createStudent();
+        Phone phone = Phone.of("600123456");
+        Phone phone1 = Phone.of("600654321");
 
+        student.addPhone(phone);
+        student.updatePhone(phone1);
+
+        assertTrue(student.getPhone().isPresent());
+        assertEquals(phone1, student.getPhone().get());
     }
 
     @Test
