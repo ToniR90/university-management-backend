@@ -234,7 +234,11 @@ class StudentTest {
     // ========== RGPD Management Tests ==========
     @Test
     void shouldGiveRgpdConsentInPerson() {
+        Student student = createStudent();
 
+        student.giveRgpdConsentInPerson();
+
+        assertTrue(student.getRgpdConsent().getSignedDate().isPresent());
     }
 
     @Test
