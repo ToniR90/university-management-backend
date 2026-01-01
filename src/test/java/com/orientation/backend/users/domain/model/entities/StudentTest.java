@@ -274,7 +274,11 @@ class StudentTest {
 
     @Test
     void shouldMarkAsNonAlumni() {
+        Student student = createStudent();
 
+        student.markAsNonAlumni();
+
+        assertFalse(student.getAlumniInfo().isAlumni());
     }
 
     // ========== Discovery & Contact Tracking Tests ==========
