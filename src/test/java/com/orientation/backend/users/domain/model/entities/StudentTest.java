@@ -1,9 +1,6 @@
 package com.orientation.backend.users.domain.model.entities;
 
-import com.orientation.backend.users.domain.model.enums.AlumniType;
-import com.orientation.backend.users.domain.model.enums.CurrentYear;
-import com.orientation.backend.users.domain.model.enums.DiscoveryChannel;
-import com.orientation.backend.users.domain.model.enums.RgpdConsentStatus;
+import com.orientation.backend.users.domain.model.enums.*;
 import com.orientation.backend.users.domain.model.valueobjects.Dni;
 import com.orientation.backend.users.domain.model.valueobjects.Email;
 import com.orientation.backend.users.domain.model.valueobjects.FullName;
@@ -295,7 +292,12 @@ class StudentTest {
 
     @Test
     void shouldRegisterContactMethod() {
+        Student student = createStudent();
 
+        student.registerContactMethod(ContactMethod.EMAIL);
+
+        assertTrue(student.getHowDidYouContactUs().isPresent());
+        assertEquals(ContactMethod.EMAIL, student.getHowDidYouContactUs().get());
     }
 
     // ========== Notes Management Tests ==========
