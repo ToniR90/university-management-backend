@@ -356,6 +356,15 @@ class StudentTest {
 
     @Test
     void shouldNotBeEqualWithDifferentId() {
+        Student student = createStudent();
+        Student student1 = Student.builder()
+                .dni(Dni.of("23000003A"))
+                .fullName(testFullName)
+                .degree("Videojocs")
+                .currentYear(CurrentYear.FIRST)
+                .build();
+
+        assertNotEquals(student, student1);
 
     }
 }
