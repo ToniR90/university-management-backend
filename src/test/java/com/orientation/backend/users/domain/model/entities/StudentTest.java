@@ -243,7 +243,11 @@ class StudentTest {
 
     @Test
     void shouldGiveRgpdConsentOnline() {
+        Student student = createStudent();
 
+        student.giveRgpdConsentOnline();
+
+        assertTrue(student.getRgpdConsent().getSignedDate().isPresent());
     }
 
     @Test
