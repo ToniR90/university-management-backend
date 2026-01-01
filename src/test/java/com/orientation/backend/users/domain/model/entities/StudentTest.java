@@ -8,6 +8,8 @@ import com.orientation.backend.users.domain.model.valueobjects.Phone;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class StudentTest {
@@ -203,16 +205,14 @@ class StudentTest {
     void shouldUpdateContactInfoAtomically() {
         Student student = createStudent();
         Email email = Email.of("dante@mail.com");
-        Email email1 = Email.of("alighiero@mail.com");
         Phone phone = Phone.of("600123456");
-        Phone phone1 = Phone.of("600654321");
 
-        student.addEmail(email);
-        student.addPhone(phone);
-        student.updateContactInfo(email1, phone1);
+        student.updateContactInfo(email, phone);
 
-        assertEquals(email1, student.getEmail().get());
-        assertEquals(phone1, student.getPhone().get());
+        assertTrue(student.getEmail().isPresent());
+        assertEquals(email, student.getEmail().get());
+        assertTrue(student.getPhone().isPresent());
+        assertEquals(phone, student.getPhone().get());
     }
 
     @Test
@@ -237,6 +237,7 @@ class StudentTest {
 
         student.giveRgpdConsentInPerson();
 
+        assertEquals(RgpdConsentStatus.SIGNED_IN_PERSON, student.getRgpdConsent().getStatus());
         assertTrue(student.getRgpdConsent().getSignedDate().isPresent());
     }
 
@@ -246,6 +247,7 @@ class StudentTest {
 
         student.giveRgpdConsentOnline();
 
+        assertEquals(RgpdConsentStatus.SIGNED_ONLINE, student.getRgpdConsent().getStatus());
         assertTrue(student.getRgpdConsent().getSignedDate().isPresent());
     }
 
@@ -256,6 +258,8 @@ class StudentTest {
         student.registerPreviousRgpdConsent(2020);
 
         assertEquals(RgpdConsentStatus.ALREADY_SIGNED, student.getRgpdConsent().getStatus());
+        assertTrue(student.getRgpdConsent().getSignedYear().isPresent());
+        assertEquals(2020, student.getRgpdConsent().getSignedYear().get());
     }
 
     // ========== Alumni Management Tests ==========
@@ -268,15 +272,21 @@ class StudentTest {
         assertTrue(student.getAlumniInfo().isAlumni());
         assertTrue(student.getAlumniInfo().getType().isPresent());
         assertEquals(AlumniType.MASTER, student.getAlumniInfo().getType().get());
+        assertTrue(student.getAlumniInfo().getGraduationYear().isPresent());
+        assertEquals(2020, student.getAlumniInfo().getGraduationYear().get());
     }
 
     @Test
     void shouldMarkAsNonAlumni() {
         Student student = createStudent();
 
+        student.markAsAlumni(AlumniType.MASTER, 2020);
+
         student.markAsNonAlumni();
 
         assertFalse(student.getAlumniInfo().isAlumni());
+        assertTrue(student.getAlumniInfo().getType().isEmpty());
+        assertTrue(student.getAlumniInfo().getGraduationYear().isEmpty());
     }
 
     // ========== Discovery & Contact Tracking Tests ==========
@@ -306,11 +316,10 @@ class StudentTest {
         Student student = createStudent();
         String notes = "This is a test";
 
-        assertTrue(student.getCounselorNotes().isEmpty());
-
         student.updateCounselorNotes(notes);
 
         assertTrue(student.getCounselorNotes().isPresent());
+        assertEquals("This is a test", student.getCounselorNotes().get());
     }
 
     @Test
@@ -318,7 +327,7 @@ class StudentTest {
         Student student = createStudent();
         String notes = "    Test    ";
 
-        student.updateCounselorNotes(notes.trim());
+        student.updateCounselorNotes(notes);
 
         assertTrue(student.getCounselorNotes().isPresent());
         assertEquals("Test", student.getCounselorNotes().get());
@@ -328,43 +337,85 @@ class StudentTest {
     void shouldAllowNullCounselorNotes() {
         Student student = createStudent();
 
+        student.updateCounselorNotes("Test notes");
+
+        student.updateCounselorNotes(null);
+
         assertTrue(student.getCounselorNotes().isEmpty());
     }
 
     // ========== Metadata Tests ==========
     @Test
-    void shouldUpdateUpdateAtWhenModifying() {
+    void shouldUpdateUpdateAtWhenModifying() throws InterruptedException {
+        Student student = createStudent();
+        LocalDateTime initialUpdateAt = student.getUpdatedAt();
 
+        Thread.sleep(100);
+
+        student.addEmail(Email.of("dante@mail.com"));
+
+        assertTrue(student.getUpdatedAt().isAfter(initialUpdateAt));
     }
 
     // ========== Equals & HashCode Tests ==========
     @Test
     void shouldBeEqualById() {
-        Student student = createStudent();
-        Student student1 = createStudent();
-
-        assertEquals(student1.getId(), student.getId());
-    }
-
-    @Test
-    void shouldBeEqualByDniWhenNoId() {
-        Student student = createStudent();
-        Student student1 = createStudent();
-
-        assertEquals(student.getDni(), student1.getDni());
-    }
-
-    @Test
-    void shouldNotBeEqualWithDifferentId() {
-        Student student = createStudent();
         Student student1 = Student.builder()
-                .dni(Dni.of("23000003A"))
+                .id(1L)
+                .dni(testDni)
                 .fullName(testFullName)
                 .degree("Videojocs")
                 .currentYear(CurrentYear.FIRST)
                 .build();
 
-        assertNotEquals(student, student1);
+        Student student2 = Student.builder()
+                .id(1L)
+                .dni(Dni.of("00000000T"))
+                .fullName(FullName.of("Jason", "Vorgees", null))
+                .degree("Matemàtiques")
+                .currentYear(CurrentYear.SECOND)
+                .build();
 
+        assertEquals(student1, student2);
+    }
+
+    @Test
+    void shouldBeEqualByDniWhenNoId() {
+        Student student1 = Student.builder()
+                .dni(testDni)
+                .fullName(testFullName)
+                .degree("Videojocs")
+                .currentYear(CurrentYear.FIRST)
+                .build();
+
+        Student student2 = Student.builder()
+                .dni(testDni)
+                .fullName(FullName.of("Jason", "Vorgees", null))
+                .degree("Matemàtiques")
+                .currentYear(CurrentYear.SECOND)
+                .build();
+
+        assertEquals(student1, student2);
+    }
+
+    @Test
+    void shouldNotBeEqualWithDifferentId() {
+        Student student1 = Student.builder()
+                .id(1L)
+                .dni(testDni)
+                .fullName(testFullName)
+                .degree("Videojocs")
+                .currentYear(CurrentYear.FIRST)
+                .build();
+
+        Student student2 = Student.builder()
+                .id(2L)
+                .dni(testDni)
+                .fullName(testFullName)
+                .degree("Videojocs")
+                .currentYear(CurrentYear.FIRST)
+                .build();
+
+        assertNotEquals(student1, student2);
     }
 }
