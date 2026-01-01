@@ -219,6 +219,13 @@ class StudentTest {
     @Test
     void shouldAllowNullInUpdateContactInfo() {
         Student student = createStudent();
+        Email email = Email.of("dante@mail.com");
+        Phone phone = Phone.of("600123456");
+
+        student.addEmail(email);
+        student.addPhone(phone);
+
+        student.updateContactInfo(null, null);
 
         assertTrue(student.getEmail().isEmpty());
         assertTrue(student.getPhone().isEmpty());
