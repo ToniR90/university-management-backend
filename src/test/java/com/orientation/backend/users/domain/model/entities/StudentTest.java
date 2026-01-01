@@ -303,7 +303,13 @@ class StudentTest {
     // ========== Notes Management Tests ==========
     @Test
     void shouldUpdateCounselorNotes() {
+        Student student = createStudent();
 
+        assertTrue(student.getCounselorNotes().isEmpty());
+
+        student.updateCounselorNotes("This is a test");
+
+        assertTrue(student.getCounselorNotes().isPresent());
     }
 
     @Test
