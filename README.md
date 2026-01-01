@@ -224,30 +224,372 @@ src/
 │   ├── java/
 │   │   └── com/orientation/backend/
 │   │       ├── StudentManagementSystemApplication.java
-│   │       ├── users/          # User management module
-│   │       ├── sessions/       # Session management module
-│   │       ├── auth/           # Authentication module (Sprint 4)
+│   │       ├── users/
+│   │       │   └── domain/
+│   │       │       └── model/
+│   │       │           ├── entities/
+│   │       │           │   └── Student.java          # Aggregate Root
+│   │       │           ├── valueobjects/
+│   │       │           │   ├── Email.java            # RFC 5322 validation
+│   │       │           │   ├── Phone.java            # E.164 format
+│   │       │           │   ├── Dni.java              # Spanish DNI/NIE (MOD 23)
+│   │       │           │   ├── FullName.java         # Composite VO
+│   │       │           │   ├── AlumniInfo.java       # Alumni status
+│   │       │           │   └── RgpdConsent.java      # GDPR consent
+│   │       │           └── enums/
+│   │       │               ├── AlumniType.java
+│   │       │               ├── ContactMethod.java
+│   │       │               ├── CurrentYear.java
+│   │       │               ├── DiscoveryChannel.java
+│   │       │               └── RgpdConsentStatus.java
+│   │       ├── sessions/       # Session management (Sprint 3)
+│   │       ├── auth/           # Authentication (Sprint 4)
 │   │       └── shared/
 │   │           └── infrastructure/
-│   │               └── config/ # Shared configuration
+│   │               └── config/
 │   └── resources/
-│       ├── application.yml     # Application configuration
+│       ├── application.yml
+│       ├── application-dev.yml
+│       ├── application-test.yml
 │       └── db/
-│           └── migration/      # Flyway migrations
+│           └── migration/
+│               └── V1__create_students_table.sql
 └── test/
     └── java/
         └── com/orientation/backend/
+            └── users/
+                └── domain/
+                    └── model/
+                        ├── valueobjects/
+                        │   ├── EmailTest.java        (9 tests)
+                        │   ├── PhoneTest.java        (12 tests)
+                        │   ├── DniTest.java          (23 tests)
+                        │   ├── FullNameTest.java     (14 tests)
+                        │   ├── AlumniInfoTest.java   (11 tests)
+                        │   └── RgpdConsentTest.java  (10 tests)
+                        └── entities/
+                            └── StudentTest.java      (31 tests)
 ```
 
 ---
 
-## 🧪 Running Tests
+## 🎯 Domain Model
+
+### Student Entity (Aggregate Root)
+
+The `Student` entity is the aggregate root representing a university student with comprehensive information management.
+
+**Core Fields:**
+- **Identity:** DNI/NIE (Spanish identification), unique ID
+- **Personal Info:** Full name (name, first surname, optional second surname)
+- **Contact:** Email, phone (both optional)
+- **Academic:** Degree name, current year (FIRST through FOURTH)
+- **Alumni Status:** Alumni type (Bachelor, Master, Doctorate, Erasmus), graduation year
+- **GDPR Compliance:** Consent status (Pending, Signed in Person, Signed Online, Already Signed)
+- **Tracking:** Discovery channel, contact method, counselor notes
+- **Metadata:** Creation and last update timestamps
+
+**Business Capabilities:**
+- Email/Phone management (add, update, remove with validation)
+- Atomic contact info updates (email + phone together)
+- GDPR consent tracking (3 signature methods)
+- Alumni status management (mark/unmark)
+- Discovery and contact channel registration
+- Counselor notes management
+
+---
+
+### Value Objects
+
+#### 1. Email
+**Purpose:** Validate and normalize email addresses
+
+**Features:**
+- RFC 5322 compliant validation
+- Automatic normalization to lowercase
+- Immutable
+
+**Validation:**
+- Valid format (user@domain.com)
+- Non-null, non-empty
+- Proper domain structure
+
+**Example:**
+```java
+Email email = Email.of("student@university.edu");
+// Normalized: "student@university.edu"
+```
+
+---
+
+#### 2. Phone
+**Purpose:** Validate and normalize Spanish phone numbers
+
+**Features:**
+- E.164 international format
+- Automatic +34 prefix addition for Spanish numbers
+- Support for mobile (6xx, 7xx) and landline (8xx, 9xx)
+- Immutable
+
+**Validation:**
+- 9 digits (Spanish format)
+- Valid prefix (6, 7, 8, 9)
+- Automatic normalization with spaces removed
+
+**Examples:**
+```java
+Phone.of("600123456")     // → "+34600123456"
+Phone.of("+34912345678")  // → "+34912345678"
+Phone.of("912 345 678")   // → "+34912345678" (spaces removed)
+```
+
+---
+
+#### 3. Dni (Spanish ID)
+**Purpose:** Validate Spanish DNI (National ID) and NIE (Foreigner ID)
+
+**Features:**
+- MOD 23 algorithm validation
+- Automatic NIE conversion (X→0, Y→1, Z→2)
+- Automatic normalization (uppercase, no spaces/dashes)
+- Distinguishes between DNI and NIE
+- Immutable
+
+**Validation:**
+- 8 digits + 1 letter
+- Correct letter according to MOD 23 algorithm
+- NIE must start with X, Y, or Z
+- DNI must start with digit
+
+**Examples:**
+```java
+Dni.of("12345678Z")    // Valid DNI
+Dni.of("X1234567L")    // Valid NIE (X converts to 0 for validation)
+Dni.of("12345678-Z")   // Normalized to "12345678Z"
+Dni.of("12345678z")    // Normalized to "12345678Z"
+```
+
+**NIE Conversion Table:**
+- X → 0 (e.g., X1234567 becomes 01234567 for validation)
+- Y → 1 (e.g., Y1234567 becomes 11234567 for validation)
+- Z → 2 (e.g., Z1234567 becomes 21234567 for validation)
+
+---
+
+#### 4. FullName
+**Purpose:** Represent a person's complete name
+
+**Features:**
+- Composite Value Object (name, first surname, second surname)
+- Second surname is optional
+- Automatic trimming of whitespace
+- Immutable
+
+**Validation:**
+- Name: required, non-empty
+- First surname: required, non-empty
+- Second surname: optional (can be null)
+
+**Methods:**
+- `getFullName()`: Returns concatenated full name
+
+**Examples:**
+```java
+FullName.of("Juan", "García", "López")
+// getFullName() → "Juan García López"
+
+FullName.of("María", "Martínez", null)
+// getFullName() → "María Martínez"
+```
+
+---
+
+#### 5. AlumniInfo
+**Purpose:** Track student's alumni status
+
+**Features:**
+- Factory methods for type-safe creation
+- Consistency validation (if alumni, requires type and year)
+- Immutable
+
+**Factory Methods:**
+- `AlumniInfo.notAlumni()` → Not an alumni
+- `AlumniInfo.createAlumni(type, year)` → Alumni with graduation info
+
+**Validation:**
+- Graduation year: >= 1900 and <= current year
+- Type and year required together for alumni
+- Type and year empty for non-alumni
+
+**Example:**
+```java
+AlumniInfo.notAlumni()
+// isAlumni() → false
+
+AlumniInfo.createAlumni(AlumniType.BACHELOR, 2023)
+// isAlumni() → true
+// getType() → Optional[BACHELOR]
+// getGraduationYear() → Optional[2023]
+```
+
+---
+
+#### 6. RgpdConsent (GDPR Consent)
+**Purpose:** Track GDPR consent compliance
+
+**Features:**
+- 4 different consent statuses
+- Factory methods for each signature type
+- Automatic timestamp/year tracking
+- Immutable
+
+**Factory Methods:**
+- `RgpdConsent.pending()` → Awaiting consent
+- `RgpdConsent.signedInPerson()` → Signed in person (with timestamp)
+- `RgpdConsent.signedOnline()` → Signed online (with timestamp)
+- `RgpdConsent.alreadySigned(year)` → Previously signed (with year)
+
+**Status Types:**
+- PENDING: No consent given yet
+- SIGNED_IN_PERSON: Physically signed (stores signedDate)
+- SIGNED_ONLINE: Digitally signed (stores signedDate)
+- ALREADY_SIGNED: Pre-existing consent (stores signedYear)
+
+**Validation:**
+- Signed year: >= 2018 (GDPR effective date) and <= current year
+- SignedDate automatically set for in-person/online
+- SignedYear required for already-signed
+
+**Examples:**
+```java
+RgpdConsent.pending()
+// getStatus() → PENDING
+
+RgpdConsent.signedInPerson()
+// getStatus() → SIGNED_IN_PERSON
+// getSignedDate() → Optional[2025-01-15T10:30:00]
+
+RgpdConsent.alreadySigned(2020)
+// getStatus() → ALREADY_SIGNED
+// getSignedYear() → Optional[2020]
+```
+
+---
+
+### Enums
+
+#### AlumniType
+Types of alumni status:
+- `BACHELOR` - Bachelor's degree graduate
+- `MASTER` - Master's degree graduate
+- `DOCTORATE` - Doctorate degree graduate
+- `ERASMUS` - Erasmus exchange program participant
+
+#### ContactMethod
+Ways students contacted the orientation service:
+- `EMAIL` - Via email
+- `PHONE` - Via phone call
+- `IN_PERSON` - In-person visit
+- `WHATSAPP` - Via WhatsApp
+- `INSTAGRAM` - Via Instagram DM
+- `OTHER` - Other methods
+
+#### CurrentYear
+Academic year levels:
+- `FIRST` - First year
+- `SECOND` - Second year
+- `THIRD` - Third year
+- `FOURTH` - Fourth year
+
+#### DiscoveryChannel
+How students discovered the orientation service:
+- `WEBSITE` - University website
+- `INSTAGRAM` - Instagram social media
+- `FRIEND` - Friend recommendation
+- `PROFESSOR` - Professor recommendation
+- `EMAIL` - Email campaign
+- `OTHER` - Other sources
+
+#### RgpdConsentStatus
+GDPR consent states:
+- `PENDING` - Awaiting consent
+- `SIGNED_IN_PERSON` - Signed physically
+- `SIGNED_ONLINE` - Signed digitally
+- `ALREADY_SIGNED` - Previously consented
+
+---
+
+### Design Patterns Used
+
+#### Value Objects
+All value objects are **immutable** and use:
+- **Factory Method pattern:** `of()` static method for creation
+- **Validation on construction:** Fail-fast principle
+- **Equals by value:** Two VOs with same value are equal
+- **No setters:** Immutable after creation
+
+#### Aggregate Root (Student)
+- **Builder pattern:** Fluent API for object construction
+- **Rich Domain Model:** Business logic in the domain
+- **Encapsulation:** Private setters, public business methods
+- **Invariant protection:** Validates state transitions
+
+#### Factory Methods (AlumniInfo, RgpdConsent)
+- **Type-safe creation:** Different methods for different states
+- **Self-documenting:** Method names express intent
+- **Consistency guarantee:** Ensures valid state combinations
+
+---
+
+## 🧪 Testing
+
+### Test Coverage
+
+The domain layer has **>80% test coverage** with **110 unit tests**:
+
+**Value Objects (79 tests):**
+- EmailTest: 9 tests (RFC 5322 validation, normalization)
+- PhoneTest: 12 tests (E.164 format, prefix handling)
+- DniTest: 23 tests (MOD 23 algorithm, DNI/NIE validation)
+- FullNameTest: 14 tests (composite VO, Optional handling)
+- AlumniInfoTest: 11 tests (consistency rules, year validation)
+- RgpdConsentTest: 10 tests (factory methods, status transitions)
+
+**Entities (31 tests):**
+- StudentTest: 31 tests (builder, business logic, equals/hashcode)
+
+### Running Tests
 ```bash
 # Run all tests
 mvn test
 
-# Run tests with coverage
+# Run specific test class
+mvn test -Dtest=StudentTest
+
+# Run tests with coverage report
 mvn clean test jacoco:report
+
+# View coverage report
+open target/site/jacoco/index.html
+```
+
+### Test Structure
+
+All tests follow the **AAA pattern** (Arrange-Act-Assert):
+```java
+@Test
+void shouldAddEmail() {
+    // Arrange
+    Student student = createStudent();
+    Email email = Email.of("test@test.com");
+
+    // Act
+    student.addEmail(email);
+
+    // Assert
+    assertTrue(student.getEmail().isPresent());
+    assertEquals(email, student.getEmail().get());
+}
 ```
 
 ---
@@ -270,9 +612,9 @@ mvn clean test jacoco:report
 - **Docker Compose** (local development)
 
 ### Testing
-- **JUnit 5**
+- **JUnit 5** (110 unit tests)
 - **Spring Boot Test**
-- **Testcontainers** (integration tests)
+- **Testcontainers** (integration tests - Sprint 2)
 
 ### Monitoring
 - **Spring Boot Actuator** (health checks, metrics)
@@ -388,27 +730,101 @@ docker ps  # STATUS should show "(healthy)"
 
 ## 📚 Architecture
 
-This project follows **Hexagonal Architecture** (Ports & Adapters) principles:
+This project follows **Hexagonal Architecture** (Ports & Adapters) and **Domain-Driven Design** principles:
 
-- **Domain Layer:** Pure business logic, no framework dependencies
-- **Application Layer:** Use cases, orchestration
-- **Infrastructure Layer:** Technical implementations (DB, REST, etc.)
+### Layers
+
+**Domain Layer (Core):**
+- Pure business logic
+- No framework dependencies
+- Value Objects, Entities, Aggregates
+- Rich Domain Model with behavior
+- Invariant protection
+
+**Application Layer:**
+- Use cases orchestration
+- Application services
+- DTOs and mappers
+- Transaction boundaries
+
+**Infrastructure Layer:**
+- Technical implementations
+- JPA repositories
+- REST controllers
+- Database configuration
+- External integrations
 
 ### Design Principles
 
 - ✅ **SOLID principles**
+- ✅ **Domain-Driven Design (DDD)**
+- ✅ **Hexagonal Architecture**
 - ✅ **Package by feature** (modular monolith)
-- ✅ **Dependency inversion** (domain doesn't depend on infrastructure)
+- ✅ **Dependency inversion** (domain independent)
 - ✅ **Separation of concerns**
+- ✅ **Immutability** (Value Objects)
+- ✅ **Fail-fast validation**
+
+### Domain Model Characteristics
+
+**Value Objects:**
+- Immutable
+- Validated on construction
+- Equals by value
+- No identity
+- Factory methods (`of()`)
+
+**Entities:**
+- Mutable state
+- Identity-based equality
+- Rich behavior
+- Encapsulated invariants
+- Builder pattern for construction
+
+**Aggregates:**
+- Consistency boundaries
+- Transaction boundaries
+- Aggregate Root (Student)
+- Business rules enforcement
 
 ---
 
 ## 🗺️ Roadmap
 
-- [x] **Sprint 1:** Student CRUD (Create & Read)
-- [ ] **Sprint 2:** Student CRUD (Update & Delete) + Refactoring
-- [ ] **Sprint 3:** Sessions Module
-- [ ] **Sprint 4:** Authentication (JWT)
+### Completed
+- [x] **Sprint 1 - Task #7:** Student Domain Model
+   - [x] Database migration (Flyway)
+   - [x] Domain enums (5 types)
+   - [x] Value Objects (6 VOs with validation)
+   - [x] Student Entity (Aggregate Root)
+   - [x] Unit tests (110 tests, >80% coverage)
+   - [x] Documentation
+
+### In Progress
+- [ ] **Sprint 1 - Task #8:** Student Repository Layer
+   - [ ] JPA Entity mapping
+   - [ ] Spring Data JPA Repository
+   - [ ] Repository implementation tests
+
+### Upcoming
+- [ ] **Sprint 1 - Task #9:** Student Application Services
+- [ ] **Sprint 1 - Task #10:** REST API Controllers
+- [ ] **Sprint 2:** Update & Delete operations + Refactoring
+- [ ] **Sprint 3:** Sessions Module (Collaborators + Sessions)
+- [ ] **Sprint 4:** Authentication & Authorization (JWT)
+
+---
+
+## 📊 Project Metrics
+
+**Current Status:**
+- **Lines of Code (Domain):** ~1,500
+- **Unit Tests:** 110
+- **Test Coverage:** >80% (domain layer)
+- **Value Objects:** 6
+- **Entities:** 1 (Aggregate Root)
+- **Enums:** 5
+- **Database Tables:** 1 (students)
 
 ---
 
