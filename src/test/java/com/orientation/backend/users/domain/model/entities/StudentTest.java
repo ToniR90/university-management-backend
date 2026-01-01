@@ -2,6 +2,7 @@ package com.orientation.backend.users.domain.model.entities;
 
 import com.orientation.backend.users.domain.model.enums.AlumniType;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
+import com.orientation.backend.users.domain.model.enums.DiscoveryChannel;
 import com.orientation.backend.users.domain.model.enums.RgpdConsentStatus;
 import com.orientation.backend.users.domain.model.valueobjects.Dni;
 import com.orientation.backend.users.domain.model.valueobjects.Email;
@@ -284,7 +285,12 @@ class StudentTest {
     // ========== Discovery & Contact Tracking Tests ==========
     @Test
     void shouldRegisterDiscoveryChannel() {
+        Student student = createStudent();
 
+        student.registerDiscoveryChannel(DiscoveryChannel.WEBSITE);
+
+        assertTrue(student.getHowDidYouKnowUs().isPresent());
+        assertEquals(DiscoveryChannel.WEBSITE, student.getHowDidYouKnowUs().get());
     }
 
     @Test
