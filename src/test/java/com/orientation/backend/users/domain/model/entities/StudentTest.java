@@ -304,17 +304,24 @@ class StudentTest {
     @Test
     void shouldUpdateCounselorNotes() {
         Student student = createStudent();
+        String notes = "This is a test";
 
         assertTrue(student.getCounselorNotes().isEmpty());
 
-        student.updateCounselorNotes("This is a test");
+        student.updateCounselorNotes(notes);
 
         assertTrue(student.getCounselorNotes().isPresent());
     }
 
     @Test
     void shouldTrimCounselorNotes() {
+        Student student = createStudent();
+        String notes = "    Test    ";
 
+        student.updateCounselorNotes(notes.trim());
+
+        assertTrue(student.getCounselorNotes().isPresent());
+        assertEquals("Test", student.getCounselorNotes().get());
     }
 
     @Test
