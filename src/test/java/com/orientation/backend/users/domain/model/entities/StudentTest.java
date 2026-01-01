@@ -190,7 +190,13 @@ class StudentTest {
 
     @Test
     void shouldRemovePhone() {
+        Student student = createStudent();
+        Phone phone = Phone.of("600123456");
 
+        student.addPhone(phone);
+        student.removePhone();
+
+        assertTrue(student.getPhone().isEmpty());
     }
 
     // ========== Contact Info Atomic Tests ==========
