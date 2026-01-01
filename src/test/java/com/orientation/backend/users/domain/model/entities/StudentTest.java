@@ -124,7 +124,11 @@ class StudentTest {
 
     @Test
     void shouldThrowExceptionWhenUpdatingNonExistentEmail() {
-
+        assertThrows(IllegalStateException.class, () -> {
+            Student student = createStudent();
+            Email email = Email.of("alighiero@mail.com");
+            student.updateEmail(email);
+        });
     }
 
     @Test
