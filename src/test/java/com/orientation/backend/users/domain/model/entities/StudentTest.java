@@ -5,6 +5,7 @@ import com.orientation.backend.users.domain.model.enums.RgpdConsentStatus;
 import com.orientation.backend.users.domain.model.valueobjects.Dni;
 import com.orientation.backend.users.domain.model.valueobjects.Email;
 import com.orientation.backend.users.domain.model.valueobjects.FullName;
+import com.orientation.backend.users.domain.model.valueobjects.Phone;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -117,7 +118,6 @@ class StudentTest {
         Email email1 = Email.of("alighiero@mail.com");
         student.updateEmail(email1);
 
-        assertNotNull(student.getEmail());
         assertTrue(student.getEmail().isPresent());
         assertEquals(email1, student.getEmail().get());
     }
@@ -136,11 +136,6 @@ class StudentTest {
         Student student = createStudent();
         Email email = Email.of("dante@mail.com");
         student.addEmail(email);
-
-        assertNotNull(student.getEmail());
-        assertTrue(student.getEmail().isPresent());
-        assertEquals(email, student.getEmail().get());
-
         student.removeEmail();
 
         assertTrue(student.getEmail().isEmpty());
@@ -158,7 +153,13 @@ class StudentTest {
     // ========== Phone Management Tests ==========
     @Test
     void shouldAddPhone() {
+        Student student = createStudent();
+        Phone phone = Phone.of("600123456");
 
+        student.addPhone(phone);
+
+        assertTrue(student.getPhone().isPresent());
+        assertEquals(phone, student.getPhone().get());
     }
 
     @Test
