@@ -340,7 +340,10 @@ class StudentTest {
     // ========== Equals & HashCode Tests ==========
     @Test
     void shouldBeEqualById() {
+        Student student = createStudent();
+        Student student1 = createStudent();
 
+        assertEquals(student1.getId(), student.getId());
     }
 
     @Test
