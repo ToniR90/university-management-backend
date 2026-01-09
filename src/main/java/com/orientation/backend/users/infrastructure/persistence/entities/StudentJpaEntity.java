@@ -50,7 +50,7 @@ public class StudentJpaEntity {
     private String rgpdConsentStatus;
 
     @Column(name = "rgpd_signed_date")
-    private LocalDate rgpdSignedDate;
+    private LocalDateTime rgpdSignedDate;
 
     @Column(name = "rgpd_signed_year")
     private Integer rgpdSignedYear;
@@ -76,7 +76,7 @@ public class StudentJpaEntity {
     public StudentJpaEntity(Long id, String dni, String name, String firstSurname, String secondSurname,
                             String email, String phone, String degree, String currentYear, Boolean isAlumni,
                             String alumniType, Integer graduationYear, String rgpdConsentStatus,
-                            LocalDate rgpdSignedDate, Integer rgpdSignedYear, String howDidYouKnowUs,
+                            LocalDateTime rgpdSignedDate, Integer rgpdSignedYear, String howDidYouKnowUs,
                             String howDidYouContactUs, String counselorNotes, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.dni = dni;
@@ -206,11 +206,11 @@ public class StudentJpaEntity {
         this.rgpdConsentStatus = rgpdConsentStatus;
     }
 
-    public LocalDate getRgpdSignedDate() {
+    public LocalDateTime getRgpdSignedDate() {
         return rgpdSignedDate;
     }
 
-    public void setRgpdSignedDate(LocalDate rgpdSignedDate) {
+    public void setRgpdSignedDate(LocalDateTime rgpdSignedDate) {
         this.rgpdSignedDate = rgpdSignedDate;
     }
 

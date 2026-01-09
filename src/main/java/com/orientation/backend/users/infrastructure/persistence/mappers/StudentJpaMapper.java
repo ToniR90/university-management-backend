@@ -5,6 +5,8 @@ import com.orientation.backend.users.domain.model.enums.*;
 import com.orientation.backend.users.domain.model.valueobjects.*;
 import com.orientation.backend.users.infrastructure.persistence.entities.StudentJpaEntity;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public class StudentJpaMapper {
@@ -15,20 +17,13 @@ public class StudentJpaMapper {
 
     // ========== JPA -> Domain ==========
     public static Student toDomain(StudentJpaEntity jpaEntity) {
-        // TODO: Implementar conversión JPA → Domain
-        // Necesitas convertir 20 campos
-
-        // 1. Value Objects simples
         Dni dni = Dni.of(jpaEntity.getDni());
 
-        // 2. Optional Value Objects
         Optional<Email> email = Optional.ofNullable(jpaEntity.getEmail()).map(Email::of);
         Optional<Phone> phone = Optional.ofNullable(jpaEntity.getPhone()).map(Phone::of);
 
-        // 3. Composite Value Objects
         FullName fullName = FullName.of(jpaEntity.getName(), jpaEntity.getFirstSurname(), jpaEntity.getSecondSurname());
 
-        // 4. AlumniInfo (factory methods)
         AlumniInfo alumniInfo;
         if (jpaEntity.getIsAlumni()) {
             AlumniType type = AlumniType.valueOf(jpaEntity.getAlumniType());
@@ -38,7 +33,6 @@ public class StudentJpaMapper {
             alumniInfo = AlumniInfo.notAlumni();
         }
 
-        // 5. RgpdConsent (factory methods)
         RgpdConsent rgpdConsent;
         RgpdConsentStatus status = RgpdConsentStatus.valueOf(jpaEntity.getRgpdConsentStatus());
 
@@ -50,17 +44,13 @@ public class StudentJpaMapper {
             default -> throw new IllegalStateException("Unknown RGPD status: " + status);
         }
 
-        // 6. Enums simples
         CurrentYear currentYear = CurrentYear.valueOf(jpaEntity.getCurrentYear());
 
-        // 7. Optional Enums
         Optional<DiscoveryChannel> howDidYouKnowUs = Optional.ofNullable(jpaEntity.getHowDidYouKnowUs()).map(DiscoveryChannel::valueOf);
         Optional<ContactMethod> howDidYouContactUs = Optional.ofNullable(jpaEntity.getHowDidYouContactUs()).map(ContactMethod::valueOf);
 
-        // 8. Optional String
         Optional<String> counselorNotes = Optional.ofNullable(jpaEntity.getCounselorNotes());
 
-        // 9. Student Builder
         return Student.builder()
                 .id(jpaEntity.getId())
                 .dni(dni)
@@ -77,5 +67,63 @@ public class StudentJpaMapper {
                 .createdAt(jpaEntity.getCreatedAt())
                 .updatedAt(jpaEntity.getUpdatedAt())
                 .build();
+    }
+
+    // ========== Domain -> Jpa ==========
+    public static StudentJpaEntity toJpaEntity(Student student) {
+
+        String dni = student.getDni().getValue();
+
+        String name = student.getFullName().getName();
+        String firstSurname = student.getFullName().getFirstSurname();
+        String secondSurname = student.getFullName().getSecondSurname().orElse(null);
+
+        String email = student.getEmail().map(Email::getValue).orElse(null);
+        String phone = student.getPhone().map(Phone::getValue).orElse(null);
+
+        String degree = student.getDegree();
+
+        String currentYear = student.getCurrentYear().name();
+
+        Boolean isAlumni = student.getAlumniInfo().isAlumni();
+        String alumniType = student.getAlumniInfo().getType().map(AlumniType::name).orElse(null);
+        Integer graduationYear = student.getAlumniInfo().getGraduationYear().orElse(null);
+
+        String rgpdConsentStatus = student.getRgpdConsent().getStatus().name();
+        LocalDateTime rgpdSignedDate = student.getRgpdConsent().getSignedDate().orElse(null);
+        Integer rgpdSignedYear = student.getRgpdConsent().getSignedYear().orElse(null);
+
+        String howDidYouKnowUs = student.getHowDidYouKnowUs().map(DiscoveryChannel::name).orElse(null);
+        String howDidYouContactUs = student.getHowDidYouContactUs().map(ContactMethod::name).orElse(null);
+
+        String counselorNotes = student.getCounselorNotes().orElse(null);
+
+        LocalDateTime createdAt = student.getCreatedAt();
+        LocalDateTime updatedAt = student.getUpdatedAt();
+
+        StudentJpaEntity jpaEntity = new StudentJpaEntity();
+
+        jpaEntity.setId(student.getId());
+        jpaEntity.setDni(dni);
+        jpaEntity.setName(name);
+        jpaEntity.setFirstSurname(firstSurname);
+        jpaEntity.setSecondSurname(secondSurname);
+        jpaEntity.setEmail(email);
+        jpaEntity.setPhone(phone);
+        jpaEntity.setDegree(degree);
+        jpaEntity.setCurrentYear(currentYear);
+        jpaEntity.setAlumni(isAlumni);
+        jpaEntity.setAlumniType(alumniType);
+        jpaEntity.setGraduationYear(graduationYear);
+        jpaEntity.setRgpdConsentStatus(rgpdConsentStatus);
+        jpaEntity.setRgpdSignedDate(rgpdSignedDate);
+        jpaEntity.setRgpdSignedYear(rgpdSignedYear);
+        jpaEntity.setHowDidYouKnowUs(howDidYouKnowUs);
+        jpaEntity.setHowDidYouContactUs(howDidYouContactUs);
+        jpaEntity.setCounselorNotes(counselorNotes);
+        jpaEntity.setCreatedAt(createdAt);
+        jpaEntity.setUpdatedAt(updatedAt);
+
+        return jpaEntity;
     }
 }
