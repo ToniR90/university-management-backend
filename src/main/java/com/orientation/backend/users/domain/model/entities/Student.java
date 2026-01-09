@@ -77,8 +77,8 @@ public class Student {
         this.howDidYouContactUs = builder.howDidYouContactUs;
         this.counselorNotes = builder.counselorNotes;
 
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.createdAt = (builder.createdAt != null) ? builder.createdAt : LocalDateTime.now();
+        this.updatedAt = (builder.updatedAt != null) ? builder.updatedAt : LocalDateTime.now();
     }
 
     // ============================================
@@ -376,6 +376,8 @@ public class Student {
         private DiscoveryChannel howDidYouKnowUs;
         private ContactMethod howDidYouContactUs;
         private String counselorNotes;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
 
         private Builder() {
             this.alumniInfo = AlumniInfo.notAlumni();
@@ -469,6 +471,16 @@ public class Student {
         // OverCharged for direct input
         public Builder counselorNotes(String counselorNotes) {
             this.counselorNotes = counselorNotes;
+            return this;
+        }
+
+        public Builder createdAt(LocalDateTime createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder updatedAt(LocalDateTime updatedAt) {
+            this.updatedAt = updatedAt;
             return this;
         }
 
