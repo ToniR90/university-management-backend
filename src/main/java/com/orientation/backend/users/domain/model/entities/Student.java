@@ -397,11 +397,23 @@ public class Student {
             return this;
         }
 
+        public Builder email(Optional<Email> email) {
+            this.email = email.orElse(null);
+            return this;
+        }
+
+        // OverCharge for direct Email
         public Builder email(Email email) {
             this.email = email;
             return this;
         }
 
+        public Builder phone(Optional<Phone> phone) {
+            this.phone = phone.orElse(null);
+            return this;
+        }
+
+        // OverCharge for direct phone
         public Builder phone(Phone phone) {
             this.phone = phone;
             return this;
@@ -427,16 +439,34 @@ public class Student {
             return this;
         }
 
+        public Builder howDidYouKnowUs(Optional<DiscoveryChannel> howDidYouKnowUs) {
+            this.howDidYouKnowUs = howDidYouKnowUs.orElse(null);
+            return this;
+        }
+
+        // OverCharge for direct input
         public Builder howDidYouKnowUs(DiscoveryChannel howDidYouKnowUs) {
             this.howDidYouKnowUs = howDidYouKnowUs;
             return this;
         }
 
+        public Builder howDidYouContactUs(Optional<ContactMethod> howDidYouContactUs) {
+            this.howDidYouContactUs = howDidYouContactUs.orElse(null);
+            return this;
+        }
+
+        // OverCharge for direct input
         public Builder howDidYouContactUs(ContactMethod howDidYouContactUs) {
             this.howDidYouContactUs = howDidYouContactUs;
             return this;
         }
 
+        public Builder counselorNotes(Optional<String> counselorNotes) {
+            this.counselorNotes = counselorNotes.orElse(null);
+            return this;
+        }
+
+        // OverCharged for direct input
         public Builder counselorNotes(String counselorNotes) {
             this.counselorNotes = counselorNotes;
             return this;
