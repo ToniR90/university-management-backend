@@ -68,4 +68,12 @@ class StudentRepositoryImplTest {
         assertThat(found).isPresent();
         assertThat(found.get().getDni().getValue()).isEqualTo("12345678Z");
     }
+
+    @Test
+    @DisplayName("Should return empty when not found by ID")
+    void shouldReturnEmptyWhenNotFoundById() {
+        Optional<Student> found = studentRepository.findById(999L);
+
+        assertThat(found).isEmpty();
+    }
 }
