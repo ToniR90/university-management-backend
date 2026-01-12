@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
+import javax.swing.text.html.Option;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -88,5 +89,11 @@ class StudentRepositoryImplTest {
         assertThat(saved.getDni().getValue()).isEqualTo("12345678Z");
     }
 
+    @Test
+    @DisplayName("Should return empty when not found the DNI")
+    void shouldReturnEmptyWhenNotFoundByDni() {
+        Optional<Student> found = studentRepository.findByDni(Dni.of("12345678Z"));
 
+        assertThat(found).isEmpty();
+    }
 }
