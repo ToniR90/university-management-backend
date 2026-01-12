@@ -45,17 +45,27 @@ class StudentRepositoryImplTest {
     @Test
     @DisplayName("Should save student correctly")
     void shouldSaveStudent() {
-        // Given
         Student student = createTestStudent("12345678Z", "test@example.com");
 
-        // When
         Student saved = studentRepository.save(student);
 
-        // Then
         assertThat(saved).isNotNull();
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getDni().getValue()).isEqualTo("12345678Z");
         assertThat(saved.getEmail()).isPresent();
         assertThat(saved.getEmail().get().getValue()).isEqualTo("test@example.com");
+    }
+
+    @Test
+    @DisplayName("Should find Student by ID")
+    void shouldFindStudentById() {
+        Student student = createTestStudent("12345678Z", "test@email.com");
+
+        Student saved = studentRepository.save(student);
+
+        Optional<Student> found = studentRepository.findById(saved.getId());
+
+        assertThat(found).isPresent();
+        assertThat(found.get().getDni().getValue()).isEqualTo("12345678Z");
     }
 }
