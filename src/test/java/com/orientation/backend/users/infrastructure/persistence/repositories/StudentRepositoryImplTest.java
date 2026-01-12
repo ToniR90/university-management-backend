@@ -160,7 +160,20 @@ class StudentRepositoryImplTest {
     @Test
     @DisplayName("Should allow null phone")
     void shouldAllowNullPhone() {
+            Student student = Student.builder()
+                    .dni(Dni.of("67890123E"))
+                    .fullName(FullName.of("Test_name", "Test_FirstSurname", "Test_SecondSurname"))
+                    .degree("Test Degree")
+                    .currentYear(CurrentYear.FIRST)
+                    .alumniInfo(AlumniInfo.notAlumni())
+                    .rgpdConsent(RgpdConsent.pending())
+                    .build();
 
+            Student saved = studentRepository.save(student);
+
+            Optional<Student> found = studentRepository.findById(saved.getId());
+            assertThat(found).isPresent();
+            assertThat(found.get().getPhone()).isEmpty();
     }
 
     @Test
