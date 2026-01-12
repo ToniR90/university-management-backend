@@ -76,4 +76,17 @@ class StudentRepositoryImplTest {
 
         assertThat(found).isEmpty();
     }
+
+    @Test
+    @DisplayName("Should find Student by DNI")
+    void shouldFindStudentByDni() {
+        Student student = createTestStudent("12345678Z", "test@mail.com");
+
+        Student saved = studentRepository.save(student);
+
+        assertThat(saved).isNotNull();
+        assertThat(saved.getDni().getValue()).isEqualTo("12345678Z");
+    }
+
+
 }
