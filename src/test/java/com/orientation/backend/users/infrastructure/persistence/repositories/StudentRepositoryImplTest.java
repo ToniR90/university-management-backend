@@ -96,4 +96,46 @@ class StudentRepositoryImplTest {
 
         assertThat(found).isEmpty();
     }
+
+    @Test
+    @DisplayName("Should exists by DNI")
+    void shouldExistsByDni() {
+        Student student = createTestStudent("12345678Z", "test@mail.com");
+
+        Student saved = studentRepository.save(student);
+
+        Optional<Student> found = studentRepository.findByDni(Dni.of(saved.getDni().getValue()));
+
+        assertThat(found).isPresent();
+    }
+
+    @Test
+    @DisplayName("Should not exists by DNI")
+    void shouldNotExistsByDni() {
+
+    }
+
+    @Test
+    @DisplayName("Should update Student")
+    void shouldUpdateStudent() {
+
+    }
+
+    @Test
+    @DisplayName("Should allow null email")
+    void shouldAllowNullEmail() {
+
+    }
+
+    @Test
+    @DisplayName("Should allow null phone")
+    void shouldAllowNullPhone() {
+
+    }
+
+    @Test
+    @DisplayName("Should fail when saving duplicate DNI")
+    void shouldFailWhenSavingDuplicateDni() {
+
+    }
 }
