@@ -225,23 +225,37 @@ src/
 │   │   └── com/orientation/backend/
 │   │       ├── StudentManagementSystemApplication.java
 │   │       ├── users/
-│   │       │   └── domain/
-│   │       │       └── model/
+│   │       │   ├── domain/
+│   │       │   │   ├── model/
+│   │       │   │   │   ├── entities/
+│   │       │   │   │   │   └── Student.java          # Aggregate Root
+│   │       │   │   │   ├── valueobjects/
+│   │       │   │   │   │   ├── Email.java            # RFC 5322 validation
+│   │       │   │   │   │   ├── Phone.java            # E.164 format
+│   │       │   │   │   │   ├── Dni.java              # Spanish DNI/NIE (MOD 23)
+│   │       │   │   │   │   ├── FullName.java         # Composite VO
+│   │       │   │   │   │   ├── AlumniInfo.java       # Alumni status
+│   │       │   │   │   │   └── RgpdConsent.java      # GDPR consent
+│   │       │   │   │   └── enums/
+│   │       │   │   │       ├── AlumniType.java
+│   │       │   │   │       ├── ContactMethod.java
+│   │       │   │   │       ├── CurrentYear.java
+│   │       │   │   │       ├── DiscoveryChannel.java
+│   │       │   │   │       └── RgpdConsentStatus.java
+│   │       │   │   │
+│   │       │   │   └── repository/
+│   │       │   │       └── StudentRepository.java     # Domain port (interface)
+│   │       │   │
+│   │       │   └── infrastructure/
+│   │       │       └── persistence/
 │   │       │           ├── entities/
-│   │       │           │   └── Student.java          # Aggregate Root
-│   │       │           ├── valueobjects/
-│   │       │           │   ├── Email.java            # RFC 5322 validation
-│   │       │           │   ├── Phone.java            # E.164 format
-│   │       │           │   ├── Dni.java              # Spanish DNI/NIE (MOD 23)
-│   │       │           │   ├── FullName.java         # Composite VO
-│   │       │           │   ├── AlumniInfo.java       # Alumni status
-│   │       │           │   └── RgpdConsent.java      # GDPR consent
-│   │       │           └── enums/
-│   │       │               ├── AlumniType.java
-│   │       │               ├── ContactMethod.java
-│   │       │               ├── CurrentYear.java
-│   │       │               ├── DiscoveryChannel.java
-│   │       │               └── RgpdConsentStatus.java
+│   │       │           │   └── StudentJpaEntity.java  # JPA entity mapping
+│   │       │           ├── mappers/
+│   │       │           │   └── StudentJpaMapper.java  # Bidirectional Domain ↔ JPA
+│   │       │           └── repositories/
+│   │       │               ├── SpringDataStudentRepository.java  # Spring Data JPA
+│   │       │               └── StudentRepositoryImpl.java        # Adapter implementation
+│   │       │
 │   │       ├── sessions/       # Session management (Sprint 3)
 │   │       ├── auth/           # Authentication (Sprint 4)
 │   │       └── shared/
@@ -258,17 +272,22 @@ src/
     └── java/
         └── com/orientation/backend/
             └── users/
-                └── domain/
-                    └── model/
-                        ├── valueobjects/
-                        │   ├── EmailTest.java        (9 tests)
-                        │   ├── PhoneTest.java        (12 tests)
-                        │   ├── DniTest.java          (23 tests)
-                        │   ├── FullNameTest.java     (14 tests)
-                        │   ├── AlumniInfoTest.java   (11 tests)
-                        │   └── RgpdConsentTest.java  (10 tests)
-                        └── entities/
-                            └── StudentTest.java      (31 tests)
+                ├── domain/
+                │   └── model/
+                │       ├── valueobjects/
+                │       │   ├── EmailTest.java        (9 tests)
+                │       │   ├── PhoneTest.java        (12 tests)
+                │       │   ├── DniTest.java          (23 tests)
+                │       │   ├── FullNameTest.java     (14 tests)
+                │       │   ├── AlumniInfoTest.java   (11 tests)
+                │       │   └── RgpdConsentTest.java  (10 tests)
+                │       └── entities/
+                │           └── StudentTest.java      (31 tests)
+                │
+                └── infrastructure/
+                    └── persistence/
+                        └── repositories/
+                            └── StudentRepositoryImplTest.java  (11 tests)
 ```
 
 ---
@@ -545,7 +564,9 @@ All value objects are **immutable** and use:
 
 ### Test Coverage
 
-The domain layer has **>80% test coverage** with **110 unit tests**:
+The project has **>80% test coverage** with **121 tests**:
+
+**Domain Layer (110 unit tests):**
 
 **Value Objects (79 tests):**
 - EmailTest: 9 tests (RFC 5322 validation, normalization)
@@ -557,6 +578,24 @@ The domain layer has **>80% test coverage** with **110 unit tests**:
 
 **Entities (31 tests):**
 - StudentTest: 31 tests (builder, business logic, equals/hashcode)
+
+**Infrastructure Layer (11 integration tests):**
+
+**Repository Tests:**
+- StudentRepositoryImplTest: 11 tests
+    - CRUD operations (Create, Read, Update)
+    - Find by ID and DNI
+    - Exists by DNI validation
+    - Unique constraint testing (duplicate DNI)
+    - Optional fields handling (null email/phone)
+    - PostgreSQL integration with real database
+
+**Test Configuration:**
+- `@DataJpaTest` for repository slice testing
+- Real PostgreSQL database (`students_test`)
+- Transaction rollback after each test
+- Test isolation with unique DNIs per test
+- `@AutoConfigureTestDatabase(replace = NONE)` to use configured database
 
 ### Running Tests
 ```bash
@@ -612,9 +651,9 @@ void shouldAddEmail() {
 - **Docker Compose** (local development)
 
 ### Testing
-- **JUnit 5** (110 unit tests)
+- **JUnit 5** (121 tests: 110 unit + 11 integration)
 - **Spring Boot Test**
-- **Testcontainers** (integration tests - Sprint 2)
+- **AssertJ** (fluent assertions)
 
 ### Monitoring
 - **Spring Boot Actuator** (health checks, metrics)
@@ -754,6 +793,39 @@ This project follows **Hexagonal Architecture** (Ports & Adapters) and **Domain-
 - Database configuration
 - External integrations
 
+### Repository Layer Implementation
+
+Following the **Ports & Adapters** pattern, the repository layer is implemented in three distinct components:
+
+**Domain Port (Interface):**
+- `StudentRepository` - Interface defined in domain layer
+- No framework dependencies
+- Defines persistence contract with domain types
+- Operations: save, findById, findByDni, existsByDni
+
+**Infrastructure Adapter:**
+- `StudentRepositoryImpl` - Implements domain port
+- Uses Spring Data JPA repository internally
+- Converts between Domain entities and JPA entities
+- Bridges domain and infrastructure layers
+
+**JPA Layer:**
+- `StudentJpaEntity` - JPA entity with annotations (@Entity, @Table, @Column)
+- Maps 20 domain fields to database columns
+- Lifecycle callbacks (@PrePersist, @PreUpdate) for timestamps
+- `StudentJpaMapper` - Bidirectional conversion (Domain ↔ JPA)
+- Handles all value objects and Optional fields
+- Null-safe transformations
+- `SpringDataStudentRepository` - Extends JpaRepository
+- Custom query methods (findByDni, existsByDni)
+
+**Benefits of this separation:**
+- ✅ Domain remains framework-agnostic
+- ✅ Easy to test (mock repository interface)
+- ✅ Easy to swap database implementations
+- ✅ Clear architectural boundaries
+- ✅ Type safety with domain value objects
+
 ### Design Principles
 
 - ✅ **SOLID principles**
@@ -792,19 +864,29 @@ This project follows **Hexagonal Architecture** (Ports & Adapters) and **Domain-
 ## 🗺️ Roadmap
 
 ### Completed
-- [x] **Sprint 1 - Task #7:** Student Domain Model
-   - [x] Database migration (Flyway)
-   - [x] Domain enums (5 types)
-   - [x] Value Objects (6 VOs with validation)
-   - [x] Student Entity (Aggregate Root)
-   - [x] Unit tests (110 tests, >80% coverage)
-   - [x] Documentation
+
+- [x] **Sprint 1 - Task #7:** Student Domain Model ✅
+    - [x] Database migration (Flyway)
+    - [x] Domain enums (5 types)
+    - [x] Value Objects (6 VOs with validation)
+    - [x] Student Entity (Aggregate Root)
+    - [x] Unit tests (110 tests, >80% coverage)
+    - [x] Documentation
+
+- [x] **Sprint 1 - Task #8:** Student Repository Layer ✅
+    - [x] JPA Entity mapping (StudentJpaEntity - 20 fields)
+    - [x] Bidirectional mapper (Domain ↔ JPA)
+    - [x] Repository pattern (3 layers: Domain Port, Spring Data, Adapter)
+    - [x] Integration tests (11 tests with PostgreSQL)
+    - [x] Hexagonal architecture implementation
 
 ### In Progress
-- [ ] **Sprint 1 - Task #8:** Student Repository Layer
-   - [ ] JPA Entity mapping
-   - [ ] Spring Data JPA Repository
-   - [ ] Repository implementation tests
+
+- [ ] **Sprint 1 - Task #9:** Student Application Services
+    - [ ] Service orchestration layer
+    - [ ] Application commands (Create, Update operations)
+    - [ ] Business validations and exception handling
+    - [ ] Service tests
 
 ### Upcoming
 - [ ] **Sprint 1 - Task #9:** Student Application Services
@@ -818,12 +900,14 @@ This project follows **Hexagonal Architecture** (Ports & Adapters) and **Domain-
 ## 📊 Project Metrics
 
 **Current Status:**
-- **Lines of Code (Domain):** ~1,500
-- **Unit Tests:** 110
-- **Test Coverage:** >80% (domain layer)
+- **Lines of Code:** ~2,000
+- **Total Tests:** 121 (110 domain + 11 integration)
+- **Test Coverage:** >80%
+- **Layers Implemented:** Domain + Infrastructure
 - **Value Objects:** 6
 - **Entities:** 1 (Aggregate Root)
 - **Enums:** 5
+- **Repositories:** 1 (with 3-layer implementation)
 - **Database Tables:** 1 (students)
 
 ---
@@ -848,4 +932,23 @@ This is a personal learning project. Feedback and suggestions are welcome!
 
 ---
 
-**Last Updated:** November 2025
+## 📅 Recent Updates
+
+### January 2026
+
+**Task #8: Repository Layer** ✅ *Completed*
+- Implemented hexagonal architecture with Ports & Adapters pattern
+- Created JPA entity mapping for Student aggregate (20 fields)
+- Built bidirectional mapper between Domain and JPA entities
+- Implemented 3-layer repository pattern (Domain Port, Spring Data, Adapter)
+- Added 11 integration tests with real PostgreSQL database
+- All tests passing (121/121) with >80% coverage
+
+**Task #7: Domain Model** ✅ *Completed*
+- Designed and implemented complete domain model
+- Created 6 value objects with validation (Email, Phone, Dni, FullName, AlumniInfo, RgpdConsent)
+- Implemented Student aggregate root with business logic
+- Added 110 unit tests with >80% coverage
+- Established DDD patterns and practices
+
+**Last Updated:** January 2026
