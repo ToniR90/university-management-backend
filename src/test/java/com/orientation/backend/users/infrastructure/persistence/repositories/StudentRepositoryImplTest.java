@@ -112,7 +112,9 @@ class StudentRepositoryImplTest {
     @Test
     @DisplayName("Should not exists by DNI")
     void shouldNotExistsByDni() {
+        Optional<Student> found = studentRepository.findByDni(Dni.of("98765432Z"));
 
+        assertThat(found).isEmpty();
     }
 
     @Test
