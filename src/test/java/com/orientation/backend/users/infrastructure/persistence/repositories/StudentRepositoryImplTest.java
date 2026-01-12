@@ -10,7 +10,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
-import javax.swing.text.html.Option;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -33,10 +32,10 @@ class StudentRepositoryImplTest {
     private Student createTestStudent(String dni, String email) {
         return Student.builder()
                 .dni(Dni.of(dni))
-                .fullName(FullName.of("Test", "Student", "Surname"))
+                .fullName(FullName.of("Test_Name", "Test_Surname1", "Test_Surname2"))
                 .email(Optional.of(Email.of(email)))
                 .phone(Optional.of(Phone.of("+34612345678")))
-                .degree("Ingeniería Informática")
+                .degree("Videojocs")
                 .currentYear(CurrentYear.FIRST)
                 .alumniInfo(AlumniInfo.notAlumni())
                 .rgpdConsent(RgpdConsent.pending())
@@ -46,13 +45,13 @@ class StudentRepositoryImplTest {
     @Test
     @DisplayName("Should save student correctly")
     void shouldSaveStudent() {
-        Student student = createTestStudent("12345678Z", "test@example.com");
+        Student student = createTestStudent("00000000T", "test@example.com");
 
         Student saved = studentRepository.save(student);
 
         assertThat(saved).isNotNull();
         assertThat(saved.getId()).isNotNull();
-        assertThat(saved.getDni().getValue()).isEqualTo("12345678Z");
+        assertThat(saved.getDni().getValue()).isEqualTo("00000000T");
         assertThat(saved.getEmail()).isPresent();
         assertThat(saved.getEmail().get().getValue()).isEqualTo("test@example.com");
     }
@@ -60,14 +59,14 @@ class StudentRepositoryImplTest {
     @Test
     @DisplayName("Should find Student by ID")
     void shouldFindStudentById() {
-        Student student = createTestStudent("12345678Z", "test@email.com");
+        Student student = createTestStudent("00000001R", "test@email.com");
 
         Student saved = studentRepository.save(student);
 
         Optional<Student> found = studentRepository.findById(saved.getId());
 
         assertThat(found).isPresent();
-        assertThat(found.get().getDni().getValue()).isEqualTo("12345678Z");
+        assertThat(found.get().getDni().getValue()).isEqualTo("00000001R");
     }
 
     @Test
@@ -81,18 +80,18 @@ class StudentRepositoryImplTest {
     @Test
     @DisplayName("Should find Student by DNI")
     void shouldFindStudentByDni() {
-        Student student = createTestStudent("12345678Z", "test@mail.com");
+        Student student = createTestStudent("00000002W", "test@mail.com");
 
         Student saved = studentRepository.save(student);
 
         assertThat(saved).isNotNull();
-        assertThat(saved.getDni().getValue()).isEqualTo("12345678Z");
+        assertThat(saved.getDni().getValue()).isEqualTo("00000002W");
     }
 
     @Test
     @DisplayName("Should return empty when not found the DNI")
     void shouldReturnEmptyWhenNotFoundByDni() {
-        Optional<Student> found = studentRepository.findByDni(Dni.of("12345678Z"));
+        Optional<Student> found = studentRepository.findByDni(Dni.of("00000003A"));
 
         assertThat(found).isEmpty();
     }
@@ -100,7 +99,7 @@ class StudentRepositoryImplTest {
     @Test
     @DisplayName("Should exists by DNI")
     void shouldExistsByDni() {
-        Student student = createTestStudent("12345678Z", "test@mail.com");
+        Student student = createTestStudent("00000004G", "test@mail.com");
 
         studentRepository.save(student);
 
@@ -112,7 +111,7 @@ class StudentRepositoryImplTest {
     @Test
     @DisplayName("Should not exists by DNI")
     void shouldNotExistsByDni() {
-        boolean exists = studentRepository.existsByDni(Dni.of("98765432Z"));
+        boolean exists = studentRepository.existsByDni(Dni.of("00000005M"));
 
         assertThat(exists).isFalse();
     }
@@ -120,12 +119,12 @@ class StudentRepositoryImplTest {
     @Test
     @DisplayName("Should update Student")
     void shouldUpdateStudent() {
-        Student student = createTestStudent("12345678Z", "test@email.com");
+        Student student = createTestStudent("00000006Y", "test@email.com");
 
         Student saved = studentRepository.save(student);
 
         saved.updateContactInfo(
-                Email.of("newEmail@example.com"),
+                Email.of("new_email@example.com"),
                 saved.getPhone().orElse(null)
         );
 
@@ -134,7 +133,7 @@ class StudentRepositoryImplTest {
         Optional<Student> found = studentRepository.findById(updated.getId());
         assertThat(found).isPresent();
         assertThat(found.get().getEmail()).isPresent();
-        assertThat(found.get().getEmail().get().getValue()).isEqualTo("newEmail@example.com");
+        assertThat(found.get().getEmail().get().getValue()).isEqualTo("new_email@example.com");
 
     }
 
@@ -142,7 +141,7 @@ class StudentRepositoryImplTest {
     @DisplayName("Should allow null email")
     void shouldAllowNullEmail() {
         Student student = Student.builder()
-                .dni(Dni.of("67890123E"))
+                .dni(Dni.of("00000007F"))
                 .fullName(FullName.of("Test_name", "Test_FirstSurname", "Test_SecondSurname"))
                 .degree("Test Degree")
                 .currentYear(CurrentYear.FIRST)
@@ -161,7 +160,7 @@ class StudentRepositoryImplTest {
     @DisplayName("Should allow null phone")
     void shouldAllowNullPhone() {
             Student student = Student.builder()
-                    .dni(Dni.of("67890123E"))
+                    .dni(Dni.of("00000008P"))
                     .fullName(FullName.of("Test_name", "Test_FirstSurname", "Test_SecondSurname"))
                     .degree("Test Degree")
                     .currentYear(CurrentYear.FIRST)
@@ -179,10 +178,10 @@ class StudentRepositoryImplTest {
     @Test
     @DisplayName("Should fail when saving duplicate DNI")
     void shouldFailWhenSavingDuplicateDni() {
-        Student student1 = createTestStudent("12345678Z", "test@example.com");
+        Student student1 = createTestStudent("00000009D", "test@example.com");
         studentRepository.save(student1);
 
-        Student student2 = createTestStudent("12345678Z", "test2@example.com");
+        Student student2 = createTestStudent("00000009D", "test2@example.com");
 
         assertThatThrownBy(() -> studentRepository.save(student2)).isInstanceOf(Exception.class);
     }
