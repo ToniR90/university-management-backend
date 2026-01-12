@@ -3,48 +3,59 @@ package com.orientation.backend.users.infrastructure.persistence.repositories;
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
 import com.orientation.backend.users.domain.model.valueobjects.*;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 
 @DataJpaTest
-@Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(StudentRepositoryImpl.class)
+@TestPropertySource(properties = {
+        "spring.datasource.url=jdbc:postgresql://localhost:5432/students_test",
+        "spring.datasource.username=postgres",
+        "spring.datasource.password=postgres",
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "spring.flyway.enabled=false"
+})
 class StudentRepositoryImplTest {
-
-    @Container
-    static PostgreSQLContainer<?> postres = new PostgreSQLContainer<>("postgres:15-alpine")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test");
 
     @Autowired
     private StudentRepositoryImpl studentRepository;
 
-    // ========== Helper Methods ==========
-
-    private Student createTestStudent(String dni, String email){
+    private Student createTestStudent(String dni, String email) {
         return Student.builder()
                 .dni(Dni.of(dni))
-                .fullName(FullName.of("Test_Name", "Test_First_Surname", "Test_Second_Surname"))
+                .fullName(FullName.of("Test", "Student", "Surname"))
                 .email(Optional.of(Email.of(email)))
                 .phone(Optional.of(Phone.of("+34612345678")))
-                .degree("Informàtica")
+                .degree("Ingeniería Informática")
                 .currentYear(CurrentYear.FIRST)
                 .alumniInfo(AlumniInfo.notAlumni())
                 .rgpdConsent(RgpdConsent.pending())
                 .build();
     }
 
-    // ========== CRUD Tests ==========
+    @Test
+    @DisplayName("Should save student correctly")
+    void shouldSaveStudent() {
+        // Given
+        Student student = createTestStudent("12345678Z", "test@example.com");
 
+        // When
+        Student saved = studentRepository.save(student);
+
+        // Then
+        assertThat(saved).isNotNull();
+        assertThat(saved.getId()).isNotNull();
+        assertThat(saved.getDni().getValue()).isEqualTo("12345678Z");
+        assertThat(saved.getEmail()).isPresent();
+        assertThat(saved.getEmail().get().getValue()).isEqualTo("test@example.com");
+    }
 }
