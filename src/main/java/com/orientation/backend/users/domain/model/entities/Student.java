@@ -77,8 +77,8 @@ public class Student {
         this.howDidYouContactUs = builder.howDidYouContactUs;
         this.counselorNotes = builder.counselorNotes;
 
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.createdAt = (builder.createdAt != null) ? builder.createdAt : LocalDateTime.now();
+        this.updatedAt = (builder.updatedAt != null) ? builder.updatedAt : LocalDateTime.now();
     }
 
     // ============================================
@@ -376,6 +376,8 @@ public class Student {
         private DiscoveryChannel howDidYouKnowUs;
         private ContactMethod howDidYouContactUs;
         private String counselorNotes;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
 
         private Builder() {
             this.alumniInfo = AlumniInfo.notAlumni();
@@ -397,11 +399,23 @@ public class Student {
             return this;
         }
 
+        public Builder email(Optional<Email> email) {
+            this.email = email.orElse(null);
+            return this;
+        }
+
+        // OverCharge for direct Email
         public Builder email(Email email) {
             this.email = email;
             return this;
         }
 
+        public Builder phone(Optional<Phone> phone) {
+            this.phone = phone.orElse(null);
+            return this;
+        }
+
+        // OverCharge for direct phone
         public Builder phone(Phone phone) {
             this.phone = phone;
             return this;
@@ -427,18 +441,46 @@ public class Student {
             return this;
         }
 
+        public Builder howDidYouKnowUs(Optional<DiscoveryChannel> howDidYouKnowUs) {
+            this.howDidYouKnowUs = howDidYouKnowUs.orElse(null);
+            return this;
+        }
+
+        // OverCharge for direct input
         public Builder howDidYouKnowUs(DiscoveryChannel howDidYouKnowUs) {
             this.howDidYouKnowUs = howDidYouKnowUs;
             return this;
         }
 
+        public Builder howDidYouContactUs(Optional<ContactMethod> howDidYouContactUs) {
+            this.howDidYouContactUs = howDidYouContactUs.orElse(null);
+            return this;
+        }
+
+        // OverCharge for direct input
         public Builder howDidYouContactUs(ContactMethod howDidYouContactUs) {
             this.howDidYouContactUs = howDidYouContactUs;
             return this;
         }
 
+        public Builder counselorNotes(Optional<String> counselorNotes) {
+            this.counselorNotes = counselorNotes.orElse(null);
+            return this;
+        }
+
+        // OverCharged for direct input
         public Builder counselorNotes(String counselorNotes) {
             this.counselorNotes = counselorNotes;
+            return this;
+        }
+
+        public Builder createdAt(LocalDateTime createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder updatedAt(LocalDateTime updatedAt) {
+            this.updatedAt = updatedAt;
             return this;
         }
 
