@@ -179,6 +179,11 @@ class StudentRepositoryImplTest {
     @Test
     @DisplayName("Should fail when saving duplicate DNI")
     void shouldFailWhenSavingDuplicateDni() {
+        Student student1 = createTestStudent("12345678Z", "test@example.com");
+        studentRepository.save(student1);
 
+        Student student2 = createTestStudent("12345678Z", "test2@example.com");
+
+        assertThatThrownBy(() -> studentRepository.save(student2)).isInstanceOf(Exception.class);
     }
 }
