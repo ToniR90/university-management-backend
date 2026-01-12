@@ -102,31 +102,59 @@ class StudentRepositoryImplTest {
     void shouldExistsByDni() {
         Student student = createTestStudent("12345678Z", "test@mail.com");
 
-        Student saved = studentRepository.save(student);
+        studentRepository.save(student);
 
-        Optional<Student> found = studentRepository.findByDni(Dni.of(saved.getDni().getValue()));
+        boolean exists = studentRepository.existsByDni(Dni.of(student.getDni().getValue()));
 
-        assertThat(found).isPresent();
+        assertThat(exists).isTrue();
     }
 
     @Test
     @DisplayName("Should not exists by DNI")
     void shouldNotExistsByDni() {
-        Optional<Student> found = studentRepository.findByDni(Dni.of("98765432Z"));
+        boolean exists = studentRepository.existsByDni(Dni.of("98765432Z"));
 
-        assertThat(found).isEmpty();
+        assertThat(exists).isFalse();
     }
 
     @Test
     @DisplayName("Should update Student")
     void shouldUpdateStudent() {
+        Student student = createTestStudent("12345678Z", "test@email.com");
+
+        Student saved = studentRepository.save(student);
+
+        saved.updateContactInfo(
+                Email.of("newEmail@example.com"),
+                saved.getPhone().orElse(null)
+        );
+
+        Student updated = studentRepository.save(saved);
+
+        Optional<Student> found = studentRepository.findById(updated.getId());
+        assertThat(found).isPresent();
+        assertThat(found.get().getEmail()).isPresent();
+        assertThat(found.get().getEmail().get().getValue()).isEqualTo("newEmail@example.com");
 
     }
 
     @Test
     @DisplayName("Should allow null email")
     void shouldAllowNullEmail() {
+        Student student = Student.builder()
+                .dni(Dni.of("67890123E"))
+                .fullName(FullName.of("Test_name", "Test_FirstSurname", "Test_SecondSurname"))
+                .degree("Test Degree")
+                .currentYear(CurrentYear.FIRST)
+                .alumniInfo(AlumniInfo.notAlumni())
+                .rgpdConsent(RgpdConsent.pending())
+                .build();
 
+        Student saved = studentRepository.save(student);
+
+        Optional<Student> found = studentRepository.findById(saved.getId());
+        assertThat(found).isPresent();
+        assertThat(found.get().getEmail()).isEmpty();
     }
 
     @Test
