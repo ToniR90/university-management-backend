@@ -1,0 +1,70 @@
+package com.orientation.backend.users.application.services;
+
+import com.orientation.backend.users.application.commands.CreateStudentCommand;
+import com.orientation.backend.users.application.commands.MarkAsAlumniCommand;
+import com.orientation.backend.users.application.commands.UpdateContactCommand;
+import com.orientation.backend.users.application.commands.UpdateRgpdConsentCommand;
+import com.orientation.backend.users.application.exceptions.DuplicateDniException;
+import com.orientation.backend.users.application.exceptions.StudentNotFoundException;
+import com.orientation.backend.users.domain.model.entities.Student;
+import com.orientation.backend.users.domain.model.enums.CurrentYear;
+import com.orientation.backend.users.domain.model.valueobjects.*;
+import com.orientation.backend.users.domain.repository.StudentRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+
+@Service
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
+public class StudentService {
+
+    private final StudentRepository studentRepository;
+
+    @Transactional
+    public Student createStudent(CreateStudentCommand command) {
+        Dni dni = Dni.of(command.dni());
+
+        if(studentRepository.existsByDni(dni)) {
+            throw new DuplicateDniException(command.dni());
+        }
+
+        Student student = Student.builder()
+                .dni(dni)
+                .fullName(FullName.of(command.name(), command.firstSurname(), command.secondSurname()))
+                .email(Optional.ofNullable(command.email()).map(Email::of))
+                .phone(Optional.ofNullable(command.phone()).map(Phone::of))
+                .degree(command.degree())
+                .currentYear(CurrentYear.valueOf(command.currentYear()))
+                .alumniInfo(AlumniInfo.notAlumni())
+                .rgpdConsent(RgpdConsent.pending())
+                .build();
+
+        return studentRepository.save(student);
+    }
+
+    public Student findById(Long id) {
+        return studentRepository.findById(id).orElseThrow(()-> new StudentNotFoundException(id));
+    }
+
+    public Student findByDni(String dni) {
+        return studentRepository.findByDni(Dni.of(dni)).orElseThrow(() -> new StudentNotFoundException(dni));
+    }
+
+    @Transactional
+    public Student updateContactInfo(Long id, UpdateContactCommand command){
+        return null;
+    }
+
+    @Transactional
+    public Student updateRgpdConsent(Long id, UpdateRgpdConsentCommand command){
+        return null;
+    }
+
+    @Transactional
+    public Student markAsAlumni(Long id, MarkAsAlumniCommand command) {
+        return null;
+    }
+}
