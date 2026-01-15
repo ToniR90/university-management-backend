@@ -1,6 +1,7 @@
 package com.orientation.backend.users.application.services;
 
 import com.orientation.backend.users.application.commands.CreateStudentCommand;
+import com.orientation.backend.users.application.exceptions.DuplicateDniException;
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
 import com.orientation.backend.users.domain.model.valueobjects.*;
@@ -57,10 +58,7 @@ class StudentServiceTest {
     @Test
     void shouldCreateStudentSuccessfully() {
 
-        // ====================
         // ARRANGE
-        // ====================
-
         CreateStudentCommand command = createTestStudentCommand("00000000T", "test@email.com");
 
         Student expectedStudent = createTestStudent("00000000T", "test@email.com");
@@ -71,22 +69,16 @@ class StudentServiceTest {
         // Forced to return the expectedStudent
         when(studentRepository.save(any(Student.class))).thenReturn(expectedStudent);
 
-
-        // ====================
         // ACT
-        // ====================
-
         Student result = studentService.createStudent(command);
 
-        // ====================
         // ASSERT
-        // ====================
-
         assertNotNull(result);
         assertEquals("00000000T", result.getDni().getValue());
         assertEquals("test_name", result.getFullName().getName());
         assertEquals("test_firstSurname", result.getFullName().getFirstSurname());
-        assertEquals("test_secondSurname", result.getFullName().getSecondSurname());
+        assertTrue(result.getFullName().getSecondSurname().isPresent());
+        assertEquals("test_secondSurname", result.getFullName().getSecondSurname().get());
 
         assertTrue(result.getEmail().isPresent());
         assertEquals("test@email.com", result.getEmail().get().getValue());
@@ -96,14 +88,30 @@ class StudentServiceTest {
 
         assertEquals(CurrentYear.FIRST, result.getCurrentYear());
 
-        // ======================
         // VERIFY
-        // ======================
-
         verify(studentRepository, times(1))
                 .existsByDni(any(Dni.class));
 
         verify(studentRepository, times(1))
+                .save(any(Student.class));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenDniAlreadyExists() {
+
+        // ARRANGE
+        CreateStudentCommand command = createTestStudentCommand("00000001R", "test@email.com");
+
+        when(studentRepository.existsByDni(any(Dni.class))).thenReturn(true);
+
+        // ACT + ASSERT
+        assertThrows(DuplicateDniException.class, () -> studentService.createStudent(command));
+
+        //VERIFY
+        verify(studentRepository, times(1))
+                .existsByDni(any(Dni.class));
+
+        verify(studentRepository, never())
                 .save(any(Student.class));
     }
 
