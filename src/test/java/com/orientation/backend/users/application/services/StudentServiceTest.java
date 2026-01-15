@@ -3,6 +3,7 @@ package com.orientation.backend.users.application.services;
 import com.orientation.backend.users.application.commands.CreateStudentCommand;
 import com.orientation.backend.users.application.commands.UpdateContactCommand;
 import com.orientation.backend.users.application.exceptions.DuplicateDniException;
+import com.orientation.backend.users.application.exceptions.InvalidStudentOperationException;
 import com.orientation.backend.users.application.exceptions.StudentNotFoundException;
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
@@ -283,5 +284,47 @@ class StudentServiceTest {
         // VERIFY
         verify(studentRepository, times(1)).findById(1L);
         verify(studentRepository, times(1)).save(any(Student.class));
+    }
+
+    @Test
+    void shouldUpdateOnlyEmail() {
+
+        // ARRANGE
+        Student student = createTestStudent("00000007F", "test@email.com");
+        UpdateContactCommand command = new UpdateContactCommand("updated_mail@email.com", null);
+
+        when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+        when(studentRepository.save(any(Student.class))).thenReturn(student);
+
+        // ACT
+        Student result = studentService.updateContactInfo(1L, command);
+
+        // ASSERT
+        assertNotNull(result);
+        assertTrue(result.getEmail().isPresent());
+        assertEquals("updated_mail@email.com", result.getEmail().get().getValue());
+        assertTrue(result.getPhone().isPresent());
+        assertTrue(student.getPhone().isPresent());
+        assertEquals(student.getPhone().get().getValue(), result.getPhone().get().getValue());
+
+        // VERIFY
+        verify(studentRepository, times(1)).findById(1L);
+        verify(studentRepository, times(1)). save(any(Student.class));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenBothContactFieldsAreNull() {
+
+        // ARRANGE
+        UpdateContactCommand command = new UpdateContactCommand(null, null);
+
+        // ACT + ASSERT
+        assertThrows(
+                InvalidStudentOperationException.class,
+                () -> studentService.updateContactInfo(1L, command)
+        );
+
+        // VERIFY
+        verifyNoInteractions(studentRepository);
     }
 }
