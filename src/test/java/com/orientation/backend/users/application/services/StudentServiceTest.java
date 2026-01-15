@@ -1,6 +1,7 @@
 package com.orientation.backend.users.application.services;
 
 import com.orientation.backend.users.application.commands.CreateStudentCommand;
+import com.orientation.backend.users.application.commands.UpdateContactCommand;
 import com.orientation.backend.users.application.exceptions.DuplicateDniException;
 import com.orientation.backend.users.application.exceptions.StudentNotFoundException;
 import com.orientation.backend.users.domain.model.entities.Student;
@@ -253,5 +254,34 @@ class StudentServiceTest {
         // VERIFY
         verify(studentRepository, times(1))
                 .findByDni(Dni.of("00000005M"));
+    }
+
+    // ========================================================
+    // UPDATE CONTACT INFO TESTS
+    // ========================================================
+
+    @Test
+    void shouldUpdateContactInfo() {
+
+        // ARRANGE
+        UpdateContactCommand command = new UpdateContactCommand("newmail@email.com", "+3461234587");
+        Student student = createTestStudent("00000006Y", "test@email.com");
+
+        when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+        when(studentRepository.save(any(Student.class))).thenReturn(student);
+
+        // ACT
+        Student result = studentService.updateContactInfo(1L, command);
+
+        // ASSERT
+        assertNotNull(result);
+        assertTrue(result.getEmail().isPresent());
+        assertEquals("newmail@email.com", result.getEmail().get().getValue());
+        assertTrue(result.getPhone().isPresent());
+        assertEquals("+3461234587", result.getPhone().get().getValue());
+
+        // VERIFY
+        verify(studentRepository, times(1)).findById(1L);
+        verify(studentRepository, times(1)).save(any(Student.class));
     }
 }
