@@ -5,6 +5,7 @@ import com.orientation.backend.users.application.commands.MarkAsAlumniCommand;
 import com.orientation.backend.users.application.commands.UpdateContactCommand;
 import com.orientation.backend.users.application.commands.UpdateRgpdConsentCommand;
 import com.orientation.backend.users.application.exceptions.DuplicateDniException;
+import com.orientation.backend.users.application.exceptions.InvalidStudentOperationException;
 import com.orientation.backend.users.application.exceptions.StudentNotFoundException;
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
@@ -55,7 +56,18 @@ public class StudentService {
 
     @Transactional
     public Student updateContactInfo(Long id, UpdateContactCommand command){
-        return null;
+        if(command.email() == null && command.phone() == null) {
+            throw new InvalidStudentOperationException("No es pot actualitzar sense cap dada de contacte");
+        }
+
+        Student student = findById(id);
+
+        Email email = Email.ofNullable(command.email());
+        Phone phone = Phone.ofNullable(command.phone());
+
+        student.updateContactInfo(email, phone);
+
+        return studentRepository.save(student);
     }
 
     @Transactional
