@@ -10,7 +10,6 @@ import com.orientation.backend.users.application.exceptions.StudentNotFoundExcep
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.enums.AlumniType;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
-import com.orientation.backend.users.domain.model.enums.RgpdConsentStatus;
 import com.orientation.backend.users.domain.model.valueobjects.*;
 import com.orientation.backend.users.domain.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
