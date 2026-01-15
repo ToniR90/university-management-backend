@@ -9,6 +9,7 @@ import com.orientation.backend.users.application.exceptions.InvalidStudentOperat
 import com.orientation.backend.users.application.exceptions.StudentNotFoundException;
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
+import com.orientation.backend.users.domain.model.enums.RgpdConsentStatus;
 import com.orientation.backend.users.domain.model.valueobjects.*;
 import com.orientation.backend.users.domain.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
@@ -72,7 +73,23 @@ public class StudentService {
 
     @Transactional
     public Student updateRgpdConsent(Long id, UpdateRgpdConsentCommand command){
-        return null;
+        Student student = findById(id);
+
+        RgpdConsent consent = switch(command.rgpdConsentStatus()) {
+            case "PENDING" -> RgpdConsent.pending();
+            case "SIGNED_IN_PERSON" -> RgpdConsent.signedInPerson();
+            case "SIGNED_ONLINE" -> RgpdConsent.signedOnline();
+            case "ALREADY_SIGNED" -> {
+                if (command.signedYear() == null) {
+                    throw new InvalidStudentOperationException("Any de signatura requerit per ALREADY_SIGNED");
+                }
+                yield RgpdConsent.alreadySigned(command.signedYear());
+            }
+            default -> throw new InvalidStudentOperationException("Status RGPD no vàlid: " + command.rgpdConsentStatus());
+        };
+        student.updateRgpdConsent(consent);
+
+        return studentRepository.save(student);
     }
 
     @Transactional
