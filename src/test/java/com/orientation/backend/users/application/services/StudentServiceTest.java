@@ -216,4 +216,42 @@ class StudentServiceTest {
         // VERIFY
         verify(studentRepository, times(1)).findById(999L);
     }
+
+    // ===================================================
+    // FIND BY DNI TESTS
+    // ===================================================
+
+    @Test
+    void shouldFindStudentByDni() {
+
+        // ARRANGE
+        Student student = createTestStudent("00000004G", "test@email.com");
+
+        when(studentRepository.findByDni(Dni.of("00000004G"))).thenReturn(Optional.of(student));
+
+        // ACT
+        Student result = studentService.findByDni("00000004G");
+
+        // ASSERT
+        assertNotNull(student);
+        assertEquals(student, result);
+        assertEquals("00000004G", result.getDni().getValue());
+
+        // VERIFY
+        verify(studentRepository, times(1)).findByDni(Dni.of("00000004G"));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenStudentNotFoundByDni() {
+
+        // ARRANGE
+        when(studentRepository.findByDni(Dni.of("00000005M"))).thenReturn(Optional.empty());
+
+        // ACT + ASSERT
+        assertThrows(StudentNotFoundException.class, () -> studentService.findByDni("00000005M"));
+
+        // VERIFY
+        verify(studentRepository, times(1))
+                .findByDni(Dni.of("00000005M"));
+    }
 }
