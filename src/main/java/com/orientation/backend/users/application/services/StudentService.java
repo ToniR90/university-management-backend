@@ -8,6 +8,7 @@ import com.orientation.backend.users.application.exceptions.DuplicateDniExceptio
 import com.orientation.backend.users.application.exceptions.InvalidStudentOperationException;
 import com.orientation.backend.users.application.exceptions.StudentNotFoundException;
 import com.orientation.backend.users.domain.model.entities.Student;
+import com.orientation.backend.users.domain.model.enums.AlumniType;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
 import com.orientation.backend.users.domain.model.enums.RgpdConsentStatus;
 import com.orientation.backend.users.domain.model.valueobjects.*;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -94,6 +96,21 @@ public class StudentService {
 
     @Transactional
     public Student markAsAlumni(Long id, MarkAsAlumniCommand command) {
-        return null;
+        Student student = findById(id);
+
+        if(command.graduationYear() < 1900 || command.graduationYear() > LocalDateTime.now().getYear()) {
+            throw new InvalidStudentOperationException("L'any de graduació no és correcte");
+        }
+
+        AlumniType type;
+        try {
+            type = AlumniType.valueOf(command.alumniType());
+        } catch (IllegalArgumentException e) {
+            throw new InvalidStudentOperationException("Tipus d'alumni no vàlid: " + command.alumniType());
+        }
+
+        student.markAsAlumni(type, command.graduationYear());
+
+        return studentRepository.save(student);
     }
 }
