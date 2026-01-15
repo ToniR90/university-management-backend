@@ -41,6 +41,19 @@ class StudentServiceTest {
                 .build();
     }
 
+    private Student createTestStudentWithoutOptionals(String dni) {
+        return Student.builder()
+                .dni(Dni.of(dni))
+                .fullName(FullName.of("test_name", "test_firstSurname", null))
+                .email(Optional.empty())
+                .phone(Optional.empty())
+                .degree("Videojocs")
+                .currentYear(CurrentYear.FIRST)
+                .alumniInfo(AlumniInfo.notAlumni())
+                .rgpdConsent(RgpdConsent.pending())
+                .build();
+    }
+
     private CreateStudentCommand createTestStudentCommand(String dni, String email) {
 
         return new CreateStudentCommand(
@@ -115,4 +128,52 @@ class StudentServiceTest {
                 .save(any(Student.class));
     }
 
+    @Test
+    void shouldCreateStudentWithoutOptionalFields() {
+
+        // ARRANGE
+        CreateStudentCommand command = new CreateStudentCommand(
+                "00000002W",
+                "test_name",
+                "test_firstSurname",
+                null,
+                null,
+                null,
+                "Videojocs",
+                "FIRST"
+        );
+
+        Student expectedStudent = createTestStudentWithoutOptionals("00000002W");
+
+        when(studentRepository.existsByDni(any(Dni.class))).thenReturn(false);
+        when(studentRepository.save(any(Student.class))).thenReturn(expectedStudent);
+
+        // ACT
+        Student result = studentService.createStudent(command);
+
+        // ASSERT
+        assertTrue(result.getFullName().getSecondSurname().isEmpty());
+        assertTrue(result.getEmail().isEmpty());
+        assertTrue(result.getPhone().isEmpty());
+
+        // VERIFY
+        verify(studentRepository, times(1))
+                .existsByDni(any(Dni.class));
+        verify(studentRepository, times(1))
+                .save(any(Student.class));
+    }
+
+    @Test
+    void shouldValidateDniFormatOnCreate() {
+
+        // ARRANGE
+        CreateStudentCommand command = createTestStudentCommand("12345678A", "test@email.com");
+
+        // ACT + ASSERT
+        assertThrows(IllegalArgumentException.class, ()-> studentService.createStudent(command));
+
+        // VERIFY
+        verify(studentRepository, never()).existsByDni(any(Dni.class));
+        verify(studentRepository, never()).save(any(Student.class));
+    }
 }
