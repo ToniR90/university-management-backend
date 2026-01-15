@@ -2,6 +2,7 @@ package com.orientation.backend.users.application.services;
 
 import com.orientation.backend.users.application.commands.CreateStudentCommand;
 import com.orientation.backend.users.application.exceptions.DuplicateDniException;
+import com.orientation.backend.users.application.exceptions.StudentNotFoundException;
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
 import com.orientation.backend.users.domain.model.valueobjects.*;
@@ -27,7 +28,7 @@ class StudentServiceTest {
     @InjectMocks
     private StudentService studentService;
 
-    // ========== Helper Method ==========
+    // ========== Helper Methods ==========
     private Student createTestStudent(String dni, String email) {
         return Student.builder()
                 .dni(Dni.of(dni))
@@ -76,10 +77,7 @@ class StudentServiceTest {
 
         Student expectedStudent = createTestStudent("00000000T", "test@email.com");
 
-        // Forced false with any Dni match
         when(studentRepository.existsByDni(any(Dni.class))).thenReturn(false);
-
-        // Forced to return the expectedStudent
         when(studentRepository.save(any(Student.class))).thenReturn(expectedStudent);
 
         // ACT
@@ -108,6 +106,10 @@ class StudentServiceTest {
         verify(studentRepository, times(1))
                 .save(any(Student.class));
     }
+
+    // =====================================================
+    // CREATE STUDENT TESTS
+    // =====================================================
 
     @Test
     void shouldThrowExceptionWhenDniAlreadyExists() {
@@ -175,5 +177,43 @@ class StudentServiceTest {
         // VERIFY
         verify(studentRepository, never()).existsByDni(any(Dni.class));
         verify(studentRepository, never()).save(any(Student.class));
+    }
+
+    // =====================================================
+    // FIND BY ID TESTS
+    // =====================================================
+
+    @Test
+    void shouldFindStudentById() {
+
+        // ARRANGE
+        Student student = createTestStudent("00000003A", "test@email.com");
+
+        when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+
+        // ACT
+        Student result = studentService.findById(1L);
+
+        // ASSERT
+        assertNotNull(result);
+        assertEquals("00000003A", result.getDni().getValue());
+        assertEquals(student, result);
+
+        // VERIFY
+        verify(studentRepository, times(1))
+                .findById(1L);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenStudentNotFoundById() {
+
+        // ARRANGE
+        when(studentRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // ACT + ASSERT
+        assertThrows(StudentNotFoundException.class, () -> studentService.findById(999L));
+
+        // VERIFY
+        verify(studentRepository, times(1)).findById(999L);
     }
 }
