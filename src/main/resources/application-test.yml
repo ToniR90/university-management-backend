@@ -1,24 +1,28 @@
-# Test profile - Overrides for testing environment
-
 spring:
-  jpa:
-    show-sql: false
-
   datasource:
+    url: jdbc:postgresql://localhost:5432/students_test
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
     hikari:
-      # Pool sizing for tests
       maximum-pool-size: 5
       minimum-idle: 2
-
-      # Timeout settings for tests
       idle-timeout: 60000
       max-lifetime: 600000
       connection-timeout: 20000
-
-      # Leak detection threshold
       leak-detection-threshold: 0
 
-# Minimal logging for tests
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: none  # ← CAMBIA esto de "validate" a "none"
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
 logging:
   level:
     root: WARN

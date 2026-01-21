@@ -43,7 +43,7 @@ public class StudentJpaEntity {
     @Column(name = "alumni_type")
     private String alumniType;
 
-    @Column(name = "graduation_year")
+    @Column(name = "alumni_graduation_year")
     private Integer graduationYear;
 
     @Column(name = "rgpd_consent_status", nullable = false)

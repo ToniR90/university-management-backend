@@ -229,6 +229,14 @@ public class Student {
         this.updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * Updates RGPD consent with a new consent object.
+     */
+    public void updateRgpdConsent(RgpdConsent newConsent) {
+        this.rgpdConsent = Objects.requireNonNull(newConsent, "El consentiment RGPD no pot ser nul");
+        this.updatedAt = LocalDateTime.now();
+    }
+
     // ============================================
     // BUSINESS METHODS - Alumni Management
     // ============================================
