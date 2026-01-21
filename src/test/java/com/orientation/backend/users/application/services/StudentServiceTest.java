@@ -392,4 +392,22 @@ class StudentServiceTest {
         verify(studentRepository, times(1)).findById(1L);
         verify(studentRepository, never()).save(any(Student.class));
     }
+
+    // ===========================================
+    // MARK AS ALUMNI TESTS
+    // ===========================================
+    @Test
+    void shouldMarkAsAlumni() {
+
+    }
+
+    @Test
+    void shouldThrowExceptionWhenInvalidAlumniType() {
+
+    }
+
+    @Test
+    void shouldThrowExceptionWhenInvalidGraduationYear() {
+
+    }
 }
