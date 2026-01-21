@@ -1,6 +1,7 @@
 package com.orientation.backend.users.application.services;
 
 import com.orientation.backend.users.application.commands.CreateStudentCommand;
+import com.orientation.backend.users.application.commands.MarkAsAlumniCommand;
 import com.orientation.backend.users.application.commands.UpdateContactCommand;
 import com.orientation.backend.users.application.commands.UpdateRgpdConsentCommand;
 import com.orientation.backend.users.application.exceptions.DuplicateDniException;
@@ -398,16 +399,56 @@ class StudentServiceTest {
     // ===========================================
     @Test
     void shouldMarkAsAlumni() {
+        // ARRANGE
+        Student student = createTestStudent("00000011B", "test@email.com");
+        MarkAsAlumniCommand command = new MarkAsAlumniCommand("BACHELOR", 2000);
 
+        when(studentRepository.findById(any(Long.class))).thenReturn(Optional.of(student));
+        when(studentRepository.save(any(Student.class))).thenReturn(student);
+
+        // ACT
+        Student result = studentService.markAsAlumni(1L, command);
+
+        // ASSERT
+        assertNotNull(result);
+        assertTrue(result.getAlumniInfo().isAlumni());
+
+        // VERIFY
+        verify(studentRepository, times(1)).findById(1L);
+        verify(studentRepository, times(1)).save(any(Student.class));
     }
 
     @Test
     void shouldThrowExceptionWhenInvalidAlumniType() {
+        // ARRANGE
+        Student student = createTestStudent("00000012N", "test@email.com");
+        MarkAsAlumniCommand command = new MarkAsAlumniCommand("INVALID_ALUMNI_TYPE", 2000);
+
+        when(studentRepository.findById(any(Long.class))).thenReturn(Optional.of(student));
+
+        // ACT + ASSERT
+        assertThrows(InvalidStudentOperationException.class, () -> studentService.markAsAlumni(1L, command));
+
+        // VERIFY
+        verify(studentRepository, times(1)).findById(1L);
+        verify(studentRepository, never()).save(any(Student.class));
 
     }
 
     @Test
     void shouldThrowExceptionWhenInvalidGraduationYear() {
+        // ARRANGE
+        Student student = createTestStudent("00000013J", "test@email.com");
+        MarkAsAlumniCommand command = new MarkAsAlumniCommand("BACHELOR", 1800);
+
+        when(studentRepository.findById(any(Long.class))).thenReturn(Optional.of(student));
+
+        // ACT + ASSERT
+        assertThrows(InvalidStudentOperationException.class, () -> studentService.markAsAlumni(1L, command));
+
+        // VERIFY
+        verify(studentRepository, times(1)).findById(1L);
+        verify(studentRepository, never()).save(any(Student.class));
 
     }
 }

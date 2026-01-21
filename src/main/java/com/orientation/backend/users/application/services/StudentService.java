@@ -64,10 +64,23 @@ public class StudentService {
 
         Student student = findById(id);
 
-        Email email = Email.ofNullable(command.email());
-        Phone phone = Phone.ofNullable(command.phone());
+        if (command.email() != null) {
+            Email email = Email.of(command.email());
+            if (student.getEmail().isPresent()) {
+                student.updateEmail(email);
+            } else {
+                student.addEmail(email);
+            }
+        }
 
-        student.updateContactInfo(email, phone);
+        if (command.phone() != null) {
+            Phone phone = Phone.of(command.phone());
+            if (student.getPhone().isPresent()) {
+                student.updatePhone(phone);
+            } else {
+                student.addPhone(phone);
+            }
+        }
 
         return studentRepository.save(student);
     }
