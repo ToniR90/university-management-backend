@@ -2,11 +2,13 @@ package com.orientation.backend.users.application.services;
 
 import com.orientation.backend.users.application.commands.CreateStudentCommand;
 import com.orientation.backend.users.application.commands.UpdateContactCommand;
+import com.orientation.backend.users.application.commands.UpdateRgpdConsentCommand;
 import com.orientation.backend.users.application.exceptions.DuplicateDniException;
 import com.orientation.backend.users.application.exceptions.InvalidStudentOperationException;
 import com.orientation.backend.users.application.exceptions.StudentNotFoundException;
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
+import com.orientation.backend.users.domain.model.enums.RgpdConsentStatus;
 import com.orientation.backend.users.domain.model.valueobjects.*;
 import com.orientation.backend.users.domain.repository.StudentRepository;
 import org.junit.jupiter.api.Test;
@@ -332,17 +334,62 @@ class StudentServiceTest {
     // UPDATE RGPD CONSENT TESTS
     // =================================================
     @Test
-    void shouldUpdateRgpdConsentToSignetInPerson() {
+    void shouldUpdateRgpdConsentToSignedInPerson() {
+        // ARRANGE
+        Student student = createTestStudent("00000008P", "test@email.com");
+        UpdateRgpdConsentCommand command = new UpdateRgpdConsentCommand("SIGNED_IN_PERSON", null);
 
+        when(studentRepository.findById(any(Long.class))).thenReturn(Optional.of(student));
+        when(studentRepository.save(any(Student.class))).thenReturn(student);
+
+        // ACT
+        Student result = studentService.updateRgpdConsent(1L, command);
+
+        // ASSERT
+        assertNotNull(result);
+        assertTrue(result.getRgpdConsent().getStatus().isSigned());
+        assertEquals(RgpdConsentStatus.SIGNED_IN_PERSON, result.getRgpdConsent().getStatus());
+
+        // VERIFY
+        verify(studentRepository, times(1)).findById(1L);
+        verify(studentRepository, times(1)).save(any(Student.class));
     }
 
     @Test
     void shouldUpdateRgpdConsentToAlreadySigned() {
+        // ARRANGE
+        Student student = createTestStudent("00000009D", "test@email.com");
+        UpdateRgpdConsentCommand command = new UpdateRgpdConsentCommand("ALREADY_SIGNED",2020);
 
+        when(studentRepository.findById(any(Long.class))).thenReturn(Optional.of(student));
+        when(studentRepository.save(any(Student.class))).thenReturn(student);
+
+        // ACT
+        Student result = studentService.updateRgpdConsent(1L, command);
+
+        // ASSERT
+        assertNotNull(result);
+        assertTrue(result.getRgpdConsent().getStatus().isSigned());
+        assertEquals(RgpdConsentStatus.ALREADY_SIGNED, result.getRgpdConsent().getStatus());
+
+        // VERIFY
+        verify(studentRepository, times(1)).findById(1L);
+        verify(studentRepository, times(1)).save(any(Student.class));
     }
 
     @Test
     void shouldThrowExceptionWhenInvalidRgpdStatus() {
+        // ARRANGE
+        Student student = createTestStudent("00000010X", "test@email.com");
+        UpdateRgpdConsentCommand command = new UpdateRgpdConsentCommand("NOT_VALID_RGPD", null);
 
+        when(studentRepository.findById(any(Long.class))).thenReturn(Optional.of(student));
+
+        // ACT + ASSERT
+        assertThrows(InvalidStudentOperationException.class, ()-> studentService.updateRgpdConsent(1L, command));
+
+        // VERIFY
+        verify(studentRepository, times(1)).findById(1L);
+        verify(studentRepository, never()).save(any(Student.class));
     }
 }
