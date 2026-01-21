@@ -449,6 +449,5 @@ class StudentServiceTest {
         // VERIFY
         verify(studentRepository, times(1)).findById(1L);
         verify(studentRepository, never()).save(any(Student.class));
-
     }
 }
