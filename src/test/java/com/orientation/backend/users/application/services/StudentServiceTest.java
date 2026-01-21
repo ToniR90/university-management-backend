@@ -327,4 +327,22 @@ class StudentServiceTest {
         // VERIFY
         verifyNoInteractions(studentRepository);
     }
+
+    // =================================================
+    // UPDATE RGPD CONSENT TESTS
+    // =================================================
+    @Test
+    void shouldUpdateRgpdConsentToSignetInPerson() {
+
+    }
+
+    @Test
+    void shouldUpdateRgpdConsentToAlreadySigned() {
+
+    }
+
+    @Test
+    void shouldThrowExceptionWhenInvalidRgpdStatus() {
+
+    }
 }
