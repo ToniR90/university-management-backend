@@ -454,7 +454,7 @@ public class Student {
             return this;
         }
 
-        // OverCharge for direct input
+        // Overload for direct input
         public Builder howDidYouKnowUs(DiscoveryChannel howDidYouKnowUs) {
             this.howDidYouKnowUs = howDidYouKnowUs;
             return this;
@@ -465,7 +465,7 @@ public class Student {
             return this;
         }
 
-        // OverCharge for direct input
+        // Overload for direct input
         public Builder howDidYouContactUs(ContactMethod howDidYouContactUs) {
             this.howDidYouContactUs = howDidYouContactUs;
             return this;
@@ -476,7 +476,7 @@ public class Student {
             return this;
         }
 
-        // OverCharged for direct input
+        // Overload for direct input
         public Builder counselorNotes(String counselorNotes) {
             this.counselorNotes = counselorNotes;
             return this;

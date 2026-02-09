@@ -5,7 +5,6 @@ import com.orientation.backend.users.domain.model.enums.*;
 import com.orientation.backend.users.domain.model.valueobjects.*;
 import com.orientation.backend.users.infrastructure.persistence.entities.StudentJpaEntity;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -38,8 +37,8 @@ public class StudentJpaMapper {
 
         switch (status) {
             case PENDING -> rgpdConsent = RgpdConsent.pending();
-            case SIGNED_IN_PERSON -> rgpdConsent = RgpdConsent.signedInPerson();
-            case SIGNED_ONLINE -> rgpdConsent = RgpdConsent.signedOnline();
+            case SIGNED_IN_PERSON -> rgpdConsent = RgpdConsent.signedInPerson(jpaEntity.getRgpdSignedDate());
+            case SIGNED_ONLINE -> rgpdConsent = RgpdConsent.signedOnline(jpaEntity.getRgpdSignedDate());
             case ALREADY_SIGNED -> rgpdConsent = RgpdConsent.alreadySigned(jpaEntity.getRgpdSignedYear());
             default -> throw new IllegalStateException("Unknown RGPD status: " + status);
         }

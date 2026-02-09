@@ -16,7 +16,7 @@ spring:
   jpa:
     show-sql: false
     hibernate:
-      ddl-auto: none  # ← CAMBIA esto de "validate" a "none"
+      ddl-auto: none  # Flyway handles schema
 
   flyway:
     enabled: true
