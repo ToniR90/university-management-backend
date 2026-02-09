@@ -3,6 +3,7 @@ package com.orientation.backend.users.domain.model.valueobjects;
 import com.orientation.backend.users.domain.model.enums.RgpdConsentStatus;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.time.Year;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -99,5 +100,32 @@ class RgpdConsentTest {
         RgpdConsent rgpdConsent2 = RgpdConsent.alreadySigned(2020);
 
         assertEquals(rgpdConsent1.hashCode(), rgpdConsent2.hashCode());
+    }
+
+    @Test
+    void shouldCreateSignedInPersonWithDate() {
+        LocalDateTime date = LocalDateTime.of(2023, 6, 15, 10, 30);
+        RgpdConsent rgpdConsent = RgpdConsent.signedInPerson(date);
+
+        assertEquals(RgpdConsentStatus.SIGNED_IN_PERSON, rgpdConsent.getStatus());
+        assertTrue(rgpdConsent.getSignedDate().isPresent());
+        assertEquals(date, rgpdConsent.getSignedDate().get());
+    }
+
+    @Test
+    void shouldCreateSignedOnlineWithDate() {
+        LocalDateTime date = LocalDateTime.of(2024, 1, 20, 14, 0);
+        RgpdConsent rgpdConsent = RgpdConsent.signedOnline(date);
+
+        assertEquals(RgpdConsentStatus.SIGNED_ONLINE, rgpdConsent.getStatus());
+        assertTrue(rgpdConsent.getSignedDate().isPresent());
+        assertEquals(date, rgpdConsent.getSignedDate().get());
+    }
+
+    @Test
+    void shouldThrowExceptionForNullDateInSignedInPerson() {
+        assertThrows(NullPointerException.class, () -> {
+            RgpdConsent.signedInPerson(null);
+        });
     }
 }
