@@ -5,7 +5,6 @@ import java.util.regex.Pattern;
 
 /**
  * Value Object representing an email address.
- * Validates email format using Apache Commons EmailValidator.
  * Immutable and self-validated.
  */
 public final class Email {
