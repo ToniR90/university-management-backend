@@ -23,7 +23,16 @@ git clone <your-repository-url>
 cd university-management-backend
 ```
 
-### 2. Start PostgreSQL Database
+### 2. Environment Setup
+
+Create a `.env` file in the project root:
+```env
+POSTGRES_DB=students_db
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+```
+
+### 3. Start PostgreSQL Database
 
 The application uses PostgreSQL as its database. Start it using Docker Compose:
 ```bash
@@ -39,14 +48,12 @@ You should see:
 - `students-db` (PostgreSQL 15-alpine) - Status: healthy
 - `pgadmin` (optional) - For database management UI
 
-### 3. Run the Application
+### 4. Run the Application
 ```bash
 mvn spring-boot:run
 ```
 
 The application will start on **http://localhost:8080**
-
-**Startup time:** ~5-6 seconds
 
 ---
 
@@ -66,8 +73,6 @@ curl http://localhost:8080/actuator/health
 }
 ```
 
-Or open in browser: http://localhost:8080/actuator/health
-
 ### Database Access (pgAdmin)
 
 Optional: Access pgAdmin web interface for database management
@@ -82,7 +87,6 @@ Optional: Access pgAdmin web interface for database management
 - Database: `students_db`
 - Username: `postgres`
 - Password: `postgres`
-
 
 ---
 
@@ -115,49 +119,23 @@ mvn spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=dev"
 - Health endpoint shows all details
 - Connection pool: 10 max, 5 min-idle
 - Leak detection enabled (30 seconds threshold)
-- Relaxed timeouts (10-30 minutes)
 
 #### Test Profile
 ```bash
-# Set environment variable (PowerShell)
-$env:SPRING_PROFILES_ACTIVE="test"
-mvn spring-boot:run
-
-# Clean up after testing
-Remove-Item Env:\SPRING_PROFILES_ACTIVE
-
-# Or run tests (automatically uses test profile)
+# Run tests (automatically uses test profile)
 mvn test
+
+# Or set environment variable
+export SPRING_PROFILES_ACTIVE=test
+mvn spring-boot:run
 ```
 
 **Features in test profile:**
-- SQL queries NOT logged (cleaner test output)
+- SQL queries NOT logged
 - Minimal logging (WARN level)
 - Health endpoint details hidden
 - Connection pool: 5 max, 2 min-idle
 - Leak detection disabled
-- Fast timeouts (1-10 minutes)
-
-#### Switching Profiles
-
-You can also set the active profile via environment variable:
-```bash
-# Linux/macOS
-export SPRING_PROFILES_ACTIVE=dev
-mvn spring-boot:run
-
-# Windows (CMD)
-set SPRING_PROFILES_ACTIVE=dev
-mvn spring-boot:run
-
-# Windows (PowerShell)
-$env:SPRING_PROFILES_ACTIVE="dev"
-mvn spring-boot:run
-```
-
-Or in your IDE:
-- **IntelliJ IDEA:** Run Configuration → Environment Variables → `SPRING_PROFILES_ACTIVE=dev`
-- **VS Code:** launch.json → `"env": {"SPRING_PROFILES_ACTIVE": "dev"}`
 
 ### Profile Configuration Files
 ```
@@ -166,54 +144,6 @@ src/main/resources/
 ├── application-dev.yml      # Development overrides
 └── application-test.yml     # Test overrides
 ```
-
-### Configuration Highlights
-
-#### HikariCP Connection Pool
-
-The application uses HikariCP for efficient database connection pooling:
-
-**Development:**
-- Maximum pool size: 10 connections
-- Minimum idle: 5 connections
-- Leak detection: 30 seconds (helps identify connection leaks during development)
-- Relaxed timeouts: idle (10 min), max lifetime (30 min)
-
-**Test:**
-- Maximum pool size: 5 connections
-- Minimum idle: 2 connections
-- Leak detection: disabled (prevents false positives in tests)
-- Fast timeouts: idle (1 min), max lifetime (10 min)
-
-#### Custom Health Indicator
-
-The application includes a custom database health indicator accessible at `/actuator/health`:
-```bash
-curl http://localhost:8080/actuator/health
-```
-
-**Response (dev profile):**
-```json
-{
-  "status": "UP",
-  "components": {
-    "database": {
-      "status": "UP",
-      "details": {
-        "database": "PostgreSQL",
-        "version": "15.15",
-        "driver": "PostgreSQL JDBC Driver",
-        "schema": "public"
-      }
-    },
-    "db": {...},
-    "diskSpace": {...},
-    "ping": {...}
-  }
-}
-```
-
-**Note:** Health details are only shown in dev profile. In test/prod, only the status is visible for security.
 
 ---
 
@@ -224,70 +154,150 @@ src/
 │   ├── java/
 │   │   └── com/orientation/backend/
 │   │       ├── StudentManagementSystemApplication.java
+│   │       │
 │   │       ├── users/
+│   │       │   ├── application/
+│   │       │   │   ├── commands/
+│   │       │   │   │   ├── CreateStudentCommand.java
+│   │       │   │   │   ├── UpdateContactCommand.java
+│   │       │   │   │   ├── UpdateRgpdConsentCommand.java
+│   │       │   │   │   └── MarkAsAlumniCommand.java
+│   │       │   │   ├── exceptions/
+│   │       │   │   │   ├── StudentNotFoundException.java
+│   │       │   │   │   ├── DuplicateDniException.java
+│   │       │   │   │   └── InvalidStudentOperationException.java
+│   │       │   │   └── services/
+│   │       │   │       └── StudentService.java
+│   │       │   │
 │   │       │   ├── domain/
 │   │       │   │   ├── model/
 │   │       │   │   │   ├── entities/
-│   │       │   │   │   │   └── Student.java          # Aggregate Root
+│   │       │   │   │   │   └── Student.java              # Aggregate Root
 │   │       │   │   │   ├── valueobjects/
-│   │       │   │   │   │   ├── Email.java            # RFC 5322 validation
-│   │       │   │   │   │   ├── Phone.java            # E.164 format
-│   │       │   │   │   │   ├── Dni.java              # Spanish DNI/NIE (MOD 23)
-│   │       │   │   │   │   ├── FullName.java         # Composite VO
-│   │       │   │   │   │   ├── AlumniInfo.java       # Alumni status
-│   │       │   │   │   │   └── RgpdConsent.java      # GDPR consent
+│   │       │   │   │   │   ├── Dni.java                  # Spanish DNI/NIE (MOD 23)
+│   │       │   │   │   │   ├── Email.java                # Email validation
+│   │       │   │   │   │   ├── Phone.java                # E.164 format
+│   │       │   │   │   │   ├── FullName.java             # Composite VO
+│   │       │   │   │   │   ├── AlumniInfo.java           # Alumni status
+│   │       │   │   │   │   └── RgpdConsent.java          # GDPR consent
 │   │       │   │   │   └── enums/
 │   │       │   │   │       ├── AlumniType.java
 │   │       │   │   │       ├── ContactMethod.java
 │   │       │   │   │       ├── CurrentYear.java
 │   │       │   │   │       ├── DiscoveryChannel.java
 │   │       │   │   │       └── RgpdConsentStatus.java
-│   │       │   │   │
 │   │       │   │   └── repository/
-│   │       │   │       └── StudentRepository.java     # Domain port (interface)
+│   │       │   │       └── StudentRepository.java         # Domain port (interface)
 │   │       │   │
 │   │       │   └── infrastructure/
-│   │       │       └── persistence/
-│   │       │           ├── entities/
-│   │       │           │   └── StudentJpaEntity.java  # JPA entity mapping
-│   │       │           ├── mappers/
-│   │       │           │   └── StudentJpaMapper.java  # Bidirectional Domain ↔ JPA
-│   │       │           └── repositories/
-│   │       │               ├── SpringDataStudentRepository.java  # Spring Data JPA
-│   │       │               └── StudentRepositoryImpl.java        # Adapter implementation
+│   │       │       ├── persistence/
+│   │       │       │   ├── entities/
+│   │       │       │   │   └── StudentJpaEntity.java
+│   │       │       │   ├── mappers/
+│   │       │       │   │   └── StudentJpaMapper.java
+│   │       │       │   └── repositories/
+│   │       │       │       ├── SpringDataStudentRepository.java
+│   │       │       │       └── StudentRepositoryImpl.java
+│   │       │       └── web/
+│   │       │           └── dto/
+│   │       │               ├── request/
+│   │       │               │   ├── CreateStudentRequest.java
+│   │       │               │   ├── UpdateContactRequest.java
+│   │       │               │   ├── UpdateRgpdRequest.java
+│   │       │               │   └── MarkAlumniRequest.java
+│   │       │               └── response/
+│   │       │                   ├── StudentResponse.java
+│   │       │                   └── ErrorResponse.java
 │   │       │
 │   │       ├── sessions/       # Session management (Sprint 3)
 │   │       ├── auth/           # Authentication (Sprint 4)
 │   │       └── shared/
 │   │           └── infrastructure/
 │   │               └── config/
+│   │                   ├── ApplicationConfig.java
+│   │                   ├── CorsConfig.java
+│   │                   └── DatabaseHealthIndicator.java
+│   │
 │   └── resources/
 │       ├── application.yml
 │       ├── application-dev.yml
 │       ├── application-test.yml
 │       └── db/
 │           └── migration/
-│               └── V1__create_students_table.sql
+│               ├── V1__create_students_table.sql
+│               └── V2__change_integer_types.sql
+│
 └── test/
     └── java/
         └── com/orientation/backend/
+            ├── ApplicationContextTest.java
             └── users/
+                ├── application/
+                │   └── services/
+                │       └── StudentServiceTest.java
                 ├── domain/
                 │   └── model/
-                │       ├── valueobjects/
-                │       │   ├── EmailTest.java        (9 tests)
-                │       │   ├── PhoneTest.java        (12 tests)
-                │       │   ├── DniTest.java          (23 tests)
-                │       │   ├── FullNameTest.java     (14 tests)
-                │       │   ├── AlumniInfoTest.java   (11 tests)
-                │       │   └── RgpdConsentTest.java  (10 tests)
-                │       └── entities/
-                │           └── StudentTest.java      (31 tests)
-                │
+                │       ├── entities/
+                │       │   └── StudentTest.java
+                │       └── valueobjects/
+                │           ├── AlumniInfoTest.java
+                │           ├── DniTest.java
+                │           ├── EmailTest.java
+                │           ├── FullNameTest.java
+                │           ├── PhoneTest.java
+                │           └── RgpdConsentTest.java
                 └── infrastructure/
                     └── persistence/
                         └── repositories/
-                            └── StudentRepositoryImplTest.java  (11 tests)
+                            └── StudentRepositoryImplTest.java
+```
+
+---
+
+## 📚 Architecture
+
+This project follows **Hexagonal Architecture** (Ports & Adapters) and **Domain-Driven Design** principles:
+
+```
+┌─────────────────────────────────────────────────┐
+│              INFRASTRUCTURE                      │
+│    Database, REST API, Configuration             │
+│                                                  │
+│    ┌───────────────────────────────────────┐     │
+│    │          APPLICATION                  │     │
+│    │   Services, Commands, Exceptions      │     │
+│    │                                       │     │
+│    │    ┌───────────────────────────┐      │     │
+│    │    │         DOMAIN            │      │     │
+│    │    │  Entities, VOs, Enums     │      │     │
+│    │    └───────────────────────────┘      │     │
+│    └───────────────────────────────────────┘     │
+└─────────────────────────────────────────────────┘
+```
+
+**Dependency rule:** Dependencies always point inward. The domain knows nothing about the outside world.
+
+### Domain Layer (Core)
+Pure business logic with no framework dependencies. Contains the Student aggregate root, 6 value objects with self-validation, 5 enums, and the repository interface (port).
+
+### Application Layer (Orchestration)
+Coordinates operations between the outside world and the domain. Contains the StudentService, command objects (CreateStudentCommand, UpdateContactCommand, etc.), and application-specific exceptions.
+
+### Infrastructure Layer (Technical Details)
+Implements the technical concerns: JPA persistence with bidirectional mapping (Domain ↔ JPA), Spring Data repositories, REST DTOs, CORS configuration, and database health monitoring.
+
+### Repository Pattern (Ports & Adapters)
+
+```
+Domain                         Infrastructure
+┌──────────────────┐           ┌──────────────────────────┐
+│ StudentRepository│◄──────────│ StudentRepositoryImpl    │
+│   (port)         │           │   (adapter)              │
+└──────────────────┘           │                          │
+                               │  SpringDataStudentRepo   │
+                               │  StudentJpaEntity        │
+                               │  StudentJpaMapper        │
+                               └──────────────────────────┘
 ```
 
 ---
@@ -296,201 +306,47 @@ src/
 
 ### Student Entity (Aggregate Root)
 
-The `Student` entity is the aggregate root representing a university student with comprehensive information management.
+The `Student` entity is the aggregate root with the following structure:
 
-**Core Fields:**
-- **Identity:** DNI/NIE (Spanish identification), unique ID
-- **Personal Info:** Full name (name, first surname, optional second surname)
-- **Contact:** Email, phone (both optional)
-- **Academic:** Degree name, current year (FIRST through FOURTH)
-- **Alumni Status:** Alumni type (Bachelor, Master, Doctorate, Erasmus), graduation year
-- **GDPR Compliance:** Consent status (Pending, Signed in Person, Signed Online, Already Signed)
-- **Tracking:** Discovery channel, contact method, counselor notes
-- **Metadata:** Creation and last update timestamps
+**Immutable fields:** DNI, full name, current year, creation timestamp
+**Mutable fields:** Email, phone, alumni info, RGPD consent, discovery/contact channels, notes
 
-**Business Capabilities:**
-- Email/Phone management (add, update, remove with validation)
-- Atomic contact info updates (email + phone together)
-- GDPR consent tracking (3 signature methods)
-- Alumni status management (mark/unmark)
+**Business operations:**
+- Email/Phone management (add, update, remove, atomic update)
+- RGPD consent tracking (3 signature methods + pending)
+- Alumni status management (mark/unmark with type and year)
 - Discovery and contact channel registration
 - Counselor notes management
+
+Built using the **Builder pattern** with intelligent defaults: new students are automatically created as non-alumni with pending RGPD consent.
 
 ---
 
 ### Value Objects
 
-#### 1. Email
-**Purpose:** Validate and normalize email addresses
+| Value Object | Purpose | Key Validation |
+|---|---|---|
+| **Dni** | Spanish DNI/NIE | MOD 23 algorithm, letter validation, DNI and NIE support |
+| **Email** | Email address | Format validation, lowercase normalization |
+| **Phone** | Phone number | E.164 international format, auto +34 prefix for Spanish numbers |
+| **FullName** | Person's name | Name + first surname required, second surname optional |
+| **AlumniInfo** | Alumni status | Composite: if alumni → type + year required; if not → both null |
+| **RgpdConsent** | GDPR consent | Composite: 4 statuses with different required fields per status |
 
-**Features:**
-- RFC 5322 compliant validation
-- Automatic normalization to lowercase
-- Immutable
-
-**Validation:**
-- Valid format (user@domain.com)
-- Non-null, non-empty
-- Proper domain structure
-
-**Example:**
-```java
-Email email = Email.of("student@university.edu");
-// Normalized: "student@university.edu"
-```
-
----
-
-#### 2. Phone
-**Purpose:** Validate and normalize Spanish phone numbers
-
-**Features:**
-- E.164 international format
-- Automatic +34 prefix addition for Spanish numbers
-- Support for mobile (6xx, 7xx) and landline (8xx, 9xx)
-- Immutable
-
-**Validation:**
-- 9 digits (Spanish format)
-- Valid prefix (6, 7, 8, 9)
-- Automatic normalization with spaces removed
+All value objects are **immutable**, **self-validated** (if it exists, it's valid), and created via **factory methods**.
 
 **Examples:**
 ```java
-Phone.of("600123456")     // → "+34600123456"
-Phone.of("+34912345678")  // → "+34912345678"
-Phone.of("912 345 678")   // → "+34912345678" (spaces removed)
-```
-
----
-
-#### 3. Dni (Spanish ID)
-**Purpose:** Validate Spanish DNI (National ID) and NIE (Foreigner ID)
-
-**Features:**
-- MOD 23 algorithm validation
-- Automatic NIE conversion (X→0, Y→1, Z→2)
-- Automatic normalization (uppercase, no spaces/dashes)
-- Distinguishes between DNI and NIE
-- Immutable
-
-**Validation:**
-- 8 digits + 1 letter
-- Correct letter according to MOD 23 algorithm
-- NIE must start with X, Y, or Z
-- DNI must start with digit
-
-**Examples:**
-```java
-Dni.of("12345678Z")    // Valid DNI
-Dni.of("X1234567L")    // Valid NIE (X converts to 0 for validation)
-Dni.of("12345678-Z")   // Normalized to "12345678Z"
-Dni.of("12345678z")    // Normalized to "12345678Z"
-```
-
-**NIE Conversion Table:**
-- X → 0 (e.g., X1234567 becomes 01234567 for validation)
-- Y → 1 (e.g., Y1234567 becomes 11234567 for validation)
-- Z → 2 (e.g., Z1234567 becomes 21234567 for validation)
-
----
-
-#### 4. FullName
-**Purpose:** Represent a person's complete name
-
-**Features:**
-- Composite Value Object (name, first surname, second surname)
-- Second surname is optional
-- Automatic trimming of whitespace
-- Immutable
-
-**Validation:**
-- Name: required, non-empty
-- First surname: required, non-empty
-- Second surname: optional (can be null)
-
-**Methods:**
-- `getFullName()`: Returns concatenated full name
-
-**Examples:**
-```java
-FullName.of("Juan", "García", "López")
-// getFullName() → "Juan García López"
-
-FullName.of("María", "Martínez", null)
-// getFullName() → "María Martínez"
-```
-
----
-
-#### 5. AlumniInfo
-**Purpose:** Track student's alumni status
-
-**Features:**
-- Factory methods for type-safe creation
-- Consistency validation (if alumni, requires type and year)
-- Immutable
-
-**Factory Methods:**
-- `AlumniInfo.notAlumni()` → Not an alumni
-- `AlumniInfo.createAlumni(type, year)` → Alumni with graduation info
-
-**Validation:**
-- Graduation year: >= 1900 and <= current year
-- Type and year required together for alumni
-- Type and year empty for non-alumni
-
-**Example:**
-```java
-AlumniInfo.notAlumni()
-// isAlumni() → false
-
-AlumniInfo.createAlumni(AlumniType.BACHELOR, 2023)
-// isAlumni() → true
-// getType() → Optional[BACHELOR]
-// getGraduationYear() → Optional[2023]
-```
-
----
-
-#### 6. RgpdConsent (GDPR Consent)
-**Purpose:** Track GDPR consent compliance
-
-**Features:**
-- 4 different consent statuses
-- Factory methods for each signature type
-- Automatic timestamp/year tracking
-- Immutable
-
-**Factory Methods:**
-- `RgpdConsent.pending()` → Awaiting consent
-- `RgpdConsent.signedInPerson()` → Signed in person (with timestamp)
-- `RgpdConsent.signedOnline()` → Signed online (with timestamp)
-- `RgpdConsent.alreadySigned(year)` → Previously signed (with year)
-
-**Status Types:**
-- PENDING: No consent given yet
-- SIGNED_IN_PERSON: Physically signed (stores signedDate)
-- SIGNED_ONLINE: Digitally signed (stores signedDate)
-- ALREADY_SIGNED: Pre-existing consent (stores signedYear)
-
-**Validation:**
-- Signed year: >= 2018 (GDPR effective date) and <= current year
-- SignedDate automatically set for in-person/online
-- SignedYear required for already-signed
-
-**Examples:**
-```java
-RgpdConsent.pending()
-// getStatus() → PENDING
-
-RgpdConsent.signedInPerson()
-// getStatus() → SIGNED_IN_PERSON
-// getSignedDate() → Optional[2025-01-15T10:30:00]
-
-RgpdConsent.alreadySigned(2020)
-// getStatus() → ALREADY_SIGNED
-// getSignedYear() → Optional[2020]
+Dni.of("12345678Z")                              // Valid DNI
+Dni.of("X1234567L")                              // Valid NIE
+Email.of("STUDENT@University.edu")               // Normalized to lowercase
+Phone.of("600123456")                            // Auto-prefixed to +34600123456
+FullName.of("Joan", "García", null)              // Optional second surname
+AlumniInfo.notAlumni()                           // Non-alumni (no type/year allowed)
+AlumniInfo.createAlumni(AlumniType.MASTER, 2023) // Alumni with required fields
+RgpdConsent.pending()                            // Awaiting consent
+RgpdConsent.signedInPerson()                     // Signed now (auto-timestamp)
+RgpdConsent.alreadySigned(2020)                  // Previously signed (year required)
 ```
 
 ---
@@ -498,104 +354,51 @@ RgpdConsent.alreadySigned(2020)
 ### Enums
 
 #### AlumniType
-Types of alumni status:
-- `BACHELOR` - Bachelor's degree graduate
-- `MASTER` - Master's degree graduate
-- `DOCTORATE` - Doctorate degree graduate
-- `ERASMUS` - Erasmus exchange program participant
+`BACHELOR`, `MASTER`, `DOCTORATE`, `DOUBLE_DEGREE`, `ERASMUS`, `EXCHANGE`, `OTHER`
 
 #### ContactMethod
-Ways students contacted the orientation service:
-- `EMAIL` - Via email
-- `PHONE` - Via phone call
-- `IN_PERSON` - In-person visit
-- `WHATSAPP` - Via WhatsApp
-- `INSTAGRAM` - Via Instagram DM
-- `OTHER` - Other methods
+`EMAIL`, `PHONE`, `IN_PERSON`, `ONLINE_FORM`, `REFERRAL`, `OTHER`
 
 #### CurrentYear
-Academic year levels:
-- `FIRST` - First year
-- `SECOND` - Second year
-- `THIRD` - Third year
-- `FOURTH` - Fourth year
+`FIRST`, `SECOND`, `THIRD`, `FOURTH`, `FIFTH`, `SIXTH`, `MASTER`, `DOCTORATE`
+
+Includes domain logic: `isGraduateLevel()`, `isUndergraduate()`
 
 #### DiscoveryChannel
-How students discovered the orientation service:
-- `WEBSITE` - University website
-- `INSTAGRAM` - Instagram social media
-- `FRIEND` - Friend recommendation
-- `PROFESSOR` - Professor recommendation
-- `EMAIL` - Email campaign
-- `OTHER` - Other sources
+`WEBSITE`, `SOCIAL_MEDIA`, `REFERRAL`, `UNIVERSITY_EVENT`, `EMAIL_CAMPAIGN`, `OTHER`
 
 #### RgpdConsentStatus
-GDPR consent states:
-- `PENDING` - Awaiting consent
-- `SIGNED_IN_PERSON` - Signed physically
-- `SIGNED_ONLINE` - Signed digitally
-- `ALREADY_SIGNED` - Previously consented
+`PENDING`, `SIGNED_IN_PERSON`, `SIGNED_ONLINE`, `ALREADY_SIGNED`
 
----
-
-### Design Patterns Used
-
-#### Value Objects
-All value objects are **immutable** and use:
-- **Factory Method pattern:** `of()` static method for creation
-- **Validation on construction:** Fail-fast principle
-- **Equals by value:** Two VOs with same value are equal
-- **No setters:** Immutable after creation
-
-#### Aggregate Root (Student)
-- **Builder pattern:** Fluent API for object construction
-- **Rich Domain Model:** Business logic in the domain
-- **Encapsulation:** Private setters, public business methods
-- **Invariant protection:** Validates state transitions
-
-#### Factory Methods (AlumniInfo, RgpdConsent)
-- **Type-safe creation:** Different methods for different states
-- **Self-documenting:** Method names express intent
-- **Consistency guarantee:** Ensures valid state combinations
+Includes domain logic: `isPending()`, `isSigned()`, `requiresYear()`, `requiresDate()`
 
 ---
 
 ## 🧪 Testing
 
-### Test Coverage
+### Test Summary
 
-The project has **>80% test coverage** with **121 tests**:
+| Layer | Test Class | Tests | Type |
+|---|---|---|---|
+| Domain - VOs | DniTest | 23 | Unit |
+| Domain - VOs | FullNameTest | 14 | Unit |
+| Domain - VOs | PhoneTest | 12 | Unit |
+| Domain - VOs | AlumniInfoTest | 11 | Unit |
+| Domain - VOs | RgpdConsentTest | 10 | Unit |
+| Domain - VOs | EmailTest | 9 | Unit |
+| Domain - Entity | StudentTest | 31 | Unit |
+| Application | StudentServiceTest | 13 | Unit (Mockito) |
+| Infrastructure | StudentRepositoryImplTest | 11 | Integration (PostgreSQL) |
 
-**Domain Layer (110 unit tests):**
+**Total: ~134 tests** across all layers.
 
-**Value Objects (79 tests):**
-- EmailTest: 9 tests (RFC 5322 validation, normalization)
-- PhoneTest: 12 tests (E.164 format, prefix handling)
-- DniTest: 23 tests (MOD 23 algorithm, DNI/NIE validation)
-- FullNameTest: 14 tests (composite VO, Optional handling)
-- AlumniInfoTest: 11 tests (consistency rules, year validation)
-- RgpdConsentTest: 10 tests (factory methods, status transitions)
+### Test Approach by Layer
 
-**Entities (31 tests):**
-- StudentTest: 31 tests (builder, business logic, equals/hashcode)
+**Domain tests (unit):** No mocks, no Spring context. Pure Java testing of business rules, validations, and value object behavior.
 
-**Infrastructure Layer (11 integration tests):**
+**Application tests (unit + Mockito):** Repository mocked with `@Mock`. Tests verify service orchestration, command handling, and exception flow without touching the database.
 
-**Repository Tests:**
-- StudentRepositoryImplTest: 11 tests
-    - CRUD operations (Create, Read, Update)
-    - Find by ID and DNI
-    - Exists by DNI validation
-    - Unique constraint testing (duplicate DNI)
-    - Optional fields handling (null email/phone)
-    - PostgreSQL integration with real database
-
-**Test Configuration:**
-- `@DataJpaTest` for repository slice testing
-- Real PostgreSQL database (`students_test`)
-- Transaction rollback after each test
-- Test isolation with unique DNIs per test
-- `@AutoConfigureTestDatabase(replace = NONE)` to use configured database
+**Infrastructure tests (integration):** `@DataJpaTest` with real PostgreSQL. Tests verify the full persistence cycle: Domain → Mapper → JPA → DB → JPA → Mapper → Domain.
 
 ### Running Tests
 ```bash
@@ -605,90 +408,27 @@ mvn test
 # Run specific test class
 mvn test -Dtest=StudentTest
 
-# Run tests with coverage report
-mvn clean test jacoco:report
-
-# View coverage report
-open target/site/jacoco/index.html
+# Run specific layer
+mvn test -Dtest="com.orientation.backend.users.domain.**"
 ```
 
-### Test Structure
-
-All tests follow the **AAA pattern** (Arrange-Act-Assert):
-```java
-@Test
-void shouldAddEmail() {
-    // Arrange
-    Student student = createStudent();
-    Email email = Email.of("test@test.com");
-
-    // Act
-    student.addEmail(email);
-
-    // Assert
-    assertTrue(student.getEmail().isPresent());
-    assertEquals(email, student.getEmail().get());
-}
-```
-
----
-
-## 🛠️ Tech Stack
-
-### Core
-- **Java 21** (LTS)
-- **Spring Boot 3.3.3**
-- **Maven 3.9**
-
-### Database
-- **PostgreSQL 15+**
-- **Flyway** (database migrations)
-- **Spring Data JPA** / **Hibernate**
-
-### Development Tools
-- **Spring Boot DevTools** (hot reload)
-- **Lombok** (reduce boilerplate)
-- **Docker Compose** (local development)
-
-### Testing
-- **JUnit 5** (121 tests: 110 unit + 11 integration)
-- **Spring Boot Test**
-- **AssertJ** (fluent assertions)
-
-### Monitoring
-- **Spring Boot Actuator** (health checks, metrics)
+**Note:** Integration tests require PostgreSQL running (via Docker).
 
 ---
 
 ## 🐳 Docker Commands
 
-### Start Services
 ```bash
+# Start services
 docker-compose up -d
-```
 
-### Stop Services
-```bash
+# Stop services
 docker-compose down
-```
 
-### View Logs
-```bash
-# All services
-docker-compose logs
-
-# Specific service
+# View logs
 docker-compose logs postgres
-docker-compose logs pgadmin
-```
 
-### Restart Services
-```bash
-docker-compose restart
-```
-
-### Remove Volumes (Clean Database)
-```bash
+# Remove volumes (clean database)
 docker-compose down -v
 ```
 
@@ -697,167 +437,23 @@ docker-compose down -v
 ## 🔧 Troubleshooting
 
 ### Port 5432 Already in Use
-
-**Check what's using the port:**
 ```bash
-# macOS/Linux
-lsof -i :5432
-
-# Windows
-netstat -ano | findstr :5432
+# Check what's using the port
+lsof -i :5432          # macOS/Linux
+netstat -ano | findstr :5432  # Windows
 ```
-
-**Solutions:**
-1. Stop the conflicting service
-2. Change port in `docker-compose.yml`:
-```yaml
-   ports:
-     - "5433:5432"  # Use 5433 on host
-```
-And update `.env`:
-```
-   DB_URL=jdbc:postgresql://localhost:5433/students_db
-```
+Change port in `docker-compose.yml` to `5433:5432` and update `DB_URL` accordingly.
 
 ### Application Fails to Start
-
-1. **Check Docker is running:**
-```bash
-   docker ps
-```
-
-2. **Check PostgreSQL logs:**
-```bash
-   docker-compose logs postgres
-```
-
-3. **Verify Java version:**
-```bash
-   java -version  # Must be 21+
-```
-
-4. **Clean and rebuild:**
-```bash
-   mvn clean install
-```
+1. Verify Docker is running: `docker ps`
+2. Check PostgreSQL health: `docker-compose logs postgres`
+3. Verify Java version: `java -version` (must be 21+)
+4. Clean rebuild: `mvn clean install`
 
 ### Flyway Migration Fails
-
-1. **Check database exists:**
-    - Connect via pgAdmin or psql
-    - Verify `students_db` database exists
-
-2. **Check Flyway configuration:**
-    - Open `src/main/resources/application.yml`
-    - Verify Flyway settings
-
-3. **Verify migration folder:**
-    - Check `src/main/resources/db/migration/` exists
-
-### Connection Refused Error
-
-**Error:** `Connection to localhost:5432 refused`
-
-**Solution:** Wait 10-15 seconds after `docker-compose up -d` for PostgreSQL to fully initialize.
-
-Check health status:
-```bash
-docker ps  # STATUS should show "(healthy)"
-```
-
----
-
-## 📚 Architecture
-
-This project follows **Hexagonal Architecture** (Ports & Adapters) and **Domain-Driven Design** principles:
-
-### Layers
-
-**Domain Layer (Core):**
-- Pure business logic
-- No framework dependencies
-- Value Objects, Entities, Aggregates
-- Rich Domain Model with behavior
-- Invariant protection
-
-**Application Layer:**
-- Use cases orchestration
-- Application services
-- DTOs and mappers
-- Transaction boundaries
-
-**Infrastructure Layer:**
-- Technical implementations
-- JPA repositories
-- REST controllers
-- Database configuration
-- External integrations
-
-### Repository Layer Implementation
-
-Following the **Ports & Adapters** pattern, the repository layer is implemented in three distinct components:
-
-**Domain Port (Interface):**
-- `StudentRepository` - Interface defined in domain layer
-- No framework dependencies
-- Defines persistence contract with domain types
-- Operations: save, findById, findByDni, existsByDni
-
-**Infrastructure Adapter:**
-- `StudentRepositoryImpl` - Implements domain port
-- Uses Spring Data JPA repository internally
-- Converts between Domain entities and JPA entities
-- Bridges domain and infrastructure layers
-
-**JPA Layer:**
-- `StudentJpaEntity` - JPA entity with annotations (@Entity, @Table, @Column)
-- Maps 20 domain fields to database columns
-- Lifecycle callbacks (@PrePersist, @PreUpdate) for timestamps
-- `StudentJpaMapper` - Bidirectional conversion (Domain ↔ JPA)
-- Handles all value objects and Optional fields
-- Null-safe transformations
-- `SpringDataStudentRepository` - Extends JpaRepository
-- Custom query methods (findByDni, existsByDni)
-
-**Benefits of this separation:**
-- ✅ Domain remains framework-agnostic
-- ✅ Easy to test (mock repository interface)
-- ✅ Easy to swap database implementations
-- ✅ Clear architectural boundaries
-- ✅ Type safety with domain value objects
-
-### Design Principles
-
-- ✅ **SOLID principles**
-- ✅ **Domain-Driven Design (DDD)**
-- ✅ **Hexagonal Architecture**
-- ✅ **Package by feature** (modular monolith)
-- ✅ **Dependency inversion** (domain independent)
-- ✅ **Separation of concerns**
-- ✅ **Immutability** (Value Objects)
-- ✅ **Fail-fast validation**
-
-### Domain Model Characteristics
-
-**Value Objects:**
-- Immutable
-- Validated on construction
-- Equals by value
-- No identity
-- Factory methods (`of()`)
-
-**Entities:**
-- Mutable state
-- Identity-based equality
-- Rich behavior
-- Encapsulated invariants
-- Builder pattern for construction
-
-**Aggregates:**
-- Consistency boundaries
-- Transaction boundaries
-- Aggregate Root (Student)
-- Business rules enforcement
+1. Verify database exists via pgAdmin
+2. Check migration files in `src/main/resources/db/migration/`
+3. Ensure no manual schema changes conflict with migrations
 
 ---
 
@@ -866,49 +462,54 @@ Following the **Ports & Adapters** pattern, the repository layer is implemented 
 ### Completed
 
 - [x] **Sprint 1 - Task #7:** Student Domain Model ✅
-    - [x] Database migration (Flyway)
-    - [x] Domain enums (5 types)
-    - [x] Value Objects (6 VOs with validation)
-    - [x] Student Entity (Aggregate Root)
-    - [x] Unit tests (110 tests, >80% coverage)
-    - [x] Documentation
+  - Database migration (Flyway V1 + V2)
+  - Domain enums (5 types with display names and business logic)
+  - Value Objects (6 VOs with self-validation)
+  - Student Entity (Aggregate Root with Builder pattern)
+  - Unit tests (110 tests)
 
 - [x] **Sprint 1 - Task #8:** Student Repository Layer ✅
-    - [x] JPA Entity mapping (StudentJpaEntity - 20 fields)
-    - [x] Bidirectional mapper (Domain ↔ JPA)
-    - [x] Repository pattern (3 layers: Domain Port, Spring Data, Adapter)
-    - [x] Integration tests (11 tests with PostgreSQL)
-    - [x] Hexagonal architecture implementation
+  - JPA Entity mapping (StudentJpaEntity)
+  - Bidirectional mapper (Domain ↔ JPA)
+  - Repository pattern (Port + Adapter + Spring Data)
+  - Integration tests (11 tests with PostgreSQL)
+
+- [x] **Sprint 1 - Task #9:** Student Application Layer ✅
+  - StudentService with CRUD orchestration
+  - Application commands (Create, UpdateContact, UpdateRgpd, MarkAsAlumni)
+  - Application exceptions (StudentNotFound, DuplicateDni, InvalidOperation)
+  - Service tests with Mockito (13 tests)
+  - REST DTOs (requests + responses)
 
 ### In Progress
 
-- [ ] **Sprint 1 - Task #9:** Student Application Services
-    - [ ] Service orchestration layer
-    - [ ] Application commands (Create, Update operations)
-    - [ ] Business validations and exception handling
-    - [ ] Service tests
+- [ ] **Sprint 1 - Task #10:** REST API Controllers
+  - StudentController with endpoints
+  - Global exception handler (@RestControllerAdvice)
+  - Request validation integration
+  - API documentation
 
 ### Upcoming
-- [ ] **Sprint 1 - Task #9:** Student Application Services
-- [ ] **Sprint 1 - Task #10:** REST API Controllers
-- [ ] **Sprint 2:** Update & Delete operations + Refactoring
+- [ ] **Sprint 2:** Refactoring + additional operations
 - [ ] **Sprint 3:** Sessions Module (Collaborators + Sessions)
 - [ ] **Sprint 4:** Authentication & Authorization (JWT)
 
 ---
 
-## 📊 Project Metrics
+## 🛠️ Tech Stack
 
-**Current Status:**
-- **Lines of Code:** ~2,000
-- **Total Tests:** 121 (110 domain + 11 integration)
-- **Test Coverage:** >80%
-- **Layers Implemented:** Domain + Infrastructure
-- **Value Objects:** 6
-- **Entities:** 1 (Aggregate Root)
-- **Enums:** 5
-- **Repositories:** 1 (with 3-layer implementation)
-- **Database Tables:** 1 (students)
+| Category | Technology |
+|---|---|
+| Language | Java 21 (LTS) |
+| Framework | Spring Boot 3.3.3 |
+| Build | Maven 3.9 |
+| Database | PostgreSQL 15 |
+| Migrations | Flyway |
+| ORM | Spring Data JPA / Hibernate |
+| Testing | JUnit 5 + Mockito + AssertJ |
+| Containers | Docker + Docker Compose |
+| Monitoring | Spring Boot Actuator |
+| Dev Tools | Lombok, Spring Boot DevTools |
 
 ---
 
@@ -920,35 +521,28 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👤 Author
 
-**Toni Romero**
-
-- GitHub: [@tonir90](https://github.com/tonir90)
-
----
-
-## 🤝 Contributing
-
-This is a personal learning project. Feedback and suggestions are welcome!
+**Toni Romero** — [@tonir90](https://github.com/tonir90)
 
 ---
 
 ## 📅 Recent Updates
 
-### January 2026
+### February 2026
+
+**Task #9: Application Layer** ✅ *Completed*
+- Implemented StudentService with full CRUD orchestration
+- Created command objects for all write operations
+- Built application-specific exceptions with meaningful messages
+- Added REST DTOs (4 requests + 2 responses)
+- 13 service tests with Mockito
 
 **Task #8: Repository Layer** ✅ *Completed*
 - Implemented hexagonal architecture with Ports & Adapters pattern
-- Created JPA entity mapping for Student aggregate (20 fields)
-- Built bidirectional mapper between Domain and JPA entities
-- Implemented 3-layer repository pattern (Domain Port, Spring Data, Adapter)
-- Added 11 integration tests with real PostgreSQL database
-- All tests passing (121/121) with >80% coverage
+- Created JPA entity mapping with bidirectional mapper
+- 11 integration tests with real PostgreSQL
 
 **Task #7: Domain Model** ✅ *Completed*
-- Designed and implemented complete domain model
-- Created 6 value objects with validation (Email, Phone, Dni, FullName, AlumniInfo, RgpdConsent)
-- Implemented Student aggregate root with business logic
-- Added 110 unit tests with >80% coverage
-- Established DDD patterns and practices
+- Complete domain model with 6 value objects and Student aggregate root
+- 110 unit tests covering all domain logic
 
-**Last Updated:** January 2026
+**Last Updated:** February 2026

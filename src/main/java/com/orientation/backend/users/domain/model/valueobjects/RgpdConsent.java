@@ -49,9 +49,21 @@ public final class RgpdConsent {
         return new RgpdConsent(RgpdConsentStatus.SIGNED_IN_PERSON, null, LocalDateTime.now());
     }
 
+    // Factory method: reconstruct signed in person (from persistence)
+    public static RgpdConsent signedInPerson(LocalDateTime signedDate) {
+        Objects.requireNonNull(signedDate, "La data de signa no pot ser nul");
+        return new RgpdConsent(RgpdConsentStatus.SIGNED_IN_PERSON, null, signedDate);
+    }
+
     // Factory method: signed online (date = NOW)
     public static RgpdConsent signedOnline() {
         return new RgpdConsent(RgpdConsentStatus.SIGNED_ONLINE, null, LocalDateTime.now());
+    }
+
+    // Factory method: reconstruct signed online (from persistence)
+    public static RgpdConsent signedOnline(LocalDateTime signedDate) {
+        Objects.requireNonNull(signedDate, "La data de signa no pot ser nul");
+        return new RgpdConsent(RgpdConsentStatus.SIGNED_ONLINE, null, signedDate);
     }
 
     // Validate year

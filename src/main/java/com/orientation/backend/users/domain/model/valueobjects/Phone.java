@@ -82,16 +82,6 @@ public final class Phone {
         return value;
     }
 
-    // Utility method
-    public String getCountryCode() {
-        // Extract country code (everything after + until first non-digit)
-        int i = 1; // Start after +
-        while (i < value.length() && Character.isDigit(value.charAt(i))) {
-            i++;
-        }
-        return value.substring(0, i);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
