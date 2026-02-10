@@ -3,6 +3,7 @@ package com.orientation.backend.users.domain.repository;
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.valueobjects.Dni;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface StudentRepository {
@@ -10,4 +11,5 @@ public interface StudentRepository {
     Optional<Student> findById(Long id);
     Optional<Student> findByDni(Dni dni);
     boolean existsByDni(Dni dni);
+    List<Student> findAll();
 }
