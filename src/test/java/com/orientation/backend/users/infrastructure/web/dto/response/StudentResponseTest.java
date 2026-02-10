@@ -3,7 +3,7 @@ package com.orientation.backend.users.infrastructure.web.dto.response;
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.enums.*;
 import com.orientation.backend.users.domain.model.valueobjects.*;
-import com.orientation.backend.users.infrastructure.web.dto.request.StudentResponse;
+import com.orientation.backend.users.infrastructure.web.dto.response.StudentResponse;
 import org.junit.jupiter.api.Test;
 
 
