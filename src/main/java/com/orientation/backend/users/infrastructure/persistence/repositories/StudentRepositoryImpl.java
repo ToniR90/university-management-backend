@@ -7,6 +7,7 @@ import com.orientation.backend.users.infrastructure.persistence.entities.Student
 import com.orientation.backend.users.infrastructure.persistence.mappers.StudentJpaMapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -40,5 +41,13 @@ public class StudentRepositoryImpl implements StudentRepository {
     @Override
     public boolean existsByDni(Dni dni) {
         return jpaRepository.existsByDni(dni.getValue());
+    }
+
+    @Override
+    public List<Student> findAll() {
+        return jpaRepository.findAll()
+                .stream()
+                .map(StudentJpaMapper::toDomain)
+                .toList();
     }
 }

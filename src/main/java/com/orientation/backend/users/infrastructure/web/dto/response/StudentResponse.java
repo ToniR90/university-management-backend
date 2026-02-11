@@ -1,4 +1,4 @@
-package com.orientation.backend.users.infrastructure.web.dto.request;
+package com.orientation.backend.users.infrastructure.web.dto.response;
 
 import com.orientation.backend.users.domain.model.entities.Student;
 

@@ -73,6 +73,12 @@ curl http://localhost:8080/actuator/health
 }
 ```
 
+### Swagger UI
+
+Interactive API documentation available at: **http://localhost:8080/swagger-ui.html**
+
+All endpoints are auto-documented and explorable via Swagger UI.
+
 ### Database Access (pgAdmin)
 
 Optional: Access pgAdmin web interface for database management
@@ -87,6 +93,50 @@ Optional: Access pgAdmin web interface for database management
 - Database: `students_db`
 - Username: `postgres`
 - Password: `postgres`
+
+---
+
+## 🌐 REST API
+
+### Base path: `/api/v1/students`
+
+| Method | Path | Description | Status |
+|--------|------|-------------|--------|
+| POST | `/api/v1/students` | Create student | 201 Created |
+| GET | `/api/v1/students` | List all students | 200 OK |
+| GET | `/api/v1/students/{id}` | Get student by ID | 200 OK |
+| GET | `/api/v1/students/dni/{dni}` | Get student by DNI | 200 OK |
+| PATCH | `/api/v1/students/{id}/contact` | Update contact info | 200 OK |
+| PATCH | `/api/v1/students/{id}/rgpd` | Update RGPD consent | 200 OK |
+| PATCH | `/api/v1/students/{id}/alumni` | Mark as alumni | 200 OK |
+
+### Error Responses
+
+All errors follow a consistent format using `ErrorResponse`:
+
+```json
+{
+  "status": 404,
+  "error": "Not Found",
+  "message": "No s'ha trobat l'estudiant amb id: 999",
+  "timestamp": "2026-02-11T20:00:00"
+}
+```
+
+| Exception | HTTP Status | When |
+|-----------|-------------|------|
+| `StudentNotFoundException` | 404 | Student not found by ID or DNI |
+| `DuplicateDniException` | 409 | DNI already exists on create |
+| `InvalidStudentOperationException` | 400 | Invalid business operation |
+| `MethodArgumentNotValidException` | 400 | Request validation fails (@Valid) |
+| `IllegalArgumentException` | 400 | Domain validation fails (VOs) |
+| `Exception` | 500 | Unexpected errors |
+
+### Postman Collection
+
+A Postman collection is available in the project root for testing all endpoints: `Student-Management-System.postman_collection.json`
+
+Import in Postman: `File → Import → Upload Files`
 
 ---
 
@@ -199,6 +249,10 @@ src/
 │   │       │       │       ├── SpringDataStudentRepository.java
 │   │       │       │       └── StudentRepositoryImpl.java
 │   │       │       └── web/
+│   │       │           ├── controller/
+│   │       │           │   └── StudentController.java
+│   │       │           ├── exception/
+│   │       │           │   └── RestExceptionHandler.java
 │   │       │           └── dto/
 │   │       │               ├── request/
 │   │       │               │   ├── CreateStudentRequest.java
@@ -247,9 +301,12 @@ src/
                 │           ├── PhoneTest.java
                 │           └── RgpdConsentTest.java
                 └── infrastructure/
-                    └── persistence/
-                        └── repositories/
-                            └── StudentRepositoryImplTest.java
+                    ├── persistence/
+                    │   └── repositories/
+                    │       └── StudentRepositoryImplTest.java
+                    └── web/
+                        └── controller/
+                            └── StudentControllerTest.java
 ```
 
 ---
@@ -261,7 +318,7 @@ This project follows **Hexagonal Architecture** (Ports & Adapters) and **Domain-
 ```
 ┌─────────────────────────────────────────────────┐
 │              INFRASTRUCTURE                      │
-│    Database, REST API, Configuration             │
+│    REST API, Database, Configuration             │
 │                                                  │
 │    ┌───────────────────────────────────────┐     │
 │    │          APPLICATION                  │     │
@@ -284,7 +341,21 @@ Pure business logic with no framework dependencies. Contains the Student aggrega
 Coordinates operations between the outside world and the domain. Contains the StudentService, command objects (CreateStudentCommand, UpdateContactCommand, etc.), and application-specific exceptions.
 
 ### Infrastructure Layer (Technical Details)
-Implements the technical concerns: JPA persistence with bidirectional mapping (Domain ↔ JPA), Spring Data repositories, REST DTOs, CORS configuration, and database health monitoring.
+Implements the technical concerns: REST controllers with global exception handling, JPA persistence with bidirectional mapping (Domain ↔ JPA), Spring Data repositories, REST DTOs, Swagger UI, CORS configuration, and database health monitoring.
+
+### Request Flow
+
+```
+HTTP Request
+    → StudentController (validate + delegate)
+        → StudentService (orchestrate)
+            → Domain (business logic)
+                → StudentRepository port
+                    → StudentRepositoryImpl adapter
+                        → Spring Data JPA → PostgreSQL
+    ← StudentResponse (via fromDomain)
+← HTTP Response
+```
 
 ### Repository Pattern (Ports & Adapters)
 
@@ -389,8 +460,9 @@ Includes domain logic: `isPending()`, `isSigned()`, `requiresYear()`, `requiresD
 | Domain - Entity | StudentTest | 31 | Unit |
 | Application | StudentServiceTest | 13 | Unit (Mockito) |
 | Infrastructure | StudentRepositoryImplTest | 11 | Integration (PostgreSQL) |
+| Infrastructure | StudentControllerTest | 14 | Web (MockMvc) |
 
-**Total: ~134 tests** across all layers.
+**Total: ~148 tests** across all layers.
 
 ### Test Approach by Layer
 
@@ -398,7 +470,9 @@ Includes domain logic: `isPending()`, `isSigned()`, `requiresYear()`, `requiresD
 
 **Application tests (unit + Mockito):** Repository mocked with `@Mock`. Tests verify service orchestration, command handling, and exception flow without touching the database.
 
-**Infrastructure tests (integration):** `@DataJpaTest` with real PostgreSQL. Tests verify the full persistence cycle: Domain → Mapper → JPA → DB → JPA → Mapper → Domain.
+**Infrastructure - persistence (integration):** `@DataJpaTest` with real PostgreSQL. Tests verify the full persistence cycle: Domain → Mapper → JPA → DB → JPA → Mapper → Domain.
+
+**Infrastructure - web (MockMvc):** `@WebMvcTest` with mocked services. Tests verify HTTP status codes, request validation, error response format, and JSON structure without starting the full application.
 
 ### Running Tests
 ```bash
@@ -410,6 +484,9 @@ mvn test -Dtest=StudentTest
 
 # Run specific layer
 mvn test -Dtest="com.orientation.backend.users.domain.**"
+
+# Run only controller tests
+mvn test -Dtest=StudentControllerTest
 ```
 
 **Note:** Integration tests require PostgreSQL running (via Docker).
@@ -459,38 +536,38 @@ Change port in `docker-compose.yml` to `5433:5432` and update `DB_URL` according
 
 ## 🗺️ Roadmap
 
-### Completed
+### Completed — Sprint 1 ✅
 
-- [x] **Sprint 1 - Task #7:** Student Domain Model ✅
+- [x] **Task #7:** Student Domain Model
   - Database migration (Flyway V1 + V2)
   - Domain enums (5 types with display names and business logic)
   - Value Objects (6 VOs with self-validation)
   - Student Entity (Aggregate Root with Builder pattern)
   - Unit tests (110 tests)
 
-- [x] **Sprint 1 - Task #8:** Student Repository Layer ✅
+- [x] **Task #8:** Student Repository Layer
   - JPA Entity mapping (StudentJpaEntity)
   - Bidirectional mapper (Domain ↔ JPA)
   - Repository pattern (Port + Adapter + Spring Data)
   - Integration tests (11 tests with PostgreSQL)
 
-- [x] **Sprint 1 - Task #9:** Student Application Layer ✅
+- [x] **Task #9:** Student Application Layer
   - StudentService with CRUD orchestration
   - Application commands (Create, UpdateContact, UpdateRgpd, MarkAsAlumni)
   - Application exceptions (StudentNotFound, DuplicateDni, InvalidOperation)
   - Service tests with Mockito (13 tests)
   - REST DTOs (requests + responses)
 
-### In Progress
-
-- [ ] **Sprint 1 - Task #10:** REST API Controllers
-  - StudentController with endpoints
+- [x] **Task #10:** REST API Controllers
+  - StudentController with 7 endpoints
   - Global exception handler (@RestControllerAdvice)
-  - Request validation integration
-  - API documentation
+  - Request validation with @Valid
+  - Swagger UI auto-generated documentation
+  - Controller tests with MockMvc (14 tests)
+  - Postman collection for manual testing
 
 ### Upcoming
-- [ ] **Sprint 2:** Refactoring + additional operations
+- [ ] **Sprint 2:** Refactoring + DELETE endpoint + additional operations
 - [ ] **Sprint 3:** Sessions Module (Collaborators + Sessions)
 - [ ] **Sprint 4:** Authentication & Authorization (JWT)
 
@@ -506,10 +583,11 @@ Change port in `docker-compose.yml` to `5433:5432` and update `DB_URL` according
 | Database | PostgreSQL 15 |
 | Migrations | Flyway |
 | ORM | Spring Data JPA / Hibernate |
-| Testing | JUnit 5 + Mockito + AssertJ |
+| API Docs | springdoc-openapi (Swagger UI) |
+| Testing | JUnit 5 + Mockito + AssertJ + MockMvc |
 | Containers | Docker + Docker Compose |
 | Monitoring | Spring Boot Actuator |
-| Dev Tools | Lombok, Spring Boot DevTools |
+| Dev Tools | Lombok, Spring Boot DevTools, Postman |
 
 ---
 
@@ -528,6 +606,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📅 Recent Updates
 
 ### February 2026
+
+**Sprint 1 Completed** 🎉
+
+**Task #10: REST API Controllers** ✅ *Completed*
+- Implemented StudentController with 7 REST endpoints
+- Built global exception handler with consistent error responses
+- Added Swagger UI for interactive API documentation
+- Created Postman collection for manual testing
+- 14 controller tests with MockMvc
 
 **Task #9: Application Layer** ✅ *Completed*
 - Implemented StudentService with full CRUD orchestration
