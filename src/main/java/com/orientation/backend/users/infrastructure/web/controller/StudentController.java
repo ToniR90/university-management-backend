@@ -1,9 +1,13 @@
 package com.orientation.backend.users.infrastructure.web.controller;
 
+import com.orientation.backend.users.application.commands.CreateStudentCommand;
 import com.orientation.backend.users.application.services.StudentService;
 import com.orientation.backend.users.domain.model.entities.Student;
+import com.orientation.backend.users.infrastructure.web.dto.request.CreateStudentRequest;
 import com.orientation.backend.users.infrastructure.web.dto.response.StudentResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,5 +41,23 @@ public class StudentController {
                 .map(StudentResponse::fromDomain)
                 .toList();
         return ResponseEntity.ok(responses);
+    }
+
+    @PostMapping
+    public ResponseEntity<StudentResponse> createStudent(@Valid @RequestBody CreateStudentRequest request){
+        CreateStudentCommand command = new CreateStudentCommand(
+                request.dni(),
+                request.name(),
+                request.firstSurname(),
+                request.secondSurname(),
+                request.email(),
+                request.phone(),
+                request.degree(),
+                request.currentYear()
+        );
+        Student student = studentService.createStudent(command);
+        StudentResponse response = StudentResponse.fromDomain(student);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
