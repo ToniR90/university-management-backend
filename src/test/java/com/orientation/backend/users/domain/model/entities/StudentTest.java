@@ -1,6 +1,7 @@
 package com.orientation.backend.users.domain.model.entities;
 
 import com.orientation.backend.users.domain.model.enums.*;
+import com.orientation.backend.users.domain.model.exceptions.StudentAlreadyInactiveException;
 import com.orientation.backend.users.domain.model.valueobjects.Dni;
 import com.orientation.backend.users.domain.model.valueobjects.Email;
 import com.orientation.backend.users.domain.model.valueobjects.FullName;
@@ -421,15 +422,32 @@ class StudentTest {
 
     @Test
     void shouldBeActiveWhenCreateStudent() {
+        // ARRANGE
+        Student student = createStudent();
+
+        // ACT + ASSERT
+        assertTrue(student.isActive());
+        assertTrue(student.getDeletedAt().isEmpty());
     }
 
     @Test
     void shouldNotBeActiveWhenIsDeactivated() {
+        // ARRANGE
+        Student student = createStudent();
 
+        // ACT + ASSERT
+        student.deactivate();
+        assertFalse(student.isActive());
+        assertTrue(student.getDeletedAt().isPresent());
     }
 
     @Test
     void shouldThrowExceptionIfAlreadyDeactivated() {
+        // ASSERT
+        Student student = createStudent();
+        student.deactivate();
 
+        // ACT + ASSERT
+        assertThrows(StudentAlreadyInactiveException.class, student::deactivate);
     }
 }
