@@ -418,4 +418,18 @@ class StudentTest {
 
         assertNotEquals(student1, student2);
     }
+
+    @Test
+    void shouldBeActiveWhenCreateStudent() {
+    }
+
+    @Test
+    void shouldNotBeActiveWhenIsDeactivated() {
+
+    }
+
+    @Test
+    void shouldThrowExceptionIfAlreadyDeactivated() {
+
+    }
 }
