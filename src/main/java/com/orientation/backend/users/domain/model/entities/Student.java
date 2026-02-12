@@ -29,6 +29,7 @@ import java.util.Optional;
 public class Student {
     // Identity
     private Long id;
+    private boolean active;
 
     // Value Objects - Immutable identity
     private final Dni dni;
@@ -55,12 +56,14 @@ public class Student {
 
     // Metadata
     private final LocalDateTime createdAt;
+    private final LocalDateTime deletedAt;
     private LocalDateTime updatedAt;
 
 
     // CONSTRUCTOR (Private - use Builder)
     private Student(Builder builder) {
         this.id = builder.id;
+        this.active = true;
         this.dni = Objects.requireNonNull(builder.dni, "El DNI no pot ser nul");
         this.fullName = Objects.requireNonNull(builder.fullName, "El nom complet no pot ser nul");
         this.currentYear = Objects.requireNonNull(builder.currentYear, "El curs actual no pot ser nul");
@@ -79,6 +82,7 @@ public class Student {
 
         this.createdAt = (builder.createdAt != null) ? builder.createdAt : LocalDateTime.now();
         this.updatedAt = (builder.updatedAt != null) ? builder.updatedAt : LocalDateTime.now();
+        this.deletedAt = null;
     }
 
     // ============================================
