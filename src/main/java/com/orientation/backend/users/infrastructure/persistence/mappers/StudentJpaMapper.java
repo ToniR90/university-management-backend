@@ -52,6 +52,7 @@ public class StudentJpaMapper {
 
         return Student.builder()
                 .id(jpaEntity.getId())
+                .active(jpaEntity.isActive())
                 .dni(dni)
                 .fullName(fullName)
                 .email(email)
@@ -65,6 +66,7 @@ public class StudentJpaMapper {
                 .counselorNotes(counselorNotes)
                 .createdAt(jpaEntity.getCreatedAt())
                 .updatedAt(jpaEntity.getUpdatedAt())
+                .deletedAt(jpaEntity.getDeletedAt())
                 .build();
     }
 
@@ -72,6 +74,7 @@ public class StudentJpaMapper {
     public static StudentJpaEntity toJpaEntity(Student student) {
 
         String dni = student.getDni().getValue();
+        boolean active = student.isActive();
 
         String name = student.getFullName().getName();
         String firstSurname = student.getFullName().getFirstSurname();
@@ -99,10 +102,12 @@ public class StudentJpaMapper {
 
         LocalDateTime createdAt = student.getCreatedAt();
         LocalDateTime updatedAt = student.getUpdatedAt();
+        LocalDateTime deletedAt = student.getDeletedAt().orElse(null);
 
         StudentJpaEntity jpaEntity = new StudentJpaEntity();
 
         jpaEntity.setId(student.getId());
+        jpaEntity.setActive(active);
         jpaEntity.setDni(dni);
         jpaEntity.setName(name);
         jpaEntity.setFirstSurname(firstSurname);
@@ -122,6 +127,7 @@ public class StudentJpaMapper {
         jpaEntity.setCounselorNotes(counselorNotes);
         jpaEntity.setCreatedAt(createdAt);
         jpaEntity.setUpdatedAt(updatedAt);
+        jpaEntity.setDeletedAt(deletedAt);
 
         return jpaEntity;
     }
