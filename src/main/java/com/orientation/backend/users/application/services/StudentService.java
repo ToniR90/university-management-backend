@@ -49,6 +49,13 @@ public class StudentService {
         return studentRepository.save(student);
     }
 
+    @Transactional
+    public void deleteStudent(Long id){
+        Student student = findById(id);
+        student.deactivate();
+        studentRepository.save(student);
+    }
+
     public Student findById(Long id) {
         return studentRepository.findById(id).orElseThrow(()-> new StudentNotFoundException(id));
     }
