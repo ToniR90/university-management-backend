@@ -13,6 +13,9 @@ public class StudentJpaEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "active")
+    private boolean active;
+
     @Column(name = "dni", nullable = false, unique = true)
     private String dni;
 
@@ -70,15 +73,20 @@ public class StudentJpaEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     // ========== Constructor ==========
     public StudentJpaEntity () {}
 
-    public StudentJpaEntity(Long id, String dni, String name, String firstSurname, String secondSurname,
+    public StudentJpaEntity(Long id, boolean active, String dni, String name, String firstSurname, String secondSurname,
                             String email, String phone, String degree, String currentYear, Boolean isAlumni,
                             String alumniType, Integer graduationYear, String rgpdConsentStatus,
                             LocalDateTime rgpdSignedDate, Integer rgpdSignedYear, String howDidYouKnowUs,
-                            String howDidYouContactUs, String counselorNotes, LocalDateTime createdAt, LocalDateTime updatedAt) {
+                            String howDidYouContactUs, String counselorNotes, LocalDateTime createdAt, LocalDateTime updatedAt,
+                            LocalDateTime deletedAt) {
         this.id = id;
+        this.active = active;
         this.dni = dni;
         this.name = name;
         this.firstSurname = firstSurname;
@@ -98,6 +106,7 @@ public class StudentJpaEntity {
         this.counselorNotes = counselorNotes;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.deletedAt = deletedAt;
     }
 
     // ========== Getters - Setters ==========
@@ -108,6 +117,14 @@ public class StudentJpaEntity {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public String getDni() {
@@ -260,6 +277,14 @@ public class StudentJpaEntity {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
     }
 
     // ========== Callbacks ==========

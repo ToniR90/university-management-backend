@@ -4,6 +4,7 @@ import com.orientation.backend.users.domain.model.enums.AlumniType;
 import com.orientation.backend.users.domain.model.enums.ContactMethod;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
 import com.orientation.backend.users.domain.model.enums.DiscoveryChannel;
+import com.orientation.backend.users.domain.model.exceptions.StudentAlreadyInactiveException;
 import com.orientation.backend.users.domain.model.valueobjects.*;
 
 import java.time.LocalDateTime;
@@ -56,14 +57,14 @@ public class Student {
 
     // Metadata
     private final LocalDateTime createdAt;
-    private final LocalDateTime deletedAt;
+    private LocalDateTime deletedAt;
     private LocalDateTime updatedAt;
 
 
     // CONSTRUCTOR (Private - use Builder)
     private Student(Builder builder) {
         this.id = builder.id;
-        this.active = true;
+        this.active = builder.active;
         this.dni = Objects.requireNonNull(builder.dni, "El DNI no pot ser nul");
         this.fullName = Objects.requireNonNull(builder.fullName, "El nom complet no pot ser nul");
         this.currentYear = Objects.requireNonNull(builder.currentYear, "El curs actual no pot ser nul");
@@ -82,7 +83,7 @@ public class Student {
 
         this.createdAt = (builder.createdAt != null) ? builder.createdAt : LocalDateTime.now();
         this.updatedAt = (builder.updatedAt != null) ? builder.updatedAt : LocalDateTime.now();
-        this.deletedAt = null;
+        this.deletedAt = builder.deletedAt;
     }
 
     // ============================================
@@ -299,11 +300,27 @@ public class Student {
     }
 
     // ============================================
+    // BUSINESS METHODS - Soft Delete Method
+    // ============================================
+
+    public void deactivate() {
+        if (!this.active) {
+            throw new StudentAlreadyInactiveException(this.id);
+        }
+        this.active = false;
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    // ============================================
     // GETTERS (Read-Only Access)
     // ============================================
 
     public Long getId() {
         return id;
+    }
+
+    public boolean isActive() {
+        return active;
     }
 
     public Dni getDni() {
@@ -358,6 +375,10 @@ public class Student {
         return updatedAt;
     }
 
+    public Optional<LocalDateTime> getDeletedAt() {
+        return Optional.ofNullable(deletedAt);
+    }
+
     // ============================================
     // HELPER METHODS (Private)
     // ============================================
@@ -377,6 +398,7 @@ public class Student {
 
     public static class Builder {
         private Long id;
+        private boolean active;
         private Dni dni;
         private FullName fullName;
         private Email email;
@@ -390,14 +412,21 @@ public class Student {
         private String counselorNotes;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
+        private LocalDateTime deletedAt;
 
         private Builder() {
+            this.active = true;
             this.alumniInfo = AlumniInfo.notAlumni();
             this.rgpdConsent = RgpdConsent.pending();
         }
 
         public Builder id(Long id) {
             this.id = id;
+            return this;
+        }
+
+        public Builder active(boolean active) {
+            this.active = active;
             return this;
         }
 
@@ -493,6 +522,11 @@ public class Student {
 
         public Builder updatedAt(LocalDateTime updatedAt) {
             this.updatedAt = updatedAt;
+            return this;
+        }
+
+        public Builder deletedAt(LocalDateTime deletedAt) {
+            this.deletedAt = deletedAt;
             return this;
         }
 
