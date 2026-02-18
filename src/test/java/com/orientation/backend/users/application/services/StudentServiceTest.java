@@ -36,6 +36,7 @@ class StudentServiceTest {
     // ========== Helper Methods ==========
     private Student createTestStudent(String dni, String email) {
         return Student.builder()
+                .id(1L)
                 .dni(Dni.of(dni))
                 .fullName(FullName.of("test_name", "test_firstSurname", "test_secondSurname"))
                 .email(Optional.of(Email.of(email)))
@@ -448,6 +449,43 @@ class StudentServiceTest {
 
         // VERIFY
         verify(studentRepository, times(1)).findById(1L);
+        verify(studentRepository, never()).save(any(Student.class));
+    }
+
+    // ===========================================
+    // DELETE STUDENT TESTS
+    // ===========================================
+
+    @Test
+    void shouldDeleteStudentSuccessfully() {
+        // ARRANGE
+        Student student = createTestStudent("00000014Z", "test@email.com");
+
+        when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+        when(studentRepository.save(any(Student.class))).thenReturn(student);
+
+        // ACT
+        studentService.deleteStudent(1L);
+
+        // ASSERT
+        assertFalse(student.isActive());
+        assertTrue(student.getDeletedAt().isPresent());
+
+        // VERIFY
+        verify(studentRepository, times(1)).findById(1L);
+        verify(studentRepository, times(1)).save(any(Student.class));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenDeletingNonExistentStudent() {
+        // ARRANGE
+        when(studentRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // ACT + ASSERT
+        assertThrows(StudentNotFoundException.class, () -> studentService.deleteStudent(999L));
+
+        // VERIFY
+        verify(studentRepository, times(1)).findById(999L);
         verify(studentRepository, never()).save(any(Student.class));
     }
 }

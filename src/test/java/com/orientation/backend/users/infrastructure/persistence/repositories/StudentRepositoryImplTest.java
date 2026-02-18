@@ -7,9 +7,11 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -22,12 +24,17 @@ import static org.assertj.core.api.Assertions.*;
         "spring.datasource.username=postgres",
         "spring.datasource.password=postgres",
         "spring.jpa.hibernate.ddl-auto=create-drop",
-        "spring.flyway.enabled=false"
+        "spring.flyway.enabled=false",
+        "spring.sql.init.mode=always",
+        "spring.jpa.defer-datasource-initialization=true"
 })
 class StudentRepositoryImplTest {
 
     @Autowired
     private StudentRepositoryImpl studentRepository;
+
+    @Autowired
+    private TestEntityManager entityManager;
 
     private Student createTestStudent(String dni, String email) {
         return Student.builder()
@@ -41,6 +48,8 @@ class StudentRepositoryImplTest {
                 .rgpdConsent(RgpdConsent.pending())
                 .build();
     }
+
+    // ========== CRUD Tests ==========
 
     @Test
     @DisplayName("Should save student correctly")
@@ -134,7 +143,6 @@ class StudentRepositoryImplTest {
         assertThat(found).isPresent();
         assertThat(found.get().getEmail()).isPresent();
         assertThat(found.get().getEmail().get().getValue()).isEqualTo("new_email@example.com");
-
     }
 
     @Test
@@ -159,20 +167,20 @@ class StudentRepositoryImplTest {
     @Test
     @DisplayName("Should allow null phone")
     void shouldAllowNullPhone() {
-            Student student = Student.builder()
-                    .dni(Dni.of("00000008P"))
-                    .fullName(FullName.of("Test_name", "Test_FirstSurname", "Test_SecondSurname"))
-                    .degree("Test Degree")
-                    .currentYear(CurrentYear.FIRST)
-                    .alumniInfo(AlumniInfo.notAlumni())
-                    .rgpdConsent(RgpdConsent.pending())
-                    .build();
+        Student student = Student.builder()
+                .dni(Dni.of("00000008P"))
+                .fullName(FullName.of("Test_name", "Test_FirstSurname", "Test_SecondSurname"))
+                .degree("Test Degree")
+                .currentYear(CurrentYear.FIRST)
+                .alumniInfo(AlumniInfo.notAlumni())
+                .rgpdConsent(RgpdConsent.pending())
+                .build();
 
-            Student saved = studentRepository.save(student);
+        Student saved = studentRepository.save(student);
 
-            Optional<Student> found = studentRepository.findById(saved.getId());
-            assertThat(found).isPresent();
-            assertThat(found.get().getPhone()).isEmpty();
+        Optional<Student> found = studentRepository.findById(saved.getId());
+        assertThat(found).isPresent();
+        assertThat(found.get().getPhone()).isEmpty();
     }
 
     @Test
@@ -184,5 +192,79 @@ class StudentRepositoryImplTest {
         Student student2 = createTestStudent("00000009D", "test2@example.com");
 
         assertThatThrownBy(() -> studentRepository.save(student2)).isInstanceOf(Exception.class);
+    }
+
+    // ========== Soft Delete Tests ==========
+
+    @Test
+    @DisplayName("Should not find student by ID after deactivation")
+    void shouldNotFindByIdAfterDeactivation() {
+        Student student = createTestStudent("00000010X", "test@example.com");
+        Student saved = studentRepository.save(student);
+
+        saved.deactivate();
+        studentRepository.save(saved);
+
+        assertThat(studentRepository.findById(saved.getId())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Should not find student by DNI after deactivation")
+    void shouldNotFindByDniAfterDeactivation() {
+        Student student = createTestStudent("00000011B", "test@example.com");
+        Student saved = studentRepository.save(student);
+
+        saved.deactivate();
+        studentRepository.save(saved);
+
+        assertThat(studentRepository.findByDni(Dni.of("00000011B"))).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Should not include deactivated students in findAll")
+    void shouldNotIncludeDeactivatedInFindAll() {
+        Student active = createTestStudent("00000012N", "active@example.com");
+        Student toDeactivate = createTestStudent("00000013J", "inactive@example.com");
+
+        studentRepository.save(active);
+        Student saved = studentRepository.save(toDeactivate);
+
+        saved.deactivate();
+        studentRepository.save(saved);
+
+        List<Student> all = studentRepository.findAll();
+        assertThat(all).hasSize(1);
+        assertThat(all.get(0).getDni().getValue()).isEqualTo("00000012N");
+    }
+
+    @Test
+    @DisplayName("Should not exist by DNI after deactivation")
+    void shouldNotExistByDniAfterDeactivation() {
+        Student student = createTestStudent("00000014Z", "test@example.com");
+        Student saved = studentRepository.save(student);
+
+        saved.deactivate();
+        studentRepository.save(saved);
+
+        assertThat(studentRepository.existsByDni(Dni.of("00000014Z"))).isFalse();
+    }
+
+    @Test
+    @DisplayName("Should reuse DNI after deactivation")
+    void shouldReuseDniAfterDeactivation() {
+        Student student = createTestStudent("00000015S", "test@example.com");
+        Student saved = studentRepository.save(student);
+
+        saved.deactivate();
+        studentRepository.save(saved);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        Student newStudent = createTestStudent("00000015S", "new@example.com");
+        Student newSaved = studentRepository.save(newStudent);
+
+        assertThat(newSaved.getId()).isNotNull();
+        assertThat(studentRepository.findByDni(Dni.of("00000015S"))).isPresent();
     }
 }

@@ -20,7 +20,7 @@ import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -52,11 +52,9 @@ class StudentControllerTest {
     // ========== GET /{id} ==========
     @Test
     void shouldGetStudentById() throws Exception {
-        // ARRANGE
         Student student = createTestStudent();
         when(studentService.findById(1L)).thenReturn(student);
 
-        // ACT + ASSERT
         mockMvc.perform(get("/api/v1/students/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
@@ -66,10 +64,8 @@ class StudentControllerTest {
 
     @Test
     void shouldReturn404WhenStudentNotFoundById() throws Exception {
-        // ARRANGE
         when(studentService.findById(999L)).thenThrow(new StudentNotFoundException(999L));
 
-        // ACT + ASSERT
         mockMvc.perform(get("/api/v1/students/999"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
@@ -79,11 +75,9 @@ class StudentControllerTest {
     // ========== GET /dni/{dni} ==========
     @Test
     void shouldGetStudentByDni() throws Exception {
-        // ARRANGE
         Student student = createTestStudent();
         when(studentService.findByDni("12345678Z")).thenReturn(student);
 
-        // ACT + ASSERT
         mockMvc.perform(get("/api/v1/students/dni/12345678Z"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
@@ -93,10 +87,8 @@ class StudentControllerTest {
 
     @Test
     void shouldReturn404WhenStudentNotFoundByDni() throws Exception {
-        // ARRANGE
         when(studentService.findByDni("21273746B")).thenThrow(new StudentNotFoundException("21273746B"));
 
-        // ACT + ASSERT
         mockMvc.perform(get("/api/v1/students/dni/21273746B"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
@@ -106,11 +98,9 @@ class StudentControllerTest {
     // ========== GET / ==========
     @Test
     void shouldGetAllStudents() throws Exception {
-        // ARRANGE
         Student student = createTestStudent();
         when(studentService.findAll()).thenReturn(List.of(student));
 
-        // ACT + ASSERT
         mockMvc.perform(get("/api/v1/students"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
@@ -120,10 +110,8 @@ class StudentControllerTest {
 
     @Test
     void shouldReturnEmptyList() throws Exception {
-        // ARRANGE
         when(studentService.findAll()).thenReturn(List.of());
 
-        // ACT + ASSERT
         mockMvc.perform(get("/api/v1/students"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
@@ -132,7 +120,6 @@ class StudentControllerTest {
     // ========== POST / ==========
     @Test
     void shouldCreateStudent() throws Exception {
-        // ARRANGE
         Student student = createTestStudent();
         when(studentService.createStudent(any())).thenReturn(student);
 
@@ -144,7 +131,6 @@ class StudentControllerTest {
                 "currentYear", "FIRST"
         );
 
-        // ACT + ASSERT
         mockMvc.perform(post("/api/v1/students")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -155,7 +141,6 @@ class StudentControllerTest {
 
     @Test
     void shouldReturn409WhenDuplicateDni() throws Exception {
-        // ARRANGE
         when(studentService.createStudent(any())).thenThrow(new DuplicateDniException("12345678Z"));
 
         Map<String, Object> request = Map.of(
@@ -166,7 +151,6 @@ class StudentControllerTest {
                 "currentYear", "FIRST"
         );
 
-        // ACT + ASSERT
         mockMvc.perform(post("/api/v1/students")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -176,10 +160,8 @@ class StudentControllerTest {
 
     @Test
     void shouldReturn400WhenMissingRequiredFields() throws Exception {
-        // ARRANGE — JSON buit, falten camps obligatoris
         Map<String, Object> request = Map.of();
 
-        // ACT + ASSERT
         mockMvc.perform(post("/api/v1/students")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -190,7 +172,6 @@ class StudentControllerTest {
     // ========== PATCH /{id}/contact ==========
     @Test
     void shouldUpdateContact() throws Exception {
-        // ARRANGE
         Student student = createTestStudent();
         when(studentService.updateContactInfo(eq(1L), any())).thenReturn(student);
 
@@ -199,7 +180,6 @@ class StudentControllerTest {
                 "phone", "600654321"
         );
 
-        // ACT + ASSERT
         mockMvc.perform(patch("/api/v1/students/1/contact")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -209,14 +189,11 @@ class StudentControllerTest {
 
     @Test
     void shouldReturn400WhenBothContactFieldsNull() throws Exception {
-        // ARRANGE
         when(studentService.updateContactInfo(eq(1L), any()))
                 .thenThrow(new InvalidStudentOperationException("No es pot actualitzar sense cap dada de contacte"));
 
-        // Enviem nulls — Map.of no admet nulls, usem ObjectMapper directament
         String request = "{\"email\": null, \"phone\": null}";
 
-        // ACT + ASSERT
         mockMvc.perform(patch("/api/v1/students/1/contact")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
@@ -227,7 +204,6 @@ class StudentControllerTest {
     // ========== PATCH /{id}/rgpd ==========
     @Test
     void shouldUpdateRgpd() throws Exception {
-        // ARRANGE
         Student student = createTestStudent();
         when(studentService.updateRgpdConsent(eq(1L), any())).thenReturn(student);
 
@@ -235,7 +211,6 @@ class StudentControllerTest {
                 "rgpdConsentStatus", "SIGNED_IN_PERSON"
         );
 
-        // ACT + ASSERT
         mockMvc.perform(patch("/api/v1/students/1/rgpd")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -245,7 +220,6 @@ class StudentControllerTest {
 
     @Test
     void shouldReturn400WhenInvalidRgpdStatus() throws Exception {
-        // ARRANGE
         when(studentService.updateRgpdConsent(eq(1L), any()))
                 .thenThrow(new InvalidStudentOperationException("Status RGPD no vàlid: INVALID"));
 
@@ -253,7 +227,6 @@ class StudentControllerTest {
                 "rgpdConsentStatus", "INVALID"
         );
 
-        // ACT + ASSERT
         mockMvc.perform(patch("/api/v1/students/1/rgpd")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -264,7 +237,6 @@ class StudentControllerTest {
     // ========== PATCH /{id}/alumni ==========
     @Test
     void shouldMarkAsAlumni() throws Exception {
-        // ARRANGE
         Student student = createTestStudent();
         when(studentService.markAsAlumni(eq(1L), any())).thenReturn(student);
 
@@ -273,7 +245,6 @@ class StudentControllerTest {
                 "graduationYear", 2023
         );
 
-        // ACT + ASSERT
         mockMvc.perform(patch("/api/v1/students/1/alumni")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -283,7 +254,6 @@ class StudentControllerTest {
 
     @Test
     void shouldReturn400WhenInvalidAlumniType() throws Exception {
-        // ARRANGE
         when(studentService.markAsAlumni(eq(1L), any()))
                 .thenThrow(new InvalidStudentOperationException("Tipus d'alumni no vàlid: INVALID"));
 
@@ -292,11 +262,31 @@ class StudentControllerTest {
                 "graduationYear", 2023
         );
 
-        // ACT + ASSERT
         mockMvc.perform(patch("/api/v1/students/1/alumni")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400));
+    }
+
+    // ========== DELETE /{id} ==========
+    @Test
+    void shouldDeleteStudent() throws Exception {
+        doNothing().when(studentService).deleteStudent(1L);
+
+        mockMvc.perform(delete("/api/v1/students/1"))
+                .andExpect(status().isNoContent());
+
+        verify(studentService, times(1)).deleteStudent(1L);
+    }
+
+    @Test
+    void shouldReturn404WhenDeletingNonExistentStudent() throws Exception {
+        doThrow(new StudentNotFoundException(999L)).when(studentService).deleteStudent(999L);
+
+        mockMvc.perform(delete("/api/v1/students/999"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.error").value("Not Found"));
     }
 }
