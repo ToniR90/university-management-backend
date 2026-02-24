@@ -2,7 +2,6 @@ package com.orientation.backend.users.infrastructure.persistence.entities;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
