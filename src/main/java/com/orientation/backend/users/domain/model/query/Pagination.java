@@ -1,5 +1,13 @@
 package com.orientation.backend.users.domain.model.query;
 
+/**
+ * Pagination parameters for paginated queries.
+ * Immutable and self-validated.
+ *
+ * This is a domain abstraction to avoid depending on Spring's PageRequest,
+ * since the domain layer must not know anything about Spring.
+ */
+
 public class Pagination {
 
     private final int page;
