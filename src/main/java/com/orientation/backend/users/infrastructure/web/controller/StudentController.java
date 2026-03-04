@@ -6,6 +6,10 @@ import com.orientation.backend.users.application.commands.UpdateContactCommand;
 import com.orientation.backend.users.application.commands.UpdateRgpdConsentCommand;
 import com.orientation.backend.users.application.services.StudentService;
 import com.orientation.backend.users.domain.model.entities.Student;
+import com.orientation.backend.users.domain.model.enums.CurrentYear;
+import com.orientation.backend.users.domain.model.query.PageResult;
+import com.orientation.backend.users.domain.model.query.Pagination;
+import com.orientation.backend.users.domain.model.query.StudentSearchCriteria;
 import com.orientation.backend.users.infrastructure.web.dto.request.CreateStudentRequest;
 import com.orientation.backend.users.infrastructure.web.dto.request.MarkAlumniRequest;
 import com.orientation.backend.users.infrastructure.web.dto.request.UpdateContactRequest;
@@ -41,9 +45,17 @@ public class StudentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<StudentResponse>> getAllStudents(){
-        List<Student> students = studentService.findAll();
-        List<StudentResponse> responses = students.stream()
+    public ResponseEntity<List<StudentResponse>> getAllStudents(@RequestParam (defaultValue = "0") int page,
+                                                                @RequestParam (defaultValue = "20") int size,
+                                                                @RequestParam (required = false) String name,
+                                                                @RequestParam (required = false) String dni,
+                                                                @RequestParam (required = false)CurrentYear currentYear,
+                                                                @RequestParam (required = false) Boolean isAlumni){
+
+        Pagination pagination = new Pagination(page, size);
+        StudentSearchCriteria criteria = new StudentSearchCriteria(name, dni, currentYear, isAlumni);
+        PageResult<Student> students = studentService.searchStudents(criteria, pagination);
+        List<StudentResponse> responses = students.getContent().stream()
                 .map(StudentResponse::fromDomain)
                 .toList();
         return ResponseEntity.ok(responses);
