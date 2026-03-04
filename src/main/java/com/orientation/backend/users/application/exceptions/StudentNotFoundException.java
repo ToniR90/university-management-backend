@@ -1,11 +1,22 @@
 package com.orientation.backend.users.application.exceptions;
 
-public class StudentNotFoundException extends RuntimeException {
-    public StudentNotFoundException(Long id) {
-        super("No es troba l'usuari amb id: " + id );
-    }
+import com.orientation.backend.users.application.exceptions.core.BusinessValidationException;
+import com.orientation.backend.users.application.exceptions.core.BusinessViolation;
+import com.orientation.backend.users.application.exceptions.core.ErrorCode;
 
-    public StudentNotFoundException(String dni) {
-        super("No es troba l'usuari amb dni: " + dni);
-    }
+import java.util.List;
+
+public class StudentNotFoundException extends BusinessValidationException {
+
+	public StudentNotFoundException(Long id) {
+		super(
+				List.of(new BusinessViolation("id", "User not found with id " + id, ErrorCode.USER_NOT_FOUND)),
+				ErrorCode.USER_NOT_FOUND);
+	}
+
+	public StudentNotFoundException(String dni) {
+		super(
+				List.of(new BusinessViolation("dni", "User not found with dni " + dni, ErrorCode.USER_NOT_FOUND)),
+				ErrorCode.USER_NOT_FOUND);
+	}
 }
