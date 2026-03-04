@@ -1,10 +1,17 @@
 package com.orientation.backend.users.infrastructure.persistence.repositories;
 
 import com.orientation.backend.users.domain.model.entities.Student;
+import com.orientation.backend.users.domain.model.query.PageResult;
+import com.orientation.backend.users.domain.model.query.Pagination;
+import com.orientation.backend.users.domain.model.query.StudentSearchCriteria;
 import com.orientation.backend.users.domain.model.valueobjects.Dni;
 import com.orientation.backend.users.domain.repository.StudentRepository;
 import com.orientation.backend.users.infrastructure.persistence.entities.StudentJpaEntity;
 import com.orientation.backend.users.infrastructure.persistence.mappers.StudentJpaMapper;
+import com.orientation.backend.users.infrastructure.persistence.specifications.StudentSpecifications;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -49,5 +56,35 @@ public class StudentRepositoryImpl implements StudentRepository {
                 .stream()
                 .map(StudentJpaMapper::toDomain)
                 .toList();
+    }
+
+    @Override
+    public PageResult<Student> search(StudentSearchCriteria criteria, Pagination pagination) {
+
+        Specification<StudentJpaEntity> specification = StudentSpecifications.isActive();
+
+        if(criteria.getName() != null) {
+            specification = specification.and(StudentSpecifications.nameContains(criteria.getName()));
+        }
+
+        if(criteria.getDni() != null) {
+            specification = specification.and(StudentSpecifications.hasDni(criteria.getDni()));
+        }
+
+        if(criteria.getCurrentYear() != null) {
+            specification = specification.and(StudentSpecifications.hasCurrentYear(criteria.getCurrentYear()));
+        }
+
+        if ((criteria.getIsAlumni() != null)) {
+            specification = specification.and(StudentSpecifications.isAlumni(criteria.getIsAlumni()));
+        }
+
+        PageRequest pageRequest = PageRequest.of(pagination.getPage(), pagination.getSize());
+
+        Page<StudentJpaEntity> page = jpaRepository.findAll(specification, pageRequest);
+
+        List<Student> students = page.getContent().stream().map(StudentJpaMapper::toDomain).toList();
+
+        return new PageResult<>(students, page.getNumber(), page.getSize(), page.getTotalElements(), page.getTotalPages());
     }
 }
