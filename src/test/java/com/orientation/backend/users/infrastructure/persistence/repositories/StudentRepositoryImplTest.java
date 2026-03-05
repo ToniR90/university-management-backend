@@ -284,6 +284,7 @@ class StudentRepositoryImplTest {
         assertThat(studentRepository.findByDni(Dni.of("00000015S"))).isPresent();
     }
 
+
     // ========== SEARCH TESTS ==========
 
     @Test
@@ -363,5 +364,34 @@ class StudentRepositoryImplTest {
         assertThat(result.getContent())
                 .extracting(s -> s.getDni().getValue())
                 .containsExactlyInAnyOrder("00000019L", "00000020C", "00000021K");
+    }
+
+    @Test
+    @DisplayName("Should apply page and size filters")
+    void shouldSearchStudentsAndApplyPageAndSizeFilters() {
+        Student student = createStudentWithDetails("00000022E", "Student", "Surname", "Maths",
+                CurrentYear.FIRST, false);
+        Student student1 = createStudentWithDetails("00000023T", "Student1", "Surname1", "Teacher",
+                CurrentYear.SECOND, true);
+        Student student2 = createStudentWithDetails("00000024R", "Student2", "Surname2", "Developer",
+                CurrentYear.FIFTH, false);
+
+        Student saved = studentRepository.save(student);
+        Student saved1 = studentRepository.save(student1);
+        Student saved2 = studentRepository.save(student2);
+
+        StudentSearchCriteria criteria = new StudentSearchCriteria(null, null, null, null);
+
+        Pagination page1 = new Pagination(0, 2);
+        Pagination page2 = new Pagination(1, 2);
+        PageResult<Student> result1 = studentRepository.search(criteria, page1);
+        PageResult<Student> result2 = studentRepository.search(criteria, page2);
+
+        assertThat(result1.getContent()).hasSize(2);
+        assertThat(result1.getTotalPages()).isEqualTo(2);
+        assertThat(result1.getTotalElements()).isEqualTo(3);
+
+        assertThat(result2.getContent()).hasSize(1);
+        assertThat(result2.getTotalPages()).isEqualTo(2);
     }
 }
