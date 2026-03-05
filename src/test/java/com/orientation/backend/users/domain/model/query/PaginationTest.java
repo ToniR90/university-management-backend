@@ -34,4 +34,32 @@ class PaginationTest {
 
     // ========== Error Path ==========
 
+    @Test
+    void shouldThrowExceptionWhenPageIsNegative() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Pagination pagination = new Pagination(-10, 10);
+        });
+    }
+
+    @Test
+    void shouldThrowExceptionWhenSizeIsZero() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Pagination pagination = new Pagination(1, 0);
+        });
+    }
+
+    @Test
+    void shouldThrowExceptionWhenSizeIsNegative() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Pagination pagination = new Pagination(1, -10);
+        });
+    }
+
+    @Test
+    void shouldThrowExceptionWhenSizeIsBiggerThan100() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Pagination pagination = new Pagination(1, 105);
+        });
+    }
+
 }
