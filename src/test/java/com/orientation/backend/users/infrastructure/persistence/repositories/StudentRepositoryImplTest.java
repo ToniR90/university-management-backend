@@ -1,6 +1,7 @@
 package com.orientation.backend.users.infrastructure.persistence.repositories;
 
 import com.orientation.backend.users.domain.model.entities.Student;
+import com.orientation.backend.users.domain.model.enums.AlumniType;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
 import com.orientation.backend.users.domain.model.valueobjects.*;
 import org.junit.jupiter.api.*;
@@ -45,6 +46,18 @@ class StudentRepositoryImplTest {
                 .degree("Videojocs")
                 .currentYear(CurrentYear.FIRST)
                 .alumniInfo(AlumniInfo.notAlumni())
+                .rgpdConsent(RgpdConsent.pending())
+                .build();
+    }
+
+    private Student createStudentWithDetails(String dni, String name, String surname,
+                                             String degree, CurrentYear year, boolean alumni) {
+        return Student.builder()
+                .dni(Dni.of(dni))
+                .fullName(FullName.of(name, surname, null))
+                .degree(degree)
+                .currentYear(year)
+                .alumniInfo(alumni ? AlumniInfo.createAlumni(AlumniType.BACHELOR, 2023) : AlumniInfo.notAlumni())
                 .rgpdConsent(RgpdConsent.pending())
                 .build();
     }
