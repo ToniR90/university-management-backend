@@ -305,9 +305,35 @@ class StudentRepositoryImplTest {
         PageResult<Student> result = studentRepository.search(criteria, pagination);
 
         assertThat(result.getContent()).hasSize(3);
-        assertThat(result.getPage()).isEqualTo(0);
+        assertThat(result.getPage()).isZero();
         assertThat(result.getSize()).isEqualTo(20);
         assertThat(result.getTotalElements()).isEqualTo(3);
         assertThat(result.getTotalPages()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Should search students with filters")
+    void shouldSearchStudentsWithFilters() {
+        Student student = createStudentWithDetails("00000019L", "Student", "Surname", "Maths",
+                CurrentYear.FIRST, false);
+        Student student1 = createStudentWithDetails("00000020C", "Student1", "Surname1", "Teacher",
+                CurrentYear.SECOND, true);
+        Student student2 = createStudentWithDetails("00000021K", "Student2", "Surname2", "Developer",
+                CurrentYear.FIFTH, false);
+
+        Student saved = studentRepository.save(student);
+        Student saved1 = studentRepository.save(student1);
+        Student saved2 = studentRepository.save(student2);
+
+        StudentSearchCriteria criteria = new StudentSearchCriteria("Student", null, null, true);
+        Pagination pagination = new Pagination(0, 20);
+        PageResult<Student> result = studentRepository.search(criteria, pagination);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getPage()).isZero();
+        assertThat(result.getSize()).isEqualTo(20);
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getTotalPages()).isEqualTo(1);
+        assertThat(result.getContent().get(0).getDni().getValue()).isEqualTo("00000020C");
     }
 }
