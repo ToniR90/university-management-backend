@@ -3,6 +3,9 @@ package com.orientation.backend.users.infrastructure.persistence.repositories;
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.enums.AlumniType;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
+import com.orientation.backend.users.domain.model.query.PageResult;
+import com.orientation.backend.users.domain.model.query.Pagination;
+import com.orientation.backend.users.domain.model.query.StudentSearchCriteria;
 import com.orientation.backend.users.domain.model.valueobjects.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -279,5 +282,32 @@ class StudentRepositoryImplTest {
 
         assertThat(newSaved.getId()).isNotNull();
         assertThat(studentRepository.findByDni(Dni.of("00000015S"))).isPresent();
+    }
+
+    // ========== SEARCH TESTS ==========
+
+    @Test
+    @DisplayName("Should search all Students if no parameters are given")
+    void shouldReturnAllStudentsIfNoParametersAreGiven() {
+        Student student = createStudentWithDetails("00000016Q", "Student", "Surname", "Maths",
+                CurrentYear.FIRST, false);
+        Student student1 = createStudentWithDetails("00000017V", "Student1", "Surname1", "Teacher",
+                CurrentYear.SECOND, true);
+        Student student2 = createStudentWithDetails("00000018H", "Student2", "Surname2", "Developer",
+                CurrentYear.FIFTH, false);
+
+        Student saved = studentRepository.save(student);
+        Student saved1 = studentRepository.save(student1);
+        Student saved2 = studentRepository.save(student2);
+
+        StudentSearchCriteria criteria = new StudentSearchCriteria(null, null, null, null);
+        Pagination pagination = new Pagination(0, 20);
+        PageResult<Student> result = studentRepository.search(criteria, pagination);
+
+        assertThat(result.getContent()).hasSize(3);
+        assertThat(result.getPage()).isEqualTo(0);
+        assertThat(result.getSize()).isEqualTo(20);
+        assertThat(result.getTotalElements()).isEqualTo(3);
+        assertThat(result.getTotalPages()).isEqualTo(1);
     }
 }
