@@ -382,10 +382,10 @@ class StudentRepositoryImplTest {
 
         StudentSearchCriteria criteria = new StudentSearchCriteria(null, null, null, null);
 
-        Pagination page1 = new Pagination(0, 2);
-        Pagination page2 = new Pagination(1, 2);
-        PageResult<Student> result1 = studentRepository.search(criteria, page1);
-        PageResult<Student> result2 = studentRepository.search(criteria, page2);
+        Pagination pagination1 = new Pagination(0, 2);
+        Pagination pagination2 = new Pagination(1, 2);
+        PageResult<Student> result1 = studentRepository.search(criteria, pagination1);
+        PageResult<Student> result2 = studentRepository.search(criteria, pagination2);
 
         assertThat(result1.getContent()).hasSize(2);
         assertThat(result1.getTotalPages()).isEqualTo(2);
@@ -393,5 +393,39 @@ class StudentRepositoryImplTest {
 
         assertThat(result2.getContent()).hasSize(1);
         assertThat(result2.getTotalPages()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("Should not search desactivated students")
+    void shouldNotSearchDesactivatedStudents() {
+        Student student = createStudentWithDetails("00000025W", "Student", "Surname", "Maths",
+                CurrentYear.FIRST, false);
+        Student student1 = createStudentWithDetails("00000026A", "Student1", "Surname1", "Teacher",
+                CurrentYear.SECOND, true);
+        Student student2 = createStudentWithDetails("00000027G", "Student2", "Surname2", "Developer",
+                CurrentYear.FIFTH, false);
+
+        Student saved = studentRepository.save(student);
+        Student saved1 = studentRepository.save(student1);
+        Student saved2 = studentRepository.save(student2);
+
+        saved.deactivate();
+        studentRepository.save(saved);
+        saved1.deactivate();
+        studentRepository.save(saved1);
+
+        StudentSearchCriteria criteria = new StudentSearchCriteria(null, null, null, null);
+        Pagination pagination = new Pagination(0, 20);
+
+        PageResult<Student> result = studentRepository.search(criteria, pagination);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().getFirst().getDni()).isEqualTo(saved2.getDni());
+    }
+
+    @Test
+    @DisplayName("Should search with current year filter")
+    void shouldSearchStudentForCurrentYear() {
+
     }
 }
