@@ -21,7 +21,7 @@ public class StudentSpecifications {
 
     public static Specification<StudentJpaEntity> hasCurrentYear(CurrentYear year) {
         return ((root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("currentYear"), year.getDisplayName()));
+                criteriaBuilder.equal(root.get("currentYear"), year.name()));
     }
 
     public static Specification<StudentJpaEntity> isAlumni(Boolean isAlumni) {

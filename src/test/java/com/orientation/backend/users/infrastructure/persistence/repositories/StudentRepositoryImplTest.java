@@ -426,6 +426,22 @@ class StudentRepositoryImplTest {
     @Test
     @DisplayName("Should search with current year filter")
     void shouldSearchStudentForCurrentYear() {
+        Student student = createStudentWithDetails("00000028M", "Student", "Surname", "Maths",
+                CurrentYear.FIRST, false);
+        Student student1 = createStudentWithDetails("00000029Y", "Student1", "Surname1", "Teacher",
+                CurrentYear.SECOND, true);
+        Student student2 = createStudentWithDetails("00000030F", "Student2", "Surname2", "Developer",
+                CurrentYear.FIFTH, false);
 
+        Student saved = studentRepository.save(student);
+        Student saved1 = studentRepository.save(student1);
+        Student saved2 = studentRepository.save(student2);
+
+        StudentSearchCriteria criteria = new StudentSearchCriteria(null, null, CurrentYear.FIRST, null);
+        Pagination pagination = new Pagination(0, 20);
+        PageResult<Student> result = studentRepository.search(criteria, pagination);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().getFirst().getDni()).isEqualTo(saved.getDni());
     }
 }
