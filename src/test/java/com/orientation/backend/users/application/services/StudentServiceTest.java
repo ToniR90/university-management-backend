@@ -10,6 +10,9 @@ import com.orientation.backend.users.application.exceptions.UpdateStudentExcepti
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
 import com.orientation.backend.users.domain.model.enums.RgpdConsentStatus;
+import com.orientation.backend.users.domain.model.query.PageResult;
+import com.orientation.backend.users.domain.model.query.Pagination;
+import com.orientation.backend.users.domain.model.query.StudentSearchCriteria;
 import com.orientation.backend.users.domain.model.valueobjects.*;
 import com.orientation.backend.users.domain.repository.StudentRepository;
 import org.junit.jupiter.api.Test;
@@ -18,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -486,5 +490,29 @@ class StudentServiceTest {
 		// VERIFY
 		verify(studentRepository, times(1)).findById(999L);
 		verify(studentRepository, never()).save(any(Student.class));
+	}
+
+	@Test
+	void shouldSearchStudents() {
+		// ARRANGE
+		PageResult<Student> expectedResult = new PageResult<>(
+				List.of(createTestStudent("00000015S", "test@email.com")),
+				0, 20, 1, 1
+		);
+		StudentSearchCriteria criteria = new StudentSearchCriteria(null, null, null, null);
+		Pagination pagination = new Pagination(0, 20);
+
+		when(studentRepository.search(criteria, pagination)).thenReturn(expectedResult);
+
+		// ACT
+		PageResult<Student> result = studentService.searchStudents(criteria, pagination);
+
+		// ASSERT
+		assertNotNull(result);
+		assertEquals(1, result.getContent().size());
+		assertEquals(expectedResult, result);
+
+		// VERIFY
+		verify(studentRepository).search(criteria, pagination);
 	}
 }
