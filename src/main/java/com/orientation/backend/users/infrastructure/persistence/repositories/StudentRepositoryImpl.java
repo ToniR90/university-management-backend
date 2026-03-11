@@ -61,23 +61,14 @@ public class StudentRepositoryImpl implements StudentRepository {
     @Override
     public PageResult<Student> search(StudentSearchCriteria criteria, Pagination pagination) {
 
-        Specification<StudentJpaEntity> specification = StudentSpecifications.isActive();
-
-        if(criteria.getName() != null) {
-            specification = specification.and(StudentSpecifications.nameContains(criteria.getName()));
+        if (criteria == null) {
+            throw new IllegalArgumentException("Search criteria cannot be null");
+        }
+        if (pagination == null) {
+            throw new IllegalArgumentException("Pagination cannot be null");
         }
 
-        if(criteria.getDni() != null) {
-            specification = specification.and(StudentSpecifications.hasDni(criteria.getDni()));
-        }
-
-        if(criteria.getCurrentYear() != null) {
-            specification = specification.and(StudentSpecifications.hasCurrentYear(criteria.getCurrentYear()));
-        }
-
-        if ((criteria.getIsAlumni() != null)) {
-            specification = specification.and(StudentSpecifications.isAlumni(criteria.getIsAlumni()));
-        }
+        Specification<StudentJpaEntity> specification = StudentSpecifications.fromCriteria(criteria);
 
         PageRequest pageRequest = PageRequest.of(pagination.getPage(), pagination.getSize());
 

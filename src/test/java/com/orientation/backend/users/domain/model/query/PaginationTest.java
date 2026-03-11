@@ -36,30 +36,22 @@ class PaginationTest {
 
     @Test
     void shouldThrowExceptionWhenPageIsNegative() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            Pagination pagination = new Pagination(-10, 10);
-        });
+        assertThrows(IllegalArgumentException.class, () -> new Pagination(-10, 10));
     }
 
     @Test
     void shouldThrowExceptionWhenSizeIsZero() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            Pagination pagination = new Pagination(1, 0);
-        });
+        assertThrows(IllegalArgumentException.class, () -> new Pagination(1, 0));
     }
 
     @Test
     void shouldThrowExceptionWhenSizeIsNegative() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            Pagination pagination = new Pagination(1, -10);
-        });
+        assertThrows(IllegalArgumentException.class, () -> new Pagination(1, -10));
     }
 
     @Test
     void shouldThrowExceptionWhenSizeIsBiggerThan100() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            Pagination pagination = new Pagination(1, 105);
-        });
+        assertThrows(IllegalArgumentException.class, () -> new Pagination(1, 105));
     }
 
 }
