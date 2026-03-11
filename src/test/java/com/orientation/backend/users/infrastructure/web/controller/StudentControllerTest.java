@@ -9,6 +9,7 @@ import com.orientation.backend.users.application.exceptions.core.ErrorCode;
 import com.orientation.backend.users.application.services.StudentService;
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
+import com.orientation.backend.users.domain.model.query.PageResult;
 import com.orientation.backend.users.domain.model.valueobjects.Dni;
 import com.orientation.backend.users.domain.model.valueobjects.Email;
 import com.orientation.backend.users.domain.model.valueobjects.FullName;
@@ -106,29 +107,124 @@ class StudentControllerTest {
 				.andExpect(jsonPath("$.errors[0].field").value("dni"))
 				.andExpect(jsonPath("$.errors[0].message").value("User not found with dni 21273746B"));
 	}
-	
-	// ========== GET / ==========
+
+	// ========== GET / (Pagination & Filtering) ==========
+
 	@Test
-	void shouldGetAllStudents() throws Exception {
+	void shouldGetAllStudentsWithDefaultPagination() throws Exception {
+		// ARRANGE
 		Student student = createTestStudent();
-		when(studentService.findAll()).thenReturn(List.of(student));
-		
+		PageResult<Student> pageResult = new PageResult<>(
+				List.of(student), 0, 20, 1, 1
+		);
+
+		when(studentService.searchStudents(any(), any())).thenReturn(pageResult);
+
+		// ACT + ASSERT
 		mockMvc.perform(get("/api/v1/students"))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.length()").value(1))
-				.andExpect(jsonPath("$[0].dni").value("12345678Z"))
-				.andExpect(jsonPath("$[0].name").value("Joan"));
+				.andExpect(jsonPath("$.content").isArray())
+				.andExpect(jsonPath("$.content.length()").value(1))
+				.andExpect(jsonPath("$.content[0].dni").value("12345678Z"))
+				.andExpect(jsonPath("$.content[0].name").value("Joan"))
+				.andExpect(jsonPath("$.page").value(0))
+				.andExpect(jsonPath("$.size").value(20))
+				.andExpect(jsonPath("$.totalElements").value(1))
+				.andExpect(jsonPath("$.totalPages").value(1));
 	}
-	
+
 	@Test
-	void shouldReturnEmptyList() throws Exception {
-		when(studentService.findAll()).thenReturn(List.of());
-		
+	void shouldReturnEmptyPagedResult() throws Exception {
+		// ARRANGE
+		PageResult<Student> emptyResult = new PageResult<>(
+				List.of(), 0, 20, 0, 0
+		);
+
+		when(studentService.searchStudents(any(), any())).thenReturn(emptyResult);
+
+		// ACT + ASSERT
 		mockMvc.perform(get("/api/v1/students"))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.length()").value(0));
+				.andExpect(jsonPath("$.content").isArray())
+				.andExpect(jsonPath("$.content.length()").value(0))
+				.andExpect(jsonPath("$.totalElements").value(0))
+				.andExpect(jsonPath("$.totalPages").value(0));
 	}
-	
+
+	@Test
+	void shouldSearchStudentsWithFilters() throws Exception {
+		// ARRANGE
+		Student student = createTestStudent();
+		PageResult<Student> pageResult = new PageResult<>(
+				List.of(student), 0, 20, 1, 1
+		);
+
+		when(studentService.searchStudents(any(), any())).thenReturn(pageResult);
+
+		// ACT + ASSERT
+		mockMvc.perform(get("/api/v1/students")
+						.param("name", "Joan")
+						.param("currentYear", "FIRST")
+						.param("isAlumni", "false"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.length()").value(1))
+				.andExpect(jsonPath("$.content[0].dni").value("12345678Z"));
+
+		// VERIFY
+		verify(studentService).searchStudents(any(), any());
+	}
+
+	@Test
+	void shouldSearchStudentsWithCustomPagination() throws Exception {
+		// ARRANGE
+		Student student = createTestStudent();
+		PageResult<Student> pageResult = new PageResult<>(
+				List.of(student), 2, 5, 11, 3
+		);
+
+		when(studentService.searchStudents(any(), any())).thenReturn(pageResult);
+
+		// ACT + ASSERT
+		mockMvc.perform(get("/api/v1/students")
+						.param("page", "2")
+						.param("size", "5"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.page").value(2))
+				.andExpect(jsonPath("$.size").value(5))
+				.andExpect(jsonPath("$.totalElements").value(11))
+				.andExpect(jsonPath("$.totalPages").value(3));
+	}
+
+	@Test
+	void shouldReturn400WhenPageIsNegative() throws Exception {
+		// ACT + ASSERT
+		mockMvc.perform(get("/api/v1/students")
+						.param("page", "-1"))
+				.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	void shouldReturn400WhenSizeIsZero() throws Exception {
+		mockMvc.perform(get("/api/v1/students")
+						.param("size", "0"))
+				.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	void shouldReturn400WhenSizeExceedsMax() throws Exception {
+		mockMvc.perform(get("/api/v1/students")
+						.param("size", "200"))
+				.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	void shouldReturn400WhenCurrentYearIsInvalid() throws Exception {
+		mockMvc.perform(get("/api/v1/students")
+						.param("currentYear", "INVALID"))
+				.andExpect(status().isBadRequest());
+	}
+
+
 	// ========== POST / ==========
 	@Test
 	void shouldCreateStudent() throws Exception {
@@ -324,4 +420,6 @@ class StudentControllerTest {
 				.andExpect(jsonPath("$.errors[0].message").value("User not found with id 999"));
 		
 	}
+
+
 }

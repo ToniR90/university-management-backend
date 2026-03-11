@@ -75,7 +75,7 @@ curl http://localhost:8080/actuator/health
 
 ### Swagger UI
 
-Interactive API documentation available at: **http://localhost:8080/swagger-ui.html**
+Interactive API documentation available at: **http://localhost:8080/swagger-ui/index.html**
 
 All endpoints are auto-documented and explorable via Swagger UI.
 
@@ -103,38 +103,97 @@ Optional: Access pgAdmin web interface for database management
 | Method | Path | Description | Status |
 |--------|------|-------------|--------|
 | POST | `/api/v1/students` | Create student | 201 Created |
-| GET | `/api/v1/students` | List all students | 200 OK |
+| GET | `/api/v1/students` | Search students (paginated + filtered) | 200 OK |
 | GET | `/api/v1/students/{id}` | Get student by ID | 200 OK |
 | GET | `/api/v1/students/dni/{dni}` | Get student by DNI | 200 OK |
 | PATCH | `/api/v1/students/{id}/contact` | Update contact info | 200 OK |
 | PATCH | `/api/v1/students/{id}/rgpd` | Update RGPD consent | 200 OK |
 | PATCH | `/api/v1/students/{id}/alumni` | Mark as alumni | 200 OK |
+| DELETE | `/api/v1/students/{id}` | Soft delete student | 204 No Content |
+
+### Pagination & Filtering
+
+The `GET /api/v1/students` endpoint supports pagination and composable filters:
+
+**Query Parameters:**
+
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| `page` | int | 0 | Page number (>= 0) |
+| `size` | int | 20 | Elements per page (1-100) |
+| `name` | String | — | Partial match, case-insensitive |
+| `dni` | String | — | Exact match |
+| `currentYear` | String | — | Enum value (FIRST, SECOND...) |
+| `isAlumni` | Boolean | — | true / false |
+
+All filters are optional and combinable. Only active students are returned (soft-deleted excluded).
+
+**Example requests:**
+```
+GET /api/v1/students                                    → All students, page 0, size 20
+GET /api/v1/students?page=1&size=5                      → Page 1, 5 per page
+GET /api/v1/students?name=Joan                          → Students named "Joan" (case-insensitive)
+GET /api/v1/students?currentYear=FIRST&isAlumni=false   → First year, non-alumni
+GET /api/v1/students?name=Joan&currentYear=FIRST&page=0&size=10  → Combined filters + pagination
+```
+
+**Response format:**
+```json
+{
+  "content": [
+    {
+      "id": 1,
+      "dni": "12345678Z",
+      "name": "Joan",
+      "firstSurname": "García",
+      ...
+    }
+  ],
+  "page": 0,
+  "size": 20,
+  "totalElements": 87,
+  "totalPages": 5
+}
+```
+
+### Soft Delete
+
+`DELETE /api/v1/students/{id}` performs a soft delete: sets `active = false` and records `deletedAt` timestamp. The student is excluded from all queries but remains in the database. A partial unique index allows DNI reuse after deactivation.
 
 ### Error Responses
 
-All errors follow a consistent format using `ErrorResponse`:
+All errors follow a consistent format using `ApiError`:
 
 ```json
 {
+  "timestamp": "2026-03-06T14:00:00",
   "status": 404,
-  "error": "Not Found",
-  "message": "No s'ha trobat l'estudiant amb id: 999",
-  "timestamp": "2026-02-11T20:00:00"
+  "errorCode": "USER_NOT_FOUND",
+  "message": "Multiple business rule violations",
+  "errors": [
+    {
+      "field": "id",
+      "message": "User not found with id 999"
+    }
+  ]
 }
 ```
+
+Supports multiple validation errors in a single response.
 
 | Exception | HTTP Status | When |
 |-----------|-------------|------|
 | `StudentNotFoundException` | 404 | Student not found by ID or DNI |
-| `DuplicateDniException` | 409 | DNI already exists on create |
-| `InvalidStudentOperationException` | 400 | Invalid business operation |
+| `CreatedStudentException` | 409 | DNI already exists on create |
+| `UpdateStudentException` | 400 | Invalid business operation |
 | `MethodArgumentNotValidException` | 400 | Request validation fails (@Valid) |
-| `IllegalArgumentException` | 400 | Domain validation fails (VOs) |
+| `MethodArgumentTypeMismatchException` | 400 | Invalid enum or type in query params |
+| `IllegalArgumentException` | 400 | Domain validation fails (VOs, Pagination) |
 | `Exception` | 500 | Unexpected errors |
 
 ### Postman Collection
 
-A Postman collection is available in the project root for testing all endpoints: `Student-Management-System.postman_collection.json`
+A Postman collection is available in the project root for testing all endpoints: `Student_Management_System_Sprint_2_Pagination.postman_collection.json`
 
 Import in Postman: `File → Import → Upload Files`
 
@@ -156,36 +215,13 @@ The application supports multiple profiles for different environments.
 
 #### Development Profile (Default)
 ```bash
-# Runs with dev profile (default)
 mvn spring-boot:run
-
-# Or explicitly
-mvn spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=dev"
 ```
-
-**Features in dev profile:**
-- SQL queries logged and formatted
-- Detailed logging (DEBUG level for application code)
-- Health endpoint shows all details
-- Connection pool: 10 max, 5 min-idle
-- Leak detection enabled (30 seconds threshold)
 
 #### Test Profile
 ```bash
-# Run tests (automatically uses test profile)
 mvn test
-
-# Or set environment variable
-export SPRING_PROFILES_ACTIVE=test
-mvn spring-boot:run
 ```
-
-**Features in test profile:**
-- SQL queries NOT logged
-- Minimal logging (WARN level)
-- Health endpoint details hidden
-- Connection pool: 5 max, 2 min-idle
-- Leak detection disabled
 
 ### Profile Configuration Files
 ```
@@ -213,31 +249,41 @@ src/
 │   │       │   │   │   ├── UpdateRgpdConsentCommand.java
 │   │       │   │   │   └── MarkAsAlumniCommand.java
 │   │       │   │   ├── exceptions/
+│   │       │   │   │   ├── core/
+│   │       │   │   │   │   ├── BusinessValidationException.java
+│   │       │   │   │   │   ├── BusinessViolation.java
+│   │       │   │   │   │   └── ErrorCode.java
+│   │       │   │   │   ├── CreatedStudentException.java
 │   │       │   │   │   ├── StudentNotFoundException.java
-│   │       │   │   │   ├── DuplicateDniException.java
-│   │       │   │   │   └── InvalidStudentOperationException.java
+│   │       │   │   │   └── UpdateStudentException.java
 │   │       │   │   └── services/
 │   │       │   │       └── StudentService.java
 │   │       │   │
 │   │       │   ├── domain/
 │   │       │   │   ├── model/
 │   │       │   │   │   ├── entities/
-│   │       │   │   │   │   └── Student.java              # Aggregate Root
+│   │       │   │   │   │   └── Student.java
 │   │       │   │   │   ├── valueobjects/
-│   │       │   │   │   │   ├── Dni.java                  # Spanish DNI/NIE (MOD 23)
-│   │       │   │   │   │   ├── Email.java                # Email validation
-│   │       │   │   │   │   ├── Phone.java                # E.164 format
-│   │       │   │   │   │   ├── FullName.java             # Composite VO
-│   │       │   │   │   │   ├── AlumniInfo.java           # Alumni status
-│   │       │   │   │   │   └── RgpdConsent.java          # GDPR consent
-│   │       │   │   │   └── enums/
-│   │       │   │   │       ├── AlumniType.java
-│   │       │   │   │       ├── ContactMethod.java
-│   │       │   │   │       ├── CurrentYear.java
-│   │       │   │   │       ├── DiscoveryChannel.java
-│   │       │   │   │       └── RgpdConsentStatus.java
+│   │       │   │   │   │   ├── Dni.java
+│   │       │   │   │   │   ├── Email.java
+│   │       │   │   │   │   ├── Phone.java
+│   │       │   │   │   │   ├── FullName.java
+│   │       │   │   │   │   ├── AlumniInfo.java
+│   │       │   │   │   │   └── RgpdConsent.java
+│   │       │   │   │   ├── enums/
+│   │       │   │   │   │   ├── AlumniType.java
+│   │       │   │   │   │   ├── ContactMethod.java
+│   │       │   │   │   │   ├── CurrentYear.java
+│   │       │   │   │   │   ├── DiscoveryChannel.java
+│   │       │   │   │   │   └── RgpdConsentStatus.java
+│   │       │   │   │   └── query/
+│   │       │   │   │       ├── Pagination.java
+│   │       │   │   │       ├── PageResult.java
+│   │       │   │   │       └── StudentSearchCriteria.java
+│   │       │   │   ├── exceptions/
+│   │       │   │   │   └── StudentAlreadyInactiveException.java
 │   │       │   │   └── repository/
-│   │       │   │       └── StudentRepository.java         # Domain port (interface)
+│   │       │   │       └── StudentRepository.java
 │   │       │   │
 │   │       │   └── infrastructure/
 │   │       │       ├── persistence/
@@ -245,9 +291,11 @@ src/
 │   │       │       │   │   └── StudentJpaEntity.java
 │   │       │       │   ├── mappers/
 │   │       │       │   │   └── StudentJpaMapper.java
-│   │       │       │   └── repositories/
-│   │       │       │       ├── SpringDataStudentRepository.java
-│   │       │       │       └── StudentRepositoryImpl.java
+│   │       │       │   ├── repositories/
+│   │       │       │   │   ├── SpringDataStudentRepository.java
+│   │       │       │   │   └── StudentRepositoryImpl.java
+│   │       │       │   └── specifications/
+│   │       │       │       └── StudentSpecifications.java
 │   │       │       └── web/
 │   │       │           ├── controller/
 │   │       │           │   └── StudentController.java
@@ -261,10 +309,13 @@ src/
 │   │       │               │   └── MarkAlumniRequest.java
 │   │       │               └── response/
 │   │       │                   ├── StudentResponse.java
+│   │       │                   ├── PagedStudentResponse.java
+│   │       │                   ├── ApiError.java
+│   │       │                   ├── FieldErrorDetail.java
 │   │       │                   └── ErrorResponse.java
 │   │       │
-│   │       ├── sessions/       # Session management (Sprint 3)
-│   │       ├── auth/           # Authentication (Sprint 4)
+│   │       ├── sessions/
+│   │       ├── auth/
 │   │       └── shared/
 │   │           └── infrastructure/
 │   │               └── config/
@@ -279,7 +330,8 @@ src/
 │       └── db/
 │           └── migration/
 │               ├── V1__create_students_table.sql
-│               └── V2__change_integer_types.sql
+│               ├── V2__change_integer_types.sql
+│               └── V3__add_soft_delete.sql
 │
 └── test/
     └── java/
@@ -293,20 +345,33 @@ src/
                 │   └── model/
                 │       ├── entities/
                 │       │   └── StudentTest.java
-                │       └── valueobjects/
-                │           ├── AlumniInfoTest.java
-                │           ├── DniTest.java
-                │           ├── EmailTest.java
-                │           ├── FullNameTest.java
-                │           ├── PhoneTest.java
-                │           └── RgpdConsentTest.java
+                │       ├── valueobjects/
+                │       │   ├── AlumniInfoTest.java
+                │       │   ├── DniTest.java
+                │       │   ├── EmailTest.java
+                │       │   ├── FullNameTest.java
+                │       │   ├── PhoneTest.java
+                │       │   └── RgpdConsentTest.java
+                │       └── query/
+                │           ├── PaginationTest.java
+                │           ├── PageResultTest.java
+                │           └── StudentSearchCriteriaTest.java
                 └── infrastructure/
                     ├── persistence/
                     │   └── repositories/
                     │       └── StudentRepositoryImplTest.java
                     └── web/
-                        └── controller/
-                            └── StudentControllerTest.java
+                        ├── controller/
+                        │   └── StudentControllerTest.java
+                        └── dto/
+                            ├── request/
+                            │   ├── CreateStudentRequestTest.java
+                            │   ├── MarkAlumniRequestTest.java
+                            │   ├── UpdateContactRequestTest.java
+                            │   └── UpdateRgpdRequestTest.java
+                            └── response/
+                                ├── ErrorResponseTest.java
+                                └── StudentResponseTest.java
 ```
 
 ---
@@ -318,7 +383,7 @@ This project follows **Hexagonal Architecture** (Ports & Adapters) and **Domain-
 ```
 ┌─────────────────────────────────────────────────┐
 │              INFRASTRUCTURE                      │
-│    REST API, Database, Configuration             │
+│    REST API, Database, Specifications            │
 │                                                  │
 │    ┌───────────────────────────────────────┐     │
 │    │          APPLICATION                  │     │
@@ -327,6 +392,7 @@ This project follows **Hexagonal Architecture** (Ports & Adapters) and **Domain-
 │    │    ┌───────────────────────────┐      │     │
 │    │    │         DOMAIN            │      │     │
 │    │    │  Entities, VOs, Enums     │      │     │
+│    │    │  Query abstractions       │      │     │
 │    │    └───────────────────────────┘      │     │
 │    └───────────────────────────────────────┘     │
 └─────────────────────────────────────────────────┘
@@ -335,13 +401,13 @@ This project follows **Hexagonal Architecture** (Ports & Adapters) and **Domain-
 **Dependency rule:** Dependencies always point inward. The domain knows nothing about the outside world.
 
 ### Domain Layer (Core)
-Pure business logic with no framework dependencies. Contains the Student aggregate root, 6 value objects with self-validation, 5 enums, and the repository interface (port).
+Pure business logic with no framework dependencies. Contains the Student aggregate root, 6 value objects with self-validation, 5 enums, query abstractions (Pagination, PageResult, StudentSearchCriteria), and the repository interface (port).
 
 ### Application Layer (Orchestration)
-Coordinates operations between the outside world and the domain. Contains the StudentService, command objects (CreateStudentCommand, UpdateContactCommand, etc.), and application-specific exceptions.
+Coordinates operations between the outside world and the domain. Contains the StudentService, command objects, and application-specific exceptions with support for multiple validation errors via BusinessViolation.
 
 ### Infrastructure Layer (Technical Details)
-Implements the technical concerns: REST controllers with global exception handling, JPA persistence with bidirectional mapping (Domain ↔ JPA), Spring Data repositories, REST DTOs, Swagger UI, CORS configuration, and database health monitoring.
+Implements the technical concerns: REST controllers with global exception handling and unified error format (ApiError), JPA persistence with bidirectional mapping and JPA Specifications for dynamic filtering, Spring Data repositories, REST DTOs, Swagger UI, CORS configuration, and database health monitoring.
 
 ### Request Flow
 
@@ -352,8 +418,9 @@ HTTP Request
             → Domain (business logic)
                 → StudentRepository port
                     → StudentRepositoryImpl adapter
-                        → Spring Data JPA → PostgreSQL
-    ← StudentResponse (via fromDomain)
+                        → Specifications + Pageable
+                            → Spring Data JPA → PostgreSQL
+    ← PagedStudentResponse / StudentResponse
 ← HTTP Response
 ```
 
@@ -366,6 +433,7 @@ Domain                         Infrastructure
 │   (port)         │           │   (adapter)              │
 └──────────────────┘           │                          │
                                │  SpringDataStudentRepo   │
+                               │  StudentSpecifications   │
                                │  StudentJpaEntity        │
                                │  StudentJpaMapper        │
                                └──────────────────────────┘
@@ -381,15 +449,15 @@ The `Student` entity is the aggregate root with the following structure:
 
 **Immutable fields:** DNI, full name, current year, creation timestamp
 **Mutable fields:** Email, phone, alumni info, RGPD consent, discovery/contact channels, notes
+**Soft delete fields:** active (boolean), deletedAt (timestamp)
 
 **Business operations:**
 - Email/Phone management (add, update, remove, atomic update)
 - RGPD consent tracking (3 signature methods + pending)
 - Alumni status management (mark/unmark with type and year)
-- Discovery and contact channel registration
-- Counselor notes management
+- Soft delete (deactivate with DNI reuse support)
 
-Built using the **Builder pattern** with intelligent defaults: new students are automatically created as non-alumni with pending RGPD consent.
+Built using the **Builder pattern** with intelligent defaults.
 
 ---
 
@@ -397,51 +465,14 @@ Built using the **Builder pattern** with intelligent defaults: new students are 
 
 | Value Object | Purpose | Key Validation |
 |---|---|---|
-| **Dni** | Spanish DNI/NIE | MOD 23 algorithm, letter validation, DNI and NIE support |
+| **Dni** | Spanish DNI/NIE | MOD 23 algorithm, letter validation |
 | **Email** | Email address | Format validation, lowercase normalization |
-| **Phone** | Phone number | E.164 international format, auto +34 prefix for Spanish numbers |
-| **FullName** | Person's name | Name + first surname required, second surname optional |
-| **AlumniInfo** | Alumni status | Composite: if alumni → type + year required; if not → both null |
-| **RgpdConsent** | GDPR consent | Composite: 4 statuses with different required fields per status |
+| **Phone** | Phone number | E.164 format, auto +34 prefix |
+| **FullName** | Person's name | Name + first surname required |
+| **AlumniInfo** | Alumni status | If alumni → type + year required |
+| **RgpdConsent** | GDPR consent | 4 statuses with different required fields |
 
-All value objects are **immutable**, **self-validated** (if it exists, it's valid), and created via **factory methods**.
-
-**Examples:**
-```java
-Dni.of("12345678Z")                              // Valid DNI
-Dni.of("X1234567L")                              // Valid NIE
-Email.of("STUDENT@University.edu")               // Normalized to lowercase
-Phone.of("600123456")                            // Auto-prefixed to +34600123456
-FullName.of("Joan", "García", null)              // Optional second surname
-AlumniInfo.notAlumni()                           // Non-alumni (no type/year allowed)
-AlumniInfo.createAlumni(AlumniType.MASTER, 2023) // Alumni with required fields
-RgpdConsent.pending()                            // Awaiting consent
-RgpdConsent.signedInPerson()                     // Signed now (auto-timestamp)
-RgpdConsent.alreadySigned(2020)                  // Previously signed (year required)
-```
-
----
-
-### Enums
-
-#### AlumniType
-`BACHELOR`, `MASTER`, `DOCTORATE`, `DOUBLE_DEGREE`, `ERASMUS`, `EXCHANGE`, `OTHER`
-
-#### ContactMethod
-`EMAIL`, `PHONE`, `IN_PERSON`, `ONLINE_FORM`, `REFERRAL`, `OTHER`
-
-#### CurrentYear
-`FIRST`, `SECOND`, `THIRD`, `FOURTH`, `FIFTH`, `SIXTH`, `MASTER`, `DOCTORATE`
-
-Includes domain logic: `isGraduateLevel()`, `isUndergraduate()`
-
-#### DiscoveryChannel
-`WEBSITE`, `SOCIAL_MEDIA`, `REFERRAL`, `UNIVERSITY_EVENT`, `EMAIL_CAMPAIGN`, `OTHER`
-
-#### RgpdConsentStatus
-`PENDING`, `SIGNED_IN_PERSON`, `SIGNED_ONLINE`, `ALREADY_SIGNED`
-
-Includes domain logic: `isPending()`, `isSigned()`, `requiresYear()`, `requiresDate()`
+All value objects are **immutable**, **self-validated**, and created via **factory methods**.
 
 ---
 
@@ -449,30 +480,17 @@ Includes domain logic: `isPending()`, `isSigned()`, `requiresYear()`, `requiresD
 
 ### Test Summary
 
-| Layer | Test Class | Tests | Type |
-|---|---|---|---|
-| Domain - VOs | DniTest | 23 | Unit |
-| Domain - VOs | FullNameTest | 14 | Unit |
-| Domain - VOs | PhoneTest | 12 | Unit |
-| Domain - VOs | AlumniInfoTest | 11 | Unit |
-| Domain - VOs | RgpdConsentTest | 10 | Unit |
-| Domain - VOs | EmailTest | 9 | Unit |
-| Domain - Entity | StudentTest | 31 | Unit |
-| Application | StudentServiceTest | 13 | Unit (Mockito) |
-| Infrastructure | StudentRepositoryImplTest | 11 | Integration (PostgreSQL) |
-| Infrastructure | StudentControllerTest | 14 | Web (MockMvc) |
+| Layer | Tests | Type |
+|---|---|---|
+| Domain (VOs + Entity) | 110 | Unit |
+| Domain (Query) | 9 | Unit |
+| Application (Service) | 16 | Unit (Mockito) |
+| Infrastructure (Repository) | 21 | Integration (PostgreSQL) |
+| Infrastructure (Controller) | 22 | Web (MockMvc) |
+| Infrastructure (DTOs) | 22 | Unit |
+| Context | 1 | Integration |
 
-**Total: ~148 tests** across all layers.
-
-### Test Approach by Layer
-
-**Domain tests (unit):** No mocks, no Spring context. Pure Java testing of business rules, validations, and value object behavior.
-
-**Application tests (unit + Mockito):** Repository mocked with `@Mock`. Tests verify service orchestration, command handling, and exception flow without touching the database.
-
-**Infrastructure - persistence (integration):** `@DataJpaTest` with real PostgreSQL. Tests verify the full persistence cycle: Domain → Mapper → JPA → DB → JPA → Mapper → Domain.
-
-**Infrastructure - web (MockMvc):** `@WebMvcTest` with mocked services. Tests verify HTTP status codes, request validation, error response format, and JSON structure without starting the full application.
+**Total: 210 tests** — all passing.
 
 ### Running Tests
 ```bash
@@ -484,9 +502,6 @@ mvn test -Dtest=StudentTest
 
 # Run specific layer
 mvn test -Dtest="com.orientation.backend.users.domain.**"
-
-# Run only controller tests
-mvn test -Dtest=StudentControllerTest
 ```
 
 **Note:** Integration tests require PostgreSQL running (via Docker).
@@ -502,73 +517,34 @@ docker-compose up -d
 # Stop services
 docker-compose down
 
-# View logs
-docker-compose logs postgres
-
 # Remove volumes (clean database)
 docker-compose down -v
 ```
 
 ---
 
-## 🔧 Troubleshooting
-
-### Port 5432 Already in Use
-```bash
-# Check what's using the port
-lsof -i :5432          # macOS/Linux
-netstat -ano | findstr :5432  # Windows
-```
-Change port in `docker-compose.yml` to `5433:5432` and update `DB_URL` accordingly.
-
-### Application Fails to Start
-1. Verify Docker is running: `docker ps`
-2. Check PostgreSQL health: `docker-compose logs postgres`
-3. Verify Java version: `java -version` (must be 21+)
-4. Clean rebuild: `mvn clean install`
-
-### Flyway Migration Fails
-1. Verify database exists via pgAdmin
-2. Check migration files in `src/main/resources/db/migration/`
-3. Ensure no manual schema changes conflict with migrations
-
----
-
 ## 🗺️ Roadmap
 
-### Completed — Sprint 1 ✅
+### Sprint 1 ✅
 
-- [x] **Task #7:** Student Domain Model
-  - Database migration (Flyway V1 + V2)
-  - Domain enums (5 types with display names and business logic)
-  - Value Objects (6 VOs with self-validation)
-  - Student Entity (Aggregate Root with Builder pattern)
-  - Unit tests (110 tests)
+- [x] **Task #7:** Student Domain Model — 110 unit tests
+- [x] **Task #8:** Student Repository Layer — 11 integration tests
+- [x] **Task #9:** Student Application Layer — 13 service tests
+- [x] **Task #10:** REST API Controllers — 14 controller tests
 
-- [x] **Task #8:** Student Repository Layer
-  - JPA Entity mapping (StudentJpaEntity)
-  - Bidirectional mapper (Domain ↔ JPA)
-  - Repository pattern (Port + Adapter + Spring Data)
-  - Integration tests (11 tests with PostgreSQL)
+### Sprint 2 ✅
 
-- [x] **Task #9:** Student Application Layer
-  - StudentService with CRUD orchestration
-  - Application commands (Create, UpdateContact, UpdateRgpd, MarkAsAlumni)
-  - Application exceptions (StudentNotFound, DuplicateDni, InvalidOperation)
-  - Service tests with Mockito (13 tests)
-  - REST DTOs (requests + responses)
+- [x] **Task #11:** Soft Delete — Deactivation, partial unique index, DNI reuse
+- [x] **Task #12:** Pagination & Filtering — JPA Specifications, composable filters, paginated responses
+- [x] **Exception Handling Refactoring** — Unified ApiError format, multiple validation errors, architectural fix (HttpStatus removed from application layer)
 
-- [x] **Task #10:** REST API Controllers
-  - StudentController with 7 endpoints
-  - Global exception handler (@RestControllerAdvice)
-  - Request validation with @Valid
-  - Swagger UI auto-generated documentation
-  - Controller tests with MockMvc (14 tests)
-  - Postman collection for manual testing
+### Sprint 2 — Pending
+
+- [ ] Testcontainers migration
+- [ ] Degree as Enum refactoring
 
 ### Upcoming
-- [ ] **Sprint 2:** Refactoring + DELETE endpoint + additional operations
-- [ ] **Sprint 3:** Sessions Module (Collaborators + Sessions)
+- [ ] **Sprint 3:** Sessions Module
 - [ ] **Sprint 4:** Authentication & Authorization (JWT)
 
 ---
@@ -583,11 +559,11 @@ Change port in `docker-compose.yml` to `5433:5432` and update `DB_URL` according
 | Database | PostgreSQL 15 |
 | Migrations | Flyway |
 | ORM | Spring Data JPA / Hibernate |
+| Dynamic Filtering | JPA Specifications (Criteria API) |
 | API Docs | springdoc-openapi (Swagger UI) |
 | Testing | JUnit 5 + Mockito + AssertJ + MockMvc |
 | Containers | Docker + Docker Compose |
 | Monitoring | Spring Boot Actuator |
-| Dev Tools | Lombok, Spring Boot DevTools, Postman |
 
 ---
 
@@ -597,39 +573,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 👤 Author
+## 👥 Authors
 
-**Toni Romero** — [@tonir90](https://github.com/tonir90)
+**Toni Romero** — [@ToniR90](https://github.com/ToniR90)
+
+**Daniel Mata** — [@DanielMataC](https://github.com/DanielMataC)
 
 ---
 
-## 📅 Recent Updates
-
-### February 2026
-
-**Sprint 1 Completed** 🎉
-
-**Task #10: REST API Controllers** ✅ *Completed*
-- Implemented StudentController with 7 REST endpoints
-- Built global exception handler with consistent error responses
-- Added Swagger UI for interactive API documentation
-- Created Postman collection for manual testing
-- 14 controller tests with MockMvc
-
-**Task #9: Application Layer** ✅ *Completed*
-- Implemented StudentService with full CRUD orchestration
-- Created command objects for all write operations
-- Built application-specific exceptions with meaningful messages
-- Added REST DTOs (4 requests + 2 responses)
-- 13 service tests with Mockito
-
-**Task #8: Repository Layer** ✅ *Completed*
-- Implemented hexagonal architecture with Ports & Adapters pattern
-- Created JPA entity mapping with bidirectional mapper
-- 11 integration tests with real PostgreSQL
-
-**Task #7: Domain Model** ✅ *Completed*
-- Complete domain model with 6 value objects and Student aggregate root
-- 110 unit tests covering all domain logic
-
-**Last Updated:** February 2026
+**Last Updated:** March 2026

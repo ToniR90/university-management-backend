@@ -12,6 +12,9 @@ import com.orientation.backend.users.application.exceptions.core.ErrorCode;
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.enums.AlumniType;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
+import com.orientation.backend.users.domain.model.query.PageResult;
+import com.orientation.backend.users.domain.model.query.Pagination;
+import com.orientation.backend.users.domain.model.query.StudentSearchCriteria;
 import com.orientation.backend.users.domain.model.valueobjects.*;
 import com.orientation.backend.users.domain.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
@@ -181,5 +184,9 @@ public class StudentService {
 		student.markAsAlumni(type, command.graduationYear());
 		
 		return studentRepository.save(student);
+	}
+
+	public PageResult<Student> searchStudents(StudentSearchCriteria criteria, Pagination pagination) {
+		return studentRepository.search(criteria, pagination);
 	}
 }

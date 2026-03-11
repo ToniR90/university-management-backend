@@ -6,18 +6,21 @@ import com.orientation.backend.users.application.commands.UpdateContactCommand;
 import com.orientation.backend.users.application.commands.UpdateRgpdConsentCommand;
 import com.orientation.backend.users.application.services.StudentService;
 import com.orientation.backend.users.domain.model.entities.Student;
+import com.orientation.backend.users.domain.model.enums.CurrentYear;
+import com.orientation.backend.users.domain.model.query.PageResult;
+import com.orientation.backend.users.domain.model.query.Pagination;
+import com.orientation.backend.users.domain.model.query.StudentSearchCriteria;
 import com.orientation.backend.users.infrastructure.web.dto.request.CreateStudentRequest;
 import com.orientation.backend.users.infrastructure.web.dto.request.MarkAlumniRequest;
 import com.orientation.backend.users.infrastructure.web.dto.request.UpdateContactRequest;
 import com.orientation.backend.users.infrastructure.web.dto.request.UpdateRgpdRequest;
+import com.orientation.backend.users.infrastructure.web.dto.response.PagedStudentResponse;
 import com.orientation.backend.users.infrastructure.web.dto.response.StudentResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/students")
@@ -41,12 +44,18 @@ public class StudentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<StudentResponse>> getAllStudents(){
-        List<Student> students = studentService.findAll();
-        List<StudentResponse> responses = students.stream()
-                .map(StudentResponse::fromDomain)
-                .toList();
-        return ResponseEntity.ok(responses);
+    public ResponseEntity<PagedStudentResponse> getAllStudents(@RequestParam (defaultValue = "0") int page,
+                                                               @RequestParam (defaultValue = "20") int size,
+                                                               @RequestParam (required = false) String name,
+                                                               @RequestParam (required = false) String dni,
+                                                               @RequestParam (required = false)CurrentYear currentYear,
+                                                               @RequestParam (required = false) Boolean isAlumni){
+
+        Pagination pagination = new Pagination(page, size);
+        StudentSearchCriteria criteria = new StudentSearchCriteria(name, dni, currentYear, isAlumni);
+        PageResult<Student> students = studentService.searchStudents(criteria, pagination);
+
+        return ResponseEntity.ok(PagedStudentResponse.fromDomain(students));
     }
 
     @PostMapping

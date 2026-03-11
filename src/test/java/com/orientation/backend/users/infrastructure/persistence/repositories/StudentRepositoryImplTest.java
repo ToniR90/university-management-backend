@@ -1,7 +1,11 @@
 package com.orientation.backend.users.infrastructure.persistence.repositories;
 
 import com.orientation.backend.users.domain.model.entities.Student;
+import com.orientation.backend.users.domain.model.enums.AlumniType;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
+import com.orientation.backend.users.domain.model.query.PageResult;
+import com.orientation.backend.users.domain.model.query.Pagination;
+import com.orientation.backend.users.domain.model.query.StudentSearchCriteria;
 import com.orientation.backend.users.domain.model.valueobjects.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +49,18 @@ class StudentRepositoryImplTest {
                 .degree("Videojocs")
                 .currentYear(CurrentYear.FIRST)
                 .alumniInfo(AlumniInfo.notAlumni())
+                .rgpdConsent(RgpdConsent.pending())
+                .build();
+    }
+
+    private Student createStudentWithDetails(String dni, String name, String surname,
+                                             String degree, CurrentYear year, boolean alumni) {
+        return Student.builder()
+                .dni(Dni.of(dni))
+                .fullName(FullName.of(name, surname, null))
+                .degree(degree)
+                .currentYear(year)
+                .alumniInfo(alumni ? AlumniInfo.createAlumni(AlumniType.BACHELOR, 2023) : AlumniInfo.notAlumni())
                 .rgpdConsent(RgpdConsent.pending())
                 .build();
     }
@@ -266,5 +282,166 @@ class StudentRepositoryImplTest {
 
         assertThat(newSaved.getId()).isNotNull();
         assertThat(studentRepository.findByDni(Dni.of("00000015S"))).isPresent();
+    }
+
+
+    // ========== SEARCH TESTS ==========
+
+    @Test
+    @DisplayName("Should search all Students if no parameters are given")
+    void shouldReturnAllStudentsIfNoParametersAreGiven() {
+        Student student = createStudentWithDetails("00000016Q", "Student", "Surname", "Maths",
+                CurrentYear.FIRST, false);
+        Student student1 = createStudentWithDetails("00000017V", "Student1", "Surname1", "Teacher",
+                CurrentYear.SECOND, true);
+        Student student2 = createStudentWithDetails("00000018H", "Student2", "Surname2", "Developer",
+                CurrentYear.FIFTH, false);
+
+        Student saved = studentRepository.save(student);
+        Student saved1 = studentRepository.save(student1);
+        Student saved2 = studentRepository.save(student2);
+
+        StudentSearchCriteria criteria = new StudentSearchCriteria(null, null, null, null);
+        Pagination pagination = new Pagination(0, 20);
+        PageResult<Student> result = studentRepository.search(criteria, pagination);
+
+        assertThat(result.getContent()).hasSize(3);
+        assertThat(result.getPage()).isZero();
+        assertThat(result.getSize()).isEqualTo(20);
+        assertThat(result.getTotalElements()).isEqualTo(3);
+        assertThat(result.getTotalPages()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Should search students with filters")
+    void shouldSearchStudentsWithFilters() {
+        Student student = createStudentWithDetails("00000019L", "Student", "Surname", "Maths",
+                CurrentYear.FIRST, false);
+        Student student1 = createStudentWithDetails("00000020C", "Student1", "Surname1", "Teacher",
+                CurrentYear.SECOND, true);
+        Student student2 = createStudentWithDetails("00000021K", "Student2", "Surname2", "Developer",
+                CurrentYear.FIFTH, false);
+
+        Student saved = studentRepository.save(student);
+        Student saved1 = studentRepository.save(student1);
+        Student saved2 = studentRepository.save(student2);
+
+        StudentSearchCriteria criteria = new StudentSearchCriteria("Student", null, null, true);
+        Pagination pagination = new Pagination(0, 20);
+        PageResult<Student> result = studentRepository.search(criteria, pagination);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getPage()).isZero();
+        assertThat(result.getSize()).isEqualTo(20);
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getTotalPages()).isEqualTo(1);
+        assertThat(result.getContent().get(0).getDni().getValue()).isEqualTo("00000020C");
+    }
+
+    @Test
+    @DisplayName("Should search students with filters and case-insensitive")
+    void shouldSearchStudentsWithFiltersAndCaseInsensitive() {
+        Student student = createStudentWithDetails("00000019L", "Student", "Surname", "Maths",
+                CurrentYear.FIRST, false);
+        Student student1 = createStudentWithDetails("00000020C", "Student1", "Surname1", "Teacher",
+                CurrentYear.SECOND, true);
+        Student student2 = createStudentWithDetails("00000021K", "Student2", "Surname2", "Developer",
+                CurrentYear.FIFTH, false);
+
+        Student saved = studentRepository.save(student);
+        Student saved1 = studentRepository.save(student1);
+        Student saved2 = studentRepository.save(student2);
+
+        StudentSearchCriteria criteria = new StudentSearchCriteria("student", null, null, null);
+        Pagination pagination = new Pagination(0, 20);
+        PageResult<Student> result = studentRepository.search(criteria, pagination);
+
+        assertThat(result.getContent()).hasSize(3);
+        assertThat(result.getPage()).isZero();
+        assertThat(result.getSize()).isEqualTo(20);
+        assertThat(result.getTotalElements()).isEqualTo(3);
+        assertThat(result.getTotalPages()).isEqualTo(1);
+        assertThat(result.getContent())
+                .extracting(s -> s.getDni().getValue())
+                .containsExactlyInAnyOrder("00000019L", "00000020C", "00000021K");
+    }
+
+    @Test
+    @DisplayName("Should apply page and size filters")
+    void shouldSearchStudentsAndApplyPageAndSizeFilters() {
+        Student student = createStudentWithDetails("00000022E", "Student", "Surname", "Maths",
+                CurrentYear.FIRST, false);
+        Student student1 = createStudentWithDetails("00000023T", "Student1", "Surname1", "Teacher",
+                CurrentYear.SECOND, true);
+        Student student2 = createStudentWithDetails("00000024R", "Student2", "Surname2", "Developer",
+                CurrentYear.FIFTH, false);
+
+        Student saved = studentRepository.save(student);
+        Student saved1 = studentRepository.save(student1);
+        Student saved2 = studentRepository.save(student2);
+
+        StudentSearchCriteria criteria = new StudentSearchCriteria(null, null, null, null);
+
+        Pagination pagination1 = new Pagination(0, 2);
+        Pagination pagination2 = new Pagination(1, 2);
+        PageResult<Student> result1 = studentRepository.search(criteria, pagination1);
+        PageResult<Student> result2 = studentRepository.search(criteria, pagination2);
+
+        assertThat(result1.getContent()).hasSize(2);
+        assertThat(result1.getTotalPages()).isEqualTo(2);
+        assertThat(result1.getTotalElements()).isEqualTo(3);
+
+        assertThat(result2.getContent()).hasSize(1);
+        assertThat(result2.getTotalPages()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("Should not search desactivated students")
+    void shouldNotSearchDesactivatedStudents() {
+        Student student = createStudentWithDetails("00000025W", "Student", "Surname", "Maths",
+                CurrentYear.FIRST, false);
+        Student student1 = createStudentWithDetails("00000026A", "Student1", "Surname1", "Teacher",
+                CurrentYear.SECOND, true);
+        Student student2 = createStudentWithDetails("00000027G", "Student2", "Surname2", "Developer",
+                CurrentYear.FIFTH, false);
+
+        Student saved = studentRepository.save(student);
+        Student saved1 = studentRepository.save(student1);
+        Student saved2 = studentRepository.save(student2);
+
+        saved.deactivate();
+        studentRepository.save(saved);
+        saved1.deactivate();
+        studentRepository.save(saved1);
+
+        StudentSearchCriteria criteria = new StudentSearchCriteria(null, null, null, null);
+        Pagination pagination = new Pagination(0, 20);
+
+        PageResult<Student> result = studentRepository.search(criteria, pagination);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().getFirst().getDni()).isEqualTo(saved2.getDni());
+    }
+
+    @Test
+    @DisplayName("Should search with current year filter")
+    void shouldSearchStudentForCurrentYear() {
+        Student student = createStudentWithDetails("00000028M", "Student", "Surname", "Maths",
+                CurrentYear.FIRST, false);
+        Student student1 = createStudentWithDetails("00000029Y", "Student1", "Surname1", "Teacher",
+                CurrentYear.SECOND, true);
+        Student student2 = createStudentWithDetails("00000030F", "Student2", "Surname2", "Developer",
+                CurrentYear.FIFTH, false);
+
+        Student saved = studentRepository.save(student);
+        Student saved1 = studentRepository.save(student1);
+        Student saved2 = studentRepository.save(student2);
+
+        StudentSearchCriteria criteria = new StudentSearchCriteria(null, null, CurrentYear.FIRST, null);
+        Pagination pagination = new Pagination(0, 20);
+        PageResult<Student> result = studentRepository.search(criteria, pagination);
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().getFirst().getDni()).isEqualTo(saved.getDni());
     }
 }

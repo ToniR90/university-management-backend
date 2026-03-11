@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -71,6 +72,12 @@ public class RestExceptionHandler {
 				List.of());
 	}
 
+	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
+	public ResponseEntity<ApiError> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+		return buildErrorResponse(HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR,
+				ex.getName() + ": valor no vàlid", List.of());
+	}
+
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ApiError> handleException(Exception exception) {
 		log.error("Unexpected error occurred", exception);
@@ -88,4 +95,5 @@ public class RestExceptionHandler {
 				errors);
 		return ResponseEntity.status(status).body(apiError);
 	}
+
 }
