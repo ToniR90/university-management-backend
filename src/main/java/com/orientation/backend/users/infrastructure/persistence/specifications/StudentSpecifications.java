@@ -12,27 +12,27 @@ public final class StudentSpecifications {
 
     private StudentSpecifications() {}
 
-    public static Specification<StudentJpaEntity> isActive() {
+    private static Specification<StudentJpaEntity> isActive() {
         return ((root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get("active"), true));
     }
 
-    public static Specification<StudentJpaEntity> hasDni(String dni) {
+    private static Specification<StudentJpaEntity> hasDni(String dni) {
         return((root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get("dni"), dni));
     }
 
-    public static Specification<StudentJpaEntity> hasCurrentYear(CurrentYear year) {
+    private static Specification<StudentJpaEntity> hasCurrentYear(CurrentYear year) {
         return ((root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get("currentYear"), year.name()));
     }
 
-    public static Specification<StudentJpaEntity> isAlumni(Boolean isAlumni) {
+    private static Specification<StudentJpaEntity> isAlumni(Boolean isAlumni) {
         return ((root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get("isAlumni"), isAlumni));
     }
 
-    public static Specification<StudentJpaEntity> nameContains(String name) {
+    private static Specification<StudentJpaEntity> nameContains(String name) {
         return ((root, query, criteriaBuilder) ->
                 criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
     }
