@@ -57,7 +57,7 @@ public class StudentJpaMapper {
                 .fullName(fullName)
                 .email(email)
                 .phone(phone)
-                .degree(jpaEntity.getDegree())
+                .degree(Degree.valueOf(jpaEntity.getDegree()))
                 .currentYear(currentYear)
                 .alumniInfo(alumniInfo)
                 .rgpdConsent(rgpdConsent)
@@ -83,7 +83,7 @@ public class StudentJpaMapper {
         String email = student.getEmail().map(Email::getValue).orElse(null);
         String phone = student.getPhone().map(Phone::getValue).orElse(null);
 
-        String degree = student.getDegree();
+        String degree = student.getDegree().name();
 
         String currentYear = student.getCurrentYear().name();
 
