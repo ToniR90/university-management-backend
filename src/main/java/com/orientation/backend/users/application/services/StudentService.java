@@ -12,6 +12,7 @@ import com.orientation.backend.users.application.exceptions.core.ErrorCode;
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.enums.AlumniType;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
+import com.orientation.backend.users.domain.model.enums.Degree;
 import com.orientation.backend.users.domain.model.query.PageResult;
 import com.orientation.backend.users.domain.model.query.Pagination;
 import com.orientation.backend.users.domain.model.query.StudentSearchCriteria;
@@ -56,7 +57,7 @@ public class StudentService {
 				.fullName(FullName.of(command.name(), command.firstSurname(), command.secondSurname()))
 				.email(Optional.ofNullable(command.email()).map(Email::of))
 				.phone(Optional.ofNullable(command.phone()).map(Phone::of))
-				.degree(command.degree())
+				.degree(Degree.fromString(command.degree()))
 				.currentYear(CurrentYear.valueOf(command.currentYear()))
 				.alumniInfo(AlumniInfo.notAlumni())
 				.rgpdConsent(RgpdConsent.pending())
