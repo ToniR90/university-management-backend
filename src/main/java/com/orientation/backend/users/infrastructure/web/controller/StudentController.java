@@ -7,6 +7,7 @@ import com.orientation.backend.users.application.commands.UpdateRgpdConsentComma
 import com.orientation.backend.users.application.services.StudentService;
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
+import com.orientation.backend.users.domain.model.enums.Degree;
 import com.orientation.backend.users.domain.model.query.PageResult;
 import com.orientation.backend.users.domain.model.query.Pagination;
 import com.orientation.backend.users.domain.model.query.StudentSearchCriteria;
@@ -49,10 +50,11 @@ public class StudentController {
                                                                @RequestParam (required = false) String name,
                                                                @RequestParam (required = false) String dni,
                                                                @RequestParam (required = false)CurrentYear currentYear,
-                                                               @RequestParam (required = false) Boolean isAlumni){
+                                                               @RequestParam (required = false) Boolean isAlumni,
+                                                               @RequestParam (required = false)Degree degree){
 
         Pagination pagination = new Pagination(page, size);
-        StudentSearchCriteria criteria = new StudentSearchCriteria(name, dni, currentYear, isAlumni);
+        StudentSearchCriteria criteria = new StudentSearchCriteria(name, dni, currentYear, isAlumni, degree);
         PageResult<Student> students = studentService.searchStudents(criteria, pagination);
 
         return ResponseEntity.ok(PagedStudentResponse.fromDomain(students));
