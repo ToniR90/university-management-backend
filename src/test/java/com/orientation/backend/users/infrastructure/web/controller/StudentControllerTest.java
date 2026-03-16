@@ -9,6 +9,7 @@ import com.orientation.backend.users.application.exceptions.core.ErrorCode;
 import com.orientation.backend.users.application.services.StudentService;
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
+import com.orientation.backend.users.domain.model.enums.Degree;
 import com.orientation.backend.users.domain.model.query.PageResult;
 import com.orientation.backend.users.domain.model.valueobjects.Dni;
 import com.orientation.backend.users.domain.model.valueobjects.Email;
@@ -51,7 +52,7 @@ class StudentControllerTest {
 				.fullName(FullName.of("Joan", "García", "López"))
 				.email(Email.of("joan@mail.com"))
 				.phone(Phone.of("600123456"))
-				.degree("Informàtica")
+				.degree(Degree.DIGITAL_MARKETING)
 				.currentYear(CurrentYear.FIRST)
 				.build();
 	}

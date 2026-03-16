@@ -124,6 +124,7 @@ The `GET /api/v1/students` endpoint supports pagination and composable filters:
 | `name` | String | — | Partial match, case-insensitive |
 | `dni` | String | — | Exact match |
 | `currentYear` | String | — | Enum value (FIRST, SECOND...) |
+| `degree` | String | — | Enum value (NURSING, COMPUTER_ENGINEERING...) |
 | `isAlumni` | Boolean | — | true / false |
 
 All filters are optional and combinable. Only active students are returned (soft-deleted excluded).
@@ -133,8 +134,9 @@ All filters are optional and combinable. Only active students are returned (soft
 GET /api/v1/students                                    → All students, page 0, size 20
 GET /api/v1/students?page=1&size=5                      → Page 1, 5 per page
 GET /api/v1/students?name=Joan                          → Students named "Joan" (case-insensitive)
+GET /api/v1/students?degree=NURSING                     → Nursing students only
 GET /api/v1/students?currentYear=FIRST&isAlumni=false   → First year, non-alumni
-GET /api/v1/students?name=Joan&currentYear=FIRST&page=0&size=10  → Combined filters + pagination
+GET /api/v1/students?degree=COMPUTER_ENGINEERING&currentYear=FIRST&page=0&size=10  → Combined
 ```
 
 **Response format:**
@@ -146,6 +148,8 @@ GET /api/v1/students?name=Joan&currentYear=FIRST&page=0&size=10  → Combined fi
       "dni": "12345678Z",
       "name": "Joan",
       "firstSurname": "García",
+      "degree": "NURSING",
+      "degreeName": "Grau en Infermeria",
       ...
     }
   ],
@@ -155,6 +159,38 @@ GET /api/v1/students?name=Joan&currentYear=FIRST&page=0&size=10  → Combined fi
   "totalPages": 5
 }
 ```
+
+### Degree (Available Values)
+
+The `degree` field is a controlled enum with 22 university degrees:
+
+| Enum Value | Display Name |
+|---|---|
+| `ELECTRONIC_ENGINEERING` | Grau en Enginyeria Electrònica Industrial i Automàtica |
+| `COMPUTER_ENGINEERING` | Grau en Enginyeria Informàtica de Gestió i Sistemes d'Informació |
+| `MECHANICAL_ENGINEERING` | Grau en Enginyeria Mecànica |
+| `INDUSTRIAL_ORGANIZATION` | Grau en Enginyeria d'Organització Industrial |
+| `AI_AND_ROBOTICS` | Grau en Intel·ligència Artificial i Robòtica Aplicada |
+| `DOUBLE_CS_VIDEOGAMES` | Doble titulació en Enginyeria Informàtica i Disseny i Producció de Videojocs |
+| `AUDIOVISUAL_MEDIA` | Grau en Mitjans Audiovisuals |
+| `VIDEOGAME_DESIGN` | Grau en Disseny i Producció de Videojocs |
+| `DOUBLE_ELECTRONIC_MECHANICAL` | Simultaneïtat d'Enginyeria Electrònica i Mecànica |
+| `DOUBLE_ELECTRONIC_CS` | Simultaneïtat d'Enginyeria Electrònica i Informàtica |
+| `DOUBLE_VIDEOGAMES_AUDIOVISUAL` | Simultaneïtat de Disseny i Producció de Videojocs + Mitjans Audiovisuals |
+| `BUSINESS_ADMINISTRATION` | Grau en Administració d'Empreses i Gestió de la Innovació |
+| `BUSINESS_ADMINISTRATION_EN` | Grau en Administració d'Empreses i Gestió de la Innovació (docència en anglès) |
+| `DIGITAL_MARKETING` | Grau en Màrqueting i Comunitats Digitals |
+| `MARITIME_LOGISTICS` | Grau en Logística i Negocis Marítims |
+| `DOUBLE_TOURISM_BUSINESS` | Doble titulació en Turisme i Gestió de l'Oci i ADE i Gestió de la Innovació |
+| `DOUBLE_BUSINESS_MARKETING` | Doble titulació en ADE i Gestió de la Innovació i Màrqueting i Comunitats Digitals |
+| `NURSING` | Grau en Infermeria |
+| `SPORTS_SCIENCE` | Grau en Ciències de l'Activitat Física i de l'Esport (CAFE) |
+| `PHYSIOTHERAPY` | Grau en Fisioteràpia |
+| `DOUBLE_PHYSIO_SPORTS` | Doble titulació en Fisioteràpia i Ciències de l'Activitat Física i de l'Esport (CAFE) |
+| `DOUBLE_TOURISM_MARKETING` | Doble titulació en Turisme i Màrqueting |
+| `NUTRITION` | Grau en Nutrició Humana i Dietètica |
+
+The API response includes both `degree` (enum value for programmatic use) and `degreeName` (display name for UI).
 
 ### Soft Delete
 
@@ -188,7 +224,7 @@ Supports multiple validation errors in a single response.
 | `UpdateStudentException` | 400 | Invalid business operation |
 | `MethodArgumentNotValidException` | 400 | Request validation fails (@Valid) |
 | `MethodArgumentTypeMismatchException` | 400 | Invalid enum or type in query params |
-| `IllegalArgumentException` | 400 | Domain validation fails (VOs, Pagination) |
+| `IllegalArgumentException` | 400 | Domain validation fails (VOs, Pagination, Degree) |
 | `Exception` | 500 | Unexpected errors |
 
 ### Postman Collection
@@ -274,6 +310,7 @@ src/
 │   │       │   │   │   │   ├── AlumniType.java
 │   │       │   │   │   │   ├── ContactMethod.java
 │   │       │   │   │   │   ├── CurrentYear.java
+│   │       │   │   │   │   ├── Degree.java
 │   │       │   │   │   │   ├── DiscoveryChannel.java
 │   │       │   │   │   │   └── RgpdConsentStatus.java
 │   │       │   │   │   └── query/
@@ -401,7 +438,7 @@ This project follows **Hexagonal Architecture** (Ports & Adapters) and **Domain-
 **Dependency rule:** Dependencies always point inward. The domain knows nothing about the outside world.
 
 ### Domain Layer (Core)
-Pure business logic with no framework dependencies. Contains the Student aggregate root, 6 value objects with self-validation, 5 enums, query abstractions (Pagination, PageResult, StudentSearchCriteria), and the repository interface (port).
+Pure business logic with no framework dependencies. Contains the Student aggregate root, 6 value objects with self-validation, 6 enums (including Degree with 22 university degrees), query abstractions (Pagination, PageResult, StudentSearchCriteria), and the repository interface (port).
 
 ### Application Layer (Orchestration)
 Coordinates operations between the outside world and the domain. Contains the StudentService, command objects, and application-specific exceptions with support for multiple validation errors via BusinessViolation.
@@ -414,13 +451,13 @@ Implements the technical concerns: REST controllers with global exception handli
 ```
 HTTP Request
     → StudentController (validate + delegate)
-        → StudentService (orchestrate)
+        → StudentService (orchestrate + Degree.fromString())
             → Domain (business logic)
                 → StudentRepository port
                     → StudentRepositoryImpl adapter
                         → Specifications + Pageable
                             → Spring Data JPA → PostgreSQL
-    ← PagedStudentResponse / StudentResponse
+    ← PagedStudentResponse / StudentResponse (degree + degreeName)
 ← HTTP Response
 ```
 
@@ -447,7 +484,7 @@ Domain                         Infrastructure
 
 The `Student` entity is the aggregate root with the following structure:
 
-**Immutable fields:** DNI, full name, current year, creation timestamp
+**Immutable fields:** DNI, full name, degree, current year, creation timestamp
 **Mutable fields:** Email, phone, alumni info, RGPD consent, discovery/contact channels, notes
 **Soft delete fields:** active (boolean), deletedAt (timestamp)
 
@@ -473,6 +510,32 @@ Built using the **Builder pattern** with intelligent defaults.
 | **RgpdConsent** | GDPR consent | 4 statuses with different required fields |
 
 All value objects are **immutable**, **self-validated**, and created via **factory methods**.
+
+---
+
+### Enums
+
+#### Degree (22 values)
+University degrees with `displayName` and `fromString()` factory method. Includes: `ELECTRONIC_ENGINEERING`, `COMPUTER_ENGINEERING`, `MECHANICAL_ENGINEERING`, `NURSING`, `PHYSIOTHERAPY`, `NUTRITION`, and 16 more.
+
+#### AlumniType
+`BACHELOR`, `MASTER`, `DOCTORATE`, `DOUBLE_DEGREE`, `ERASMUS`, `EXCHANGE`, `OTHER`
+
+#### ContactMethod
+`EMAIL`, `PHONE`, `IN_PERSON`, `ONLINE_FORM`, `REFERRAL`, `OTHER`
+
+#### CurrentYear
+`FIRST`, `SECOND`, `THIRD`, `FOURTH`, `FIFTH`, `SIXTH`, `MASTER`, `DOCTORATE`
+
+Includes domain logic: `isGraduateLevel()`, `isUndergraduate()`
+
+#### DiscoveryChannel
+`WEBSITE`, `SOCIAL_MEDIA`, `REFERRAL`, `UNIVERSITY_EVENT`, `EMAIL_CAMPAIGN`, `OTHER`
+
+#### RgpdConsentStatus
+`PENDING`, `SIGNED_IN_PERSON`, `SIGNED_ONLINE`, `ALREADY_SIGNED`
+
+Includes domain logic: `isPending()`, `isSigned()`, `requiresYear()`, `requiresDate()`
 
 ---
 
@@ -536,12 +599,12 @@ docker-compose down -v
 
 - [x] **Task #11:** Soft Delete — Deactivation, partial unique index, DNI reuse
 - [x] **Task #12:** Pagination & Filtering — JPA Specifications, composable filters, paginated responses
-- [x] **Exception Handling Refactoring** — Unified ApiError format, multiple validation errors, architectural fix (HttpStatus removed from application layer)
+- [x] **Task #13:** Degree as Enum — 22 university degrees, fromString(), displayName, filter support
+- [x] **Exception Handling Refactoring** — Unified ApiError format, multiple validation errors, architectural fix
 
 ### Sprint 2 — Pending
 
 - [ ] Testcontainers migration
-- [ ] Degree as Enum refactoring
 
 ### Upcoming
 - [ ] **Sprint 3:** Sessions Module
