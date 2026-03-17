@@ -1,5 +1,6 @@
 package com.orientation.backend.users.infrastructure.persistence.repositories;
 
+import com.orientation.backend.BaseIntegrationTest;
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.enums.AlumniType;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
@@ -14,7 +15,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,16 +24,8 @@ import static org.assertj.core.api.Assertions.*;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(StudentRepositoryImpl.class)
-@TestPropertySource(properties = {
-        "spring.datasource.url=jdbc:postgresql://localhost:5432/students_test",
-        "spring.datasource.username=postgres",
-        "spring.datasource.password=postgres",
-        "spring.jpa.hibernate.ddl-auto=create-drop",
-        "spring.flyway.enabled=false",
-        "spring.sql.init.mode=always",
-        "spring.jpa.defer-datasource-initialization=true"
-})
-class StudentRepositoryImplTest {
+
+class StudentRepositoryImplTest extends BaseIntegrationTest {
 
     @Autowired
     private StudentRepositoryImpl studentRepository;

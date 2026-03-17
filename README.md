@@ -229,7 +229,7 @@ Supports multiple validation errors in a single response.
 
 ### Postman Collection
 
-A Postman collection is available in the project root for testing all endpoints: `Student_Management_System_Sprint_2_Pagination.postman_collection.json`
+A Postman collection is available in the project root for testing all endpoints: `Student_Management_System_Sprint_2_Complete.postman_collection.json`
 
 Import in Postman: `File → Import → Upload Files`
 
@@ -374,6 +374,7 @@ src/
     └── java/
         └── com/orientation/backend/
             ├── ApplicationContextTest.java
+            ├── BaseIntegrationTest.java          # Testcontainers base class
             └── users/
                 ├── application/
                 │   └── services/
@@ -541,23 +542,32 @@ Includes domain logic: `isPending()`, `isSigned()`, `requiresYear()`, `requiresD
 
 ## 🧪 Testing
 
+### Test Infrastructure
+
+Integration tests use **Testcontainers** to automatically manage a PostgreSQL container during test execution. No local database setup is required — only Docker needs to be running.
+
+All integration tests extend `BaseIntegrationTest`, which:
+- Starts a `postgres:15` container automatically
+- Injects datasource properties dynamically via `@DynamicPropertySource`
+- Destroys the container after tests complete
+
 ### Test Summary
 
 | Layer | Tests | Type |
 |---|---|---|
 | Domain (VOs + Entity) | 110 | Unit |
 | Domain (Query) | 9 | Unit |
-| Application (Service) | 16 | Unit (Mockito) |
-| Infrastructure (Repository) | 21 | Integration (PostgreSQL) |
-| Infrastructure (Controller) | 22 | Web (MockMvc) |
-| Infrastructure (DTOs) | 22 | Unit |
+| Application (Service) | 20 | Unit (Mockito) |
+| Infrastructure (Repository) | 22 | Integration (Testcontainers + PostgreSQL) |
+| Infrastructure (Controller) | 23 | Web (MockMvc) |
+| Infrastructure (DTOs) | 25 | Unit |
 | Context | 1 | Integration |
 
 **Total: 210 tests** — all passing.
 
 ### Running Tests
 ```bash
-# Run all tests
+# Run all tests (Docker must be running)
 mvn test
 
 # Run specific test class
@@ -567,14 +577,14 @@ mvn test -Dtest=StudentTest
 mvn test -Dtest="com.orientation.backend.users.domain.**"
 ```
 
-**Note:** Integration tests require PostgreSQL running (via Docker).
+**Note:** Integration tests require Docker running. Testcontainers automatically manages the PostgreSQL container — no manual database setup needed.
 
 ---
 
 ## 🐳 Docker Commands
 
 ```bash
-# Start services
+# Start services (for running the application)
 docker-compose up -d
 
 # Stop services
@@ -583,6 +593,8 @@ docker-compose down
 # Remove volumes (clean database)
 docker-compose down -v
 ```
+
+**Note:** `docker-compose` is only needed for running the application. Tests use Testcontainers and don't require `docker-compose`.
 
 ---
 
@@ -600,11 +612,8 @@ docker-compose down -v
 - [x] **Task #11:** Soft Delete — Deactivation, partial unique index, DNI reuse
 - [x] **Task #12:** Pagination & Filtering — JPA Specifications, composable filters, paginated responses
 - [x] **Task #13:** Degree as Enum — 22 university degrees, fromString(), displayName, filter support
+- [x] **Task #14:** Testcontainers — Automated PostgreSQL container for integration tests, zero manual setup
 - [x] **Exception Handling Refactoring** — Unified ApiError format, multiple validation errors, architectural fix
-
-### Sprint 2 — Pending
-
-- [ ] Testcontainers migration
 
 ### Upcoming
 - [ ] **Sprint 3:** Sessions Module
@@ -624,7 +633,7 @@ docker-compose down -v
 | ORM | Spring Data JPA / Hibernate |
 | Dynamic Filtering | JPA Specifications (Criteria API) |
 | API Docs | springdoc-openapi (Swagger UI) |
-| Testing | JUnit 5 + Mockito + AssertJ + MockMvc |
+| Testing | JUnit 5 + Mockito + AssertJ + MockMvc + Testcontainers 2.0.3 |
 | Containers | Docker + Docker Compose |
 | Monitoring | Spring Boot Actuator |
 
