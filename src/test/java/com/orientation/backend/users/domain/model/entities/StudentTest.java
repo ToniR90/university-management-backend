@@ -29,7 +29,7 @@ class StudentTest {
         return Student.builder()
                 .dni(testDni)
                 .fullName(testFullName)
-                .degree("Videojocs")
+                .degree(Degree.VIDEOGAME_DESIGN)
                 .currentYear(CurrentYear.FIRST)
                 .build();
     }
@@ -42,7 +42,7 @@ class StudentTest {
         assertNotNull(student);
         assertEquals(testDni, student.getDni());
         assertEquals(testFullName, student.getFullName());
-        assertEquals("Videojocs", student.getDegree());
+        assertEquals(Degree.VIDEOGAME_DESIGN, student.getDegree());
         assertEquals(CurrentYear.FIRST, student.getCurrentYear());
     }
 
@@ -60,7 +60,7 @@ class StudentTest {
             Student student = Student.builder()
                     .dni(null)
                     .fullName(testFullName)
-                    .degree("Videojocs")
+                    .degree(Degree.VIDEOGAME_DESIGN)
                     .currentYear(CurrentYear.FIRST)
                     .build();
         });
@@ -73,7 +73,7 @@ class StudentTest {
             Student student = Student.builder()
                     .dni(testDni)
                     .fullName(null)
-                    .degree("Videojocs")
+                    .degree(Degree.VIDEOGAME_DESIGN)
                     .currentYear(CurrentYear.FIRST)
                     .build();
         });
@@ -365,7 +365,7 @@ class StudentTest {
                 .id(1L)
                 .dni(testDni)
                 .fullName(testFullName)
-                .degree("Videojocs")
+                .degree(Degree.VIDEOGAME_DESIGN)
                 .currentYear(CurrentYear.FIRST)
                 .build();
 
@@ -373,7 +373,7 @@ class StudentTest {
                 .id(1L)
                 .dni(Dni.of("00000000T"))
                 .fullName(FullName.of("Jason", "Vorgees", null))
-                .degree("Matemàtiques")
+                .degree(Degree.AUDIOVISUAL_MEDIA)
                 .currentYear(CurrentYear.SECOND)
                 .build();
 
@@ -385,14 +385,14 @@ class StudentTest {
         Student student1 = Student.builder()
                 .dni(testDni)
                 .fullName(testFullName)
-                .degree("Videojocs")
+                .degree(Degree.VIDEOGAME_DESIGN)
                 .currentYear(CurrentYear.FIRST)
                 .build();
 
         Student student2 = Student.builder()
                 .dni(testDni)
                 .fullName(FullName.of("Jason", "Vorgees", null))
-                .degree("Matemàtiques")
+                .degree(Degree.AUDIOVISUAL_MEDIA)
                 .currentYear(CurrentYear.SECOND)
                 .build();
 
@@ -405,7 +405,7 @@ class StudentTest {
                 .id(1L)
                 .dni(testDni)
                 .fullName(testFullName)
-                .degree("Videojocs")
+                .degree(Degree.VIDEOGAME_DESIGN)
                 .currentYear(CurrentYear.FIRST)
                 .build();
 
@@ -413,7 +413,7 @@ class StudentTest {
                 .id(2L)
                 .dni(testDni)
                 .fullName(testFullName)
-                .degree("Videojocs")
+                .degree(Degree.VIDEOGAME_DESIGN)
                 .currentYear(CurrentYear.FIRST)
                 .build();
 

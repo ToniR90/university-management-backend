@@ -9,6 +9,7 @@ import com.orientation.backend.users.application.exceptions.StudentNotFoundExcep
 import com.orientation.backend.users.application.exceptions.UpdateStudentException;
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
+import com.orientation.backend.users.domain.model.enums.Degree;
 import com.orientation.backend.users.domain.model.enums.RgpdConsentStatus;
 import com.orientation.backend.users.domain.model.query.PageResult;
 import com.orientation.backend.users.domain.model.query.Pagination;
@@ -45,7 +46,7 @@ class StudentServiceTest {
 				.fullName(FullName.of("test_name", "test_firstSurname", "test_secondSurname"))
 				.email(Optional.of(Email.of(email)))
 				.phone(Optional.of(Phone.of("+34612345678")))
-				.degree("Videojocs")
+				.degree(Degree.VIDEOGAME_DESIGN)
 				.currentYear(CurrentYear.FIRST)
 				.alumniInfo(AlumniInfo.notAlumni())
 				.rgpdConsent(RgpdConsent.pending())
@@ -58,7 +59,7 @@ class StudentServiceTest {
 				.fullName(FullName.of("test_name", "test_firstSurname", null))
 				.email(Optional.empty())
 				.phone(Optional.empty())
-				.degree("Videojocs")
+				.degree(Degree.VIDEOGAME_DESIGN)
 				.currentYear(CurrentYear.FIRST)
 				.alumniInfo(AlumniInfo.notAlumni())
 				.rgpdConsent(RgpdConsent.pending())
@@ -74,7 +75,7 @@ class StudentServiceTest {
 				"test_secondSurname",
 				email,
 				"+34612345678",
-				"Videojocs",
+				"VIDEOGAME_DESIGN",
 				"FIRST"
 		);
 	}
@@ -151,7 +152,7 @@ class StudentServiceTest {
 				null,
 				null,
 				null,
-				"Videojocs",
+				"VIDEOGAME_DESIGN",
 				"FIRST"
 		);
 		
@@ -499,7 +500,7 @@ class StudentServiceTest {
 				List.of(createTestStudent("00000015S", "test@email.com")),
 				0, 20, 1, 1
 		);
-		StudentSearchCriteria criteria = new StudentSearchCriteria(null, null, null, null);
+		StudentSearchCriteria criteria = new StudentSearchCriteria(null, null, null, null, null);
 		Pagination pagination = new Pagination(0, 20);
 
 		when(studentRepository.search(criteria, pagination)).thenReturn(expectedResult);

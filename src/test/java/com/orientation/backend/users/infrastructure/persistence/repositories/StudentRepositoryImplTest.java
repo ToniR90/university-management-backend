@@ -1,8 +1,10 @@
 package com.orientation.backend.users.infrastructure.persistence.repositories;
 
+import com.orientation.backend.BaseIntegrationTest;
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.enums.AlumniType;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
+import com.orientation.backend.users.domain.model.enums.Degree;
 import com.orientation.backend.users.domain.model.query.PageResult;
 import com.orientation.backend.users.domain.model.query.Pagination;
 import com.orientation.backend.users.domain.model.query.StudentSearchCriteria;
@@ -13,7 +15,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,16 +24,8 @@ import static org.assertj.core.api.Assertions.*;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(StudentRepositoryImpl.class)
-@TestPropertySource(properties = {
-        "spring.datasource.url=jdbc:postgresql://localhost:5432/students_test",
-        "spring.datasource.username=postgres",
-        "spring.datasource.password=postgres",
-        "spring.jpa.hibernate.ddl-auto=create-drop",
-        "spring.flyway.enabled=false",
-        "spring.sql.init.mode=always",
-        "spring.jpa.defer-datasource-initialization=true"
-})
-class StudentRepositoryImplTest {
+
+class StudentRepositoryImplTest extends BaseIntegrationTest {
 
     @Autowired
     private StudentRepositoryImpl studentRepository;
@@ -46,7 +39,7 @@ class StudentRepositoryImplTest {
                 .fullName(FullName.of("Test_Name", "Test_Surname1", "Test_Surname2"))
                 .email(Optional.of(Email.of(email)))
                 .phone(Optional.of(Phone.of("+34612345678")))
-                .degree("Videojocs")
+                .degree(Degree.VIDEOGAME_DESIGN)
                 .currentYear(CurrentYear.FIRST)
                 .alumniInfo(AlumniInfo.notAlumni())
                 .rgpdConsent(RgpdConsent.pending())
@@ -54,7 +47,7 @@ class StudentRepositoryImplTest {
     }
 
     private Student createStudentWithDetails(String dni, String name, String surname,
-                                             String degree, CurrentYear year, boolean alumni) {
+                                             Degree degree, CurrentYear year, boolean alumni) {
         return Student.builder()
                 .dni(Dni.of(dni))
                 .fullName(FullName.of(name, surname, null))
@@ -167,7 +160,7 @@ class StudentRepositoryImplTest {
         Student student = Student.builder()
                 .dni(Dni.of("00000007F"))
                 .fullName(FullName.of("Test_name", "Test_FirstSurname", "Test_SecondSurname"))
-                .degree("Test Degree")
+                .degree(Degree.VIDEOGAME_DESIGN)
                 .currentYear(CurrentYear.FIRST)
                 .alumniInfo(AlumniInfo.notAlumni())
                 .rgpdConsent(RgpdConsent.pending())
@@ -186,7 +179,7 @@ class StudentRepositoryImplTest {
         Student student = Student.builder()
                 .dni(Dni.of("00000008P"))
                 .fullName(FullName.of("Test_name", "Test_FirstSurname", "Test_SecondSurname"))
-                .degree("Test Degree")
+                .degree(Degree.VIDEOGAME_DESIGN)
                 .currentYear(CurrentYear.FIRST)
                 .alumniInfo(AlumniInfo.notAlumni())
                 .rgpdConsent(RgpdConsent.pending())
@@ -290,18 +283,18 @@ class StudentRepositoryImplTest {
     @Test
     @DisplayName("Should search all Students if no parameters are given")
     void shouldReturnAllStudentsIfNoParametersAreGiven() {
-        Student student = createStudentWithDetails("00000016Q", "Student", "Surname", "Maths",
+        Student student = createStudentWithDetails("00000016Q", "Student", "Surname", Degree.AI_AND_ROBOTICS,
                 CurrentYear.FIRST, false);
-        Student student1 = createStudentWithDetails("00000017V", "Student1", "Surname1", "Teacher",
+        Student student1 = createStudentWithDetails("00000017V", "Student1", "Surname1", Degree.AUDIOVISUAL_MEDIA,
                 CurrentYear.SECOND, true);
-        Student student2 = createStudentWithDetails("00000018H", "Student2", "Surname2", "Developer",
+        Student student2 = createStudentWithDetails("00000018H", "Student2", "Surname2", Degree.VIDEOGAME_DESIGN,
                 CurrentYear.FIFTH, false);
 
         Student saved = studentRepository.save(student);
         Student saved1 = studentRepository.save(student1);
         Student saved2 = studentRepository.save(student2);
 
-        StudentSearchCriteria criteria = new StudentSearchCriteria(null, null, null, null);
+        StudentSearchCriteria criteria = new StudentSearchCriteria(null, null, null, null, null);
         Pagination pagination = new Pagination(0, 20);
         PageResult<Student> result = studentRepository.search(criteria, pagination);
 
@@ -315,18 +308,18 @@ class StudentRepositoryImplTest {
     @Test
     @DisplayName("Should search students with filters")
     void shouldSearchStudentsWithFilters() {
-        Student student = createStudentWithDetails("00000019L", "Student", "Surname", "Maths",
+        Student student = createStudentWithDetails("00000019L", "Student", "Surname", Degree.AI_AND_ROBOTICS,
                 CurrentYear.FIRST, false);
-        Student student1 = createStudentWithDetails("00000020C", "Student1", "Surname1", "Teacher",
+        Student student1 = createStudentWithDetails("00000020C", "Student1", "Surname1", Degree.COMPUTER_ENGINEERING,
                 CurrentYear.SECOND, true);
-        Student student2 = createStudentWithDetails("00000021K", "Student2", "Surname2", "Developer",
+        Student student2 = createStudentWithDetails("00000021K", "Student2", "Surname2", Degree.BUSINESS_ADMINISTRATION,
                 CurrentYear.FIFTH, false);
 
         Student saved = studentRepository.save(student);
         Student saved1 = studentRepository.save(student1);
         Student saved2 = studentRepository.save(student2);
 
-        StudentSearchCriteria criteria = new StudentSearchCriteria("Student", null, null, true);
+        StudentSearchCriteria criteria = new StudentSearchCriteria("Student", null, null, true, null);
         Pagination pagination = new Pagination(0, 20);
         PageResult<Student> result = studentRepository.search(criteria, pagination);
 
@@ -341,18 +334,18 @@ class StudentRepositoryImplTest {
     @Test
     @DisplayName("Should search students with filters and case-insensitive")
     void shouldSearchStudentsWithFiltersAndCaseInsensitive() {
-        Student student = createStudentWithDetails("00000019L", "Student", "Surname", "Maths",
+        Student student = createStudentWithDetails("00000019L", "Student", "Surname", Degree.COMPUTER_ENGINEERING,
                 CurrentYear.FIRST, false);
-        Student student1 = createStudentWithDetails("00000020C", "Student1", "Surname1", "Teacher",
+        Student student1 = createStudentWithDetails("00000020C", "Student1", "Surname1", Degree.AUDIOVISUAL_MEDIA,
                 CurrentYear.SECOND, true);
-        Student student2 = createStudentWithDetails("00000021K", "Student2", "Surname2", "Developer",
+        Student student2 = createStudentWithDetails("00000021K", "Student2", "Surname2", Degree.AI_AND_ROBOTICS,
                 CurrentYear.FIFTH, false);
 
         Student saved = studentRepository.save(student);
         Student saved1 = studentRepository.save(student1);
         Student saved2 = studentRepository.save(student2);
 
-        StudentSearchCriteria criteria = new StudentSearchCriteria("student", null, null, null);
+        StudentSearchCriteria criteria = new StudentSearchCriteria("student", null, null, null, null);
         Pagination pagination = new Pagination(0, 20);
         PageResult<Student> result = studentRepository.search(criteria, pagination);
 
@@ -369,18 +362,18 @@ class StudentRepositoryImplTest {
     @Test
     @DisplayName("Should apply page and size filters")
     void shouldSearchStudentsAndApplyPageAndSizeFilters() {
-        Student student = createStudentWithDetails("00000022E", "Student", "Surname", "Maths",
+        Student student = createStudentWithDetails("00000022E", "Student", "Surname", Degree.AI_AND_ROBOTICS,
                 CurrentYear.FIRST, false);
-        Student student1 = createStudentWithDetails("00000023T", "Student1", "Surname1", "Teacher",
+        Student student1 = createStudentWithDetails("00000023T", "Student1", "Surname1", Degree.BUSINESS_ADMINISTRATION,
                 CurrentYear.SECOND, true);
-        Student student2 = createStudentWithDetails("00000024R", "Student2", "Surname2", "Developer",
+        Student student2 = createStudentWithDetails("00000024R", "Student2", "Surname2", Degree.DIGITAL_MARKETING,
                 CurrentYear.FIFTH, false);
 
         Student saved = studentRepository.save(student);
         Student saved1 = studentRepository.save(student1);
         Student saved2 = studentRepository.save(student2);
 
-        StudentSearchCriteria criteria = new StudentSearchCriteria(null, null, null, null);
+        StudentSearchCriteria criteria = new StudentSearchCriteria(null, null, null, null, null);
 
         Pagination pagination1 = new Pagination(0, 2);
         Pagination pagination2 = new Pagination(1, 2);
@@ -398,11 +391,11 @@ class StudentRepositoryImplTest {
     @Test
     @DisplayName("Should not search desactivated students")
     void shouldNotSearchDesactivatedStudents() {
-        Student student = createStudentWithDetails("00000025W", "Student", "Surname", "Maths",
+        Student student = createStudentWithDetails("00000025W", "Student", "Surname", Degree.DIGITAL_MARKETING,
                 CurrentYear.FIRST, false);
-        Student student1 = createStudentWithDetails("00000026A", "Student1", "Surname1", "Teacher",
+        Student student1 = createStudentWithDetails("00000026A", "Student1", "Surname1", Degree.AI_AND_ROBOTICS,
                 CurrentYear.SECOND, true);
-        Student student2 = createStudentWithDetails("00000027G", "Student2", "Surname2", "Developer",
+        Student student2 = createStudentWithDetails("00000027G", "Student2", "Surname2", Degree.VIDEOGAME_DESIGN,
                 CurrentYear.FIFTH, false);
 
         Student saved = studentRepository.save(student);
@@ -414,7 +407,7 @@ class StudentRepositoryImplTest {
         saved1.deactivate();
         studentRepository.save(saved1);
 
-        StudentSearchCriteria criteria = new StudentSearchCriteria(null, null, null, null);
+        StudentSearchCriteria criteria = new StudentSearchCriteria(null, null, null, null, null);
         Pagination pagination = new Pagination(0, 20);
 
         PageResult<Student> result = studentRepository.search(criteria, pagination);
@@ -426,18 +419,18 @@ class StudentRepositoryImplTest {
     @Test
     @DisplayName("Should search with current year filter")
     void shouldSearchStudentForCurrentYear() {
-        Student student = createStudentWithDetails("00000028M", "Student", "Surname", "Maths",
+        Student student = createStudentWithDetails("00000028M", "Student", "Surname", Degree.VIDEOGAME_DESIGN,
                 CurrentYear.FIRST, false);
-        Student student1 = createStudentWithDetails("00000029Y", "Student1", "Surname1", "Teacher",
+        Student student1 = createStudentWithDetails("00000029Y", "Student1", "Surname1", Degree.DIGITAL_MARKETING,
                 CurrentYear.SECOND, true);
-        Student student2 = createStudentWithDetails("00000030F", "Student2", "Surname2", "Developer",
+        Student student2 = createStudentWithDetails("00000030F", "Student2", "Surname2", Degree.COMPUTER_ENGINEERING,
                 CurrentYear.FIFTH, false);
 
         Student saved = studentRepository.save(student);
         Student saved1 = studentRepository.save(student1);
         Student saved2 = studentRepository.save(student2);
 
-        StudentSearchCriteria criteria = new StudentSearchCriteria(null, null, CurrentYear.FIRST, null);
+        StudentSearchCriteria criteria = new StudentSearchCriteria(null, null, CurrentYear.FIRST, null, null);
         Pagination pagination = new Pagination(0, 20);
         PageResult<Student> result = studentRepository.search(criteria, pagination);
 

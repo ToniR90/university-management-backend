@@ -18,7 +18,7 @@ class StudentResponseTest {
                 .fullName(FullName.of("Joan", "García", "López"))
                 .email(Email.of("joan@mail.com"))
                 .phone(Phone.of("600123456"))
-                .degree("Enginyeria Informàtica")
+                .degree(Degree.DIGITAL_MARKETING)
                 .currentYear(CurrentYear.FIRST)
                 .alumniInfo(AlumniInfo.createAlumni(AlumniType.BACHELOR, 2023))
                 .rgpdConsent(RgpdConsent.alreadySigned(2020))
@@ -32,7 +32,7 @@ class StudentResponseTest {
         return Student.builder()
                 .dni(Dni.of("00000000T"))
                 .fullName(FullName.of("Maria", "Martínez", null))
-                .degree("Matemàtiques")
+                .degree(Degree.COMPUTER_ENGINEERING)
                 .currentYear(CurrentYear.SECOND)
                 .build();
     }
@@ -51,7 +51,7 @@ class StudentResponseTest {
         assertEquals("López", response.secondSurname());
         assertEquals("joan@mail.com", response.email());
         assertEquals("+34600123456", response.phone());
-        assertEquals("Enginyeria Informàtica", response.degree());
+        assertEquals("DIGITAL_MARKETING", response.degree());
         assertEquals("FIRST", response.currentYear());
         assertTrue(response.isAlumni());
         assertEquals("BACHELOR", response.alumniType());

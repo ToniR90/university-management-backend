@@ -1,9 +1,6 @@
 package com.orientation.backend.users.domain.model.entities;
 
-import com.orientation.backend.users.domain.model.enums.AlumniType;
-import com.orientation.backend.users.domain.model.enums.ContactMethod;
-import com.orientation.backend.users.domain.model.enums.CurrentYear;
-import com.orientation.backend.users.domain.model.enums.DiscoveryChannel;
+import com.orientation.backend.users.domain.model.enums.*;
 import com.orientation.backend.users.domain.model.exceptions.StudentAlreadyInactiveException;
 import com.orientation.backend.users.domain.model.valueobjects.*;
 
@@ -42,7 +39,7 @@ public class Student {
     private Phone phone;
 
     // Academic Info
-    private String degree;  // TODO: Catalog in Sprint 2
+    private Degree degree;
 
     // Composite Value Objects
     private AlumniInfo alumniInfo;
@@ -72,7 +69,7 @@ public class Student {
         this.email = builder.email;
         this.phone = builder.phone;
 
-        this.degree = validateDegree(builder.degree);
+        this.degree = Objects.requireNonNull(builder.degree);
 
         this.alumniInfo = Objects.requireNonNull(builder.alumniInfo, "La informació d'alumni no pot ser nul");
         this.rgpdConsent = Objects.requireNonNull(builder.rgpdConsent, "El consentiment RGPD no pot ser nul");
@@ -339,7 +336,7 @@ public class Student {
         return Optional.ofNullable(phone);
     }
 
-    public String getDegree() {
+    public Degree getDegree() {
         return degree;
     }
 
@@ -380,19 +377,6 @@ public class Student {
     }
 
     // ============================================
-    // HELPER METHODS (Private)
-    // ============================================
-
-    private static String validateDegree(String degree) {
-        Objects.requireNonNull(degree, "El grau no pot ser nul");
-        String trimmed = degree.trim();
-        if (trimmed.isEmpty()) {
-            throw new IllegalArgumentException("El grau no pot estar buit");
-        }
-        return trimmed;
-    }
-
-    // ============================================
     // BUILDER (Inner Static Class)
     // ============================================
 
@@ -403,7 +387,7 @@ public class Student {
         private FullName fullName;
         private Email email;
         private Phone phone;
-        private String degree;
+        private Degree degree;
         private CurrentYear currentYear;
         private AlumniInfo alumniInfo;
         private RgpdConsent rgpdConsent;
@@ -462,7 +446,7 @@ public class Student {
             return this;
         }
 
-        public Builder degree(String degree) {
+        public Builder degree(Degree degree) {
             this.degree = degree;
             return this;
         }
