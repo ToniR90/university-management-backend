@@ -57,7 +57,7 @@ public class StudentJpaMapper {
                 .fullName(fullName)
                 .email(email)
                 .phone(phone)
-                .degree(Degree.valueOf(jpaEntity.getDegree()))
+                .degree(Degree.fromString(jpaEntity.getDegree()))
                 .currentYear(currentYear)
                 .alumniInfo(alumniInfo)
                 .rgpdConsent(rgpdConsent)
