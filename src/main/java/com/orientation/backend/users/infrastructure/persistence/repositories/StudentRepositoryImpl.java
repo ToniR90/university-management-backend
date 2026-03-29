@@ -9,6 +9,7 @@ import com.orientation.backend.users.domain.repository.StudentRepository;
 import com.orientation.backend.users.infrastructure.persistence.entities.StudentJpaEntity;
 import com.orientation.backend.users.infrastructure.persistence.mappers.StudentJpaMapper;
 import com.orientation.backend.users.infrastructure.persistence.specifications.StudentSpecifications;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -18,13 +19,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@RequiredArgsConstructor
 public class StudentRepositoryImpl implements StudentRepository {
 
     private final SpringDataStudentRepository jpaRepository;
-
-    public StudentRepositoryImpl(SpringDataStudentRepository jpaRepository) {
-        this.jpaRepository = jpaRepository;
-    }
 
     @Override
     public Student save(Student student) {

@@ -4,14 +4,14 @@ import com.orientation.backend.users.domain.model.enums.CurrentYear;
 import com.orientation.backend.users.domain.model.enums.Degree;
 import com.orientation.backend.users.domain.model.query.StudentSearchCriteria;
 import com.orientation.backend.users.infrastructure.persistence.entities.StudentJpaEntity;
+import lombok.experimental.UtilityClass;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
  * This class includes all the methods for the diferents specifications of the filters
  */
-public final class StudentSpecifications {
-
-    private StudentSpecifications() {}
+@UtilityClass
+public class StudentSpecifications {
 
     private static Specification<StudentJpaEntity> isActive() {
         return ((root, query, criteriaBuilder) ->

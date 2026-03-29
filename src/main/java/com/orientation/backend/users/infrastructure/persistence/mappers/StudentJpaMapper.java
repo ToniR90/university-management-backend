@@ -5,14 +5,13 @@ import com.orientation.backend.users.domain.model.enums.*;
 import com.orientation.backend.users.domain.model.valueobjects.*;
 import com.orientation.backend.users.infrastructure.persistence.entities.StudentJpaEntity;
 
+import lombok.experimental.UtilityClass;
+
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+@UtilityClass
 public class StudentJpaMapper {
-
-    // ========== Constructor ==========
-    private StudentJpaMapper() {
-    }
 
     // ========== JPA -> Domain ==========
     public static Student toDomain(StudentJpaEntity jpaEntity) {
@@ -116,7 +115,7 @@ public class StudentJpaMapper {
         jpaEntity.setPhone(phone);
         jpaEntity.setDegree(degree);
         jpaEntity.setCurrentYear(currentYear);
-        jpaEntity.setAlumni(isAlumni);
+        jpaEntity.setIsAlumni(isAlumni);
         jpaEntity.setAlumniType(alumniType);
         jpaEntity.setGraduationYear(graduationYear);
         jpaEntity.setRgpdConsentStatus(rgpdConsentStatus);
