@@ -3,9 +3,17 @@ package com.orientation.backend.users.infrastructure.persistence.entities;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "students")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class StudentJpaEntity {
 
     @Id
@@ -74,217 +82,6 @@ public class StudentJpaEntity {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
-
-    // ========== Constructor ==========
-    public StudentJpaEntity () {}
-
-    public StudentJpaEntity(Long id, boolean active, String dni, String name, String firstSurname, String secondSurname,
-                            String email, String phone, String degree, String currentYear, Boolean isAlumni,
-                            String alumniType, Integer graduationYear, String rgpdConsentStatus,
-                            LocalDateTime rgpdSignedDate, Integer rgpdSignedYear, String howDidYouKnowUs,
-                            String howDidYouContactUs, String counselorNotes, LocalDateTime createdAt, LocalDateTime updatedAt,
-                            LocalDateTime deletedAt) {
-        this.id = id;
-        this.active = active;
-        this.dni = dni;
-        this.name = name;
-        this.firstSurname = firstSurname;
-        this.secondSurname = secondSurname;
-        this.email = email;
-        this.phone = phone;
-        this.degree = degree;
-        this.currentYear = currentYear;
-        this.isAlumni = isAlumni;
-        this.alumniType = alumniType;
-        this.graduationYear = graduationYear;
-        this.rgpdConsentStatus = rgpdConsentStatus;
-        this.rgpdSignedDate = rgpdSignedDate;
-        this.rgpdSignedYear = rgpdSignedYear;
-        this.howDidYouKnowUs = howDidYouKnowUs;
-        this.howDidYouContactUs = howDidYouContactUs;
-        this.counselorNotes = counselorNotes;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.deletedAt = deletedAt;
-    }
-
-    // ========== Getters - Setters ==========
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    public String getDni() {
-        return dni;
-    }
-
-    public void setDni(String dni) {
-        this.dni = dni;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getFirstSurname() {
-        return firstSurname;
-    }
-
-    public void setFirstSurname(String firstSurname) {
-        this.firstSurname = firstSurname;
-    }
-
-    public String getSecondSurname() {
-        return secondSurname;
-    }
-
-    public void setSecondSurname(String secondSurname) {
-        this.secondSurname = secondSurname;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getDegree() {
-        return degree;
-    }
-
-    public void setDegree(String degree) {
-        this.degree = degree;
-    }
-
-    public String getCurrentYear() {
-        return currentYear;
-    }
-
-    public void setCurrentYear(String currentYear) {
-        this.currentYear = currentYear;
-    }
-
-    public Boolean getIsAlumni() {
-        return isAlumni;
-    }
-
-    public void setAlumni(Boolean alumni) {
-        isAlumni = alumni;
-    }
-
-    public String getAlumniType() {
-        return alumniType;
-    }
-
-    public void setAlumniType(String alumniType) {
-        this.alumniType = alumniType;
-    }
-
-    public Integer getGraduationYear() {
-        return graduationYear;
-    }
-
-    public void setGraduationYear(Integer graduationYear) {
-        this.graduationYear = graduationYear;
-    }
-
-    public String getRgpdConsentStatus() {
-        return rgpdConsentStatus;
-    }
-
-    public void setRgpdConsentStatus(String rgpdConsentStatus) {
-        this.rgpdConsentStatus = rgpdConsentStatus;
-    }
-
-    public LocalDateTime getRgpdSignedDate() {
-        return rgpdSignedDate;
-    }
-
-    public void setRgpdSignedDate(LocalDateTime rgpdSignedDate) {
-        this.rgpdSignedDate = rgpdSignedDate;
-    }
-
-    public Integer getRgpdSignedYear() {
-        return rgpdSignedYear;
-    }
-
-    public void setRgpdSignedYear(Integer rgpdSignedYear) {
-        this.rgpdSignedYear = rgpdSignedYear;
-    }
-
-    public String getHowDidYouKnowUs() {
-        return howDidYouKnowUs;
-    }
-
-    public void setHowDidYouKnowUs(String howDidYouKnowUs) {
-        this.howDidYouKnowUs = howDidYouKnowUs;
-    }
-
-    public String getHowDidYouContactUs() {
-        return howDidYouContactUs;
-    }
-
-    public void setHowDidYouContactUs(String howDidYouContactUs) {
-        this.howDidYouContactUs = howDidYouContactUs;
-    }
-
-    public String getCounselorNotes() {
-        return counselorNotes;
-    }
-
-    public void setCounselorNotes(String counselorNotes) {
-        this.counselorNotes = counselorNotes;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
-    }
-
-    public void setDeletedAt(LocalDateTime deletedAt) {
-        this.deletedAt = deletedAt;
-    }
 
     // ========== Callbacks ==========
 
