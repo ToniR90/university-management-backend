@@ -11,7 +11,6 @@ import java.util.Optional;
 /**
  * Student Aggregate Root.
  * Represents a student managed by the orientation department.
- *
  * Invariants:
  * - dni must be unique and valid
  * - fullName cannot be empty
