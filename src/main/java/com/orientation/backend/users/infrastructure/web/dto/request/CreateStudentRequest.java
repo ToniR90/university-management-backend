@@ -17,10 +17,7 @@ public record CreateStudentRequest(
 
         @NotBlank(message = "S'ha d'introduir el primer cognom")
         @Size(max = 100)
-        String firstSurname,
-
-        @Size(max = 100)
-        String secondSurname,
+        String surname,
 
         @Email(message = "El format de l'email ha de ser vàlid")
         String email,
@@ -35,7 +32,6 @@ public record CreateStudentRequest(
         String currentYear  // Validación la hace CurrentYear.valueOf()
 ) {
     public CreateStudentRequest {
-        secondSurname = normalizeString(secondSurname);
         email = normalizeString(email);
         phone = normalizeString(phone);
     }

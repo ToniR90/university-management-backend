@@ -24,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,9 +42,9 @@ class StudentServiceTest {
 	// ========== Helper Methods ==========
 	private Student createTestStudent(String dni, String email) {
 		return Student.builder()
-				.id(1L)
+				.id(UUID.randomUUID())
 				.dni(Dni.of(dni))
-				.fullName(FullName.of("test_name", "test_firstSurname", "test_secondSurname"))
+				.fullName(FullName.of("test_name", "test_surname"))
 				.email(Optional.of(Email.of(email)))
 				.phone(Optional.of(Phone.of("+34612345678")))
 				.degree(Degree.VIDEOGAME_DESIGN)
@@ -56,7 +57,7 @@ class StudentServiceTest {
 	private Student createTestStudentWithoutOptionals(String dni) {
 		return Student.builder()
 				.dni(Dni.of(dni))
-				.fullName(FullName.of("test_name", "test_firstSurname", null))
+				.fullName(FullName.of("test_name", "test_firstSurname"))
 				.email(Optional.empty())
 				.phone(Optional.empty())
 				.degree(Degree.VIDEOGAME_DESIGN)
@@ -72,8 +73,7 @@ class StudentServiceTest {
 				dni,
 				"test_name",
 				"test_firstSurname",
-				"test_secondSurname",
-				email,
+				"test@email.com",
 				"+34612345678",
 				"VIDEOGAME_DESIGN",
 				"FIRST"
@@ -98,9 +98,7 @@ class StudentServiceTest {
 		assertNotNull(result);
 		assertEquals("00000000T", result.getDni().getValue());
 		assertEquals("test_name", result.getFullName().getName());
-		assertEquals("test_firstSurname", result.getFullName().getFirstSurname());
-		assertTrue(result.getFullName().getSecondSurname().isPresent());
-		assertEquals("test_secondSurname", result.getFullName().getSecondSurname().get());
+		assertEquals("test_surname", result.getFullName().getSurname());
 		
 		assertTrue(result.getEmail().isPresent());
 		assertEquals("test@email.com", result.getEmail().get().getValue());
@@ -148,8 +146,7 @@ class StudentServiceTest {
 		CreateStudentCommand command = new CreateStudentCommand(
 				"00000002W",
 				"test_name",
-				"test_firstSurname",
-				null,
+				"test_surname",
 				null,
 				null,
 				"VIDEOGAME_DESIGN",
@@ -165,7 +162,6 @@ class StudentServiceTest {
 		Student result = studentService.createStudent(command);
 		
 		// ASSERT
-		assertTrue(result.getFullName().getSecondSurname().isEmpty());
 		assertTrue(result.getEmail().isEmpty());
 		assertTrue(result.getPhone().isEmpty());
 		
@@ -189,44 +185,7 @@ class StudentServiceTest {
 		verify(studentRepository, never()).existsByDni(any(Dni.class));
 		verify(studentRepository, never()).save(any(Student.class));
 	}
-	
-	// =====================================================
-	// FIND BY ID TESTS
-	// =====================================================
-	
-	@Test
-	void shouldFindStudentById() {
-		
-		// ARRANGE
-		Student student = createTestStudent("00000003A", "test@email.com");
-		
-		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
-		
-		// ACT
-		Student result = studentService.findById(1L);
-		
-		// ASSERT
-		assertNotNull(result);
-		assertEquals("00000003A", result.getDni().getValue());
-		assertEquals(student, result);
-		
-		// VERIFY
-		verify(studentRepository, times(1))
-				.findById(1L);
-	}
-	
-	@Test
-	void shouldThrowExceptionWhenStudentNotFoundById() {
-		
-		// ARRANGE
-		when(studentRepository.findById(999L)).thenReturn(Optional.empty());
-		
-		// ACT + ASSERT
-		assertThrows(StudentNotFoundException.class, () -> studentService.findById(999L));
-		
-		// VERIFY
-		verify(studentRepository, times(1)).findById(999L);
-	}
+
 	
 	// ===================================================
 	// FIND BY DNI TESTS
@@ -277,11 +236,11 @@ class StudentServiceTest {
 		UpdateContactCommand command = new UpdateContactCommand("newmail@email.com", "+3461234587");
 		Student student = createTestStudent("00000006Y", "test@email.com");
 		
-		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+		when(studentRepository.findByDni(Dni.of(student.getDni().getValue()))).thenReturn(Optional.of(student));
 		when(studentRepository.save(any(Student.class))).thenReturn(student);
 		
 		// ACT
-		Student result = studentService.updateContactInfo(1L, command);
+		Student result = studentService.updateContactInfo(student.getDni().getValue(), command);
 		
 		// ASSERT
 		assertNotNull(result);
@@ -291,7 +250,7 @@ class StudentServiceTest {
 		assertEquals("+3461234587", result.getPhone().get().getValue());
 		
 		// VERIFY
-		verify(studentRepository, times(1)).findById(1L);
+		verify(studentRepository, times(1)).findByDni(Dni.of(student.getDni().getValue()));
 		verify(studentRepository, times(1)).save(any(Student.class));
 	}
 	
@@ -302,11 +261,11 @@ class StudentServiceTest {
 		Student student = createTestStudent("00000007F", "test@email.com");
 		UpdateContactCommand command = new UpdateContactCommand("updated_mail@email.com", null);
 		
-		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+		when(studentRepository.findByDni(Dni.of(student.getDni().getValue()))).thenReturn(Optional.of(student));
 		when(studentRepository.save(any(Student.class))).thenReturn(student);
 		
 		// ACT
-		Student result = studentService.updateContactInfo(1L, command);
+		Student result = studentService.updateContactInfo(student.getDni().getValue(), command);
 		
 		// ASSERT
 		assertNotNull(result);
@@ -317,7 +276,7 @@ class StudentServiceTest {
 		assertEquals(student.getPhone().get().getValue(), result.getPhone().get().getValue());
 		
 		// VERIFY
-		verify(studentRepository, times(1)).findById(1L);
+		verify(studentRepository, times(1)).findByDni(Dni.of(student.getDni().getValue()));
 		verify(studentRepository, times(1)).save(any(Student.class));
 	}
 	
@@ -326,13 +285,13 @@ class StudentServiceTest {
 		
 		// ARRANGE
 		Student student = createTestStudent("00000008P", "test@email.com");
-		when(studentRepository.findById(any(Long.class))).thenReturn(Optional.of(student));
+		when(studentRepository.findByDni(student.getDni())).thenReturn(Optional.of(student));
 		UpdateContactCommand command = new UpdateContactCommand(null, null);
 		
 		// ACT + ASSERT
 		assertThrows(
 				UpdateStudentException.class,
-				() -> studentService.updateContactInfo(1L, command)
+				() -> studentService.updateContactInfo(student.getDni().getValue(), command)
 		);
 	}
 	
@@ -345,11 +304,11 @@ class StudentServiceTest {
 		Student student = createTestStudent("00000008P", "test@email.com");
 		UpdateRgpdConsentCommand command = new UpdateRgpdConsentCommand("SIGNED_IN_PERSON", null);
 		
-		when(studentRepository.findById(any(Long.class))).thenReturn(Optional.of(student));
+		when(studentRepository.findByDni(student.getDni())).thenReturn(Optional.of(student));
 		when(studentRepository.save(any(Student.class))).thenReturn(student);
 		
 		// ACT
-		Student result = studentService.updateRgpdConsent(1L, command);
+		Student result = studentService.updateRgpdConsent(student.getDni().getValue(), command);
 		
 		// ASSERT
 		assertNotNull(result);
@@ -357,7 +316,7 @@ class StudentServiceTest {
 		assertEquals(RgpdConsentStatus.SIGNED_IN_PERSON, result.getRgpdConsent().getStatus());
 		
 		// VERIFY
-		verify(studentRepository, times(1)).findById(1L);
+		verify(studentRepository, times(1)).findByDni(student.getDni());
 		verify(studentRepository, times(1)).save(any(Student.class));
 	}
 	
@@ -367,11 +326,11 @@ class StudentServiceTest {
 		Student student = createTestStudent("00000009D", "test@email.com");
 		UpdateRgpdConsentCommand command = new UpdateRgpdConsentCommand("ALREADY_SIGNED", 2020);
 		
-		when(studentRepository.findById(any(Long.class))).thenReturn(Optional.of(student));
+		when(studentRepository.findByDni(student.getDni())).thenReturn(Optional.of(student));
 		when(studentRepository.save(any(Student.class))).thenReturn(student);
 		
 		// ACT
-		Student result = studentService.updateRgpdConsent(1L, command);
+		Student result = studentService.updateRgpdConsent(student.getDni().getValue(), command);
 		
 		// ASSERT
 		assertNotNull(result);
@@ -379,7 +338,7 @@ class StudentServiceTest {
 		assertEquals(RgpdConsentStatus.ALREADY_SIGNED, result.getRgpdConsent().getStatus());
 		
 		// VERIFY
-		verify(studentRepository, times(1)).findById(1L);
+		verify(studentRepository, times(1)).findByDni(student.getDni());
 		verify(studentRepository, times(1)).save(any(Student.class));
 	}
 	
@@ -389,13 +348,13 @@ class StudentServiceTest {
 		Student student = createTestStudent("00000010X", "test@email.com");
 		UpdateRgpdConsentCommand command = new UpdateRgpdConsentCommand("NOT_VALID_RGPD", null);
 		
-		when(studentRepository.findById(any(Long.class))).thenReturn(Optional.of(student));
+		when(studentRepository.findByDni(student.getDni())).thenReturn(Optional.of(student));
 		
 		// ACT + ASSERT
-		assertThrows(UpdateStudentException.class, () -> studentService.updateRgpdConsent(1L, command));
+		assertThrows(UpdateStudentException.class, () -> studentService.updateRgpdConsent(student.getDni().getValue(), command));
 		
 		// VERIFY
-		verify(studentRepository, times(1)).findById(1L);
+		verify(studentRepository, times(1)).findByDni(student.getDni());
 		verify(studentRepository, never()).save(any(Student.class));
 	}
 	
@@ -408,18 +367,18 @@ class StudentServiceTest {
 		Student student = createTestStudent("00000011B", "test@email.com");
 		MarkAsAlumniCommand command = new MarkAsAlumniCommand("BACHELOR", 2000);
 		
-		when(studentRepository.findById(any(Long.class))).thenReturn(Optional.of(student));
+		when(studentRepository.findByDni(student.getDni())).thenReturn(Optional.of(student));
 		when(studentRepository.save(any(Student.class))).thenReturn(student);
 		
 		// ACT
-		Student result = studentService.markAsAlumni(1L, command);
+		Student result = studentService.markAsAlumni(student.getDni().getValue(), command);
 		
 		// ASSERT
 		assertNotNull(result);
 		assertTrue(result.getAlumniInfo().isAlumni());
 		
 		// VERIFY
-		verify(studentRepository, times(1)).findById(1L);
+		verify(studentRepository, times(1)).findByDni(student.getDni());
 		verify(studentRepository, times(1)).save(any(Student.class));
 	}
 	
@@ -429,13 +388,13 @@ class StudentServiceTest {
 		Student student = createTestStudent("00000012N", "test@email.com");
 		MarkAsAlumniCommand command = new MarkAsAlumniCommand("INVALID_ALUMNI_TYPE", 2000);
 		
-		when(studentRepository.findById(any(Long.class))).thenReturn(Optional.of(student));
+		when(studentRepository.findByDni(student.getDni())).thenReturn(Optional.of(student));
 		
 		// ACT + ASSERT
-		assertThrows(UpdateStudentException.class, () -> studentService.markAsAlumni(1L, command));
+		assertThrows(UpdateStudentException.class, () -> studentService.markAsAlumni(student.getDni().getValue(), command));
 		
 		// VERIFY
-		verify(studentRepository, times(1)).findById(1L);
+		verify(studentRepository, times(1)).findByDni(student.getDni());
 		verify(studentRepository, never()).save(any(Student.class));
 		
 	}
@@ -446,13 +405,13 @@ class StudentServiceTest {
 		Student student = createTestStudent("00000013J", "test@email.com");
 		MarkAsAlumniCommand command = new MarkAsAlumniCommand("BACHELOR", 1800);
 		
-		when(studentRepository.findById(any(Long.class))).thenReturn(Optional.of(student));
+		when(studentRepository.findByDni(student.getDni())).thenReturn(Optional.of(student));
 		
 		// ACT + ASSERT
-		assertThrows(UpdateStudentException.class, () -> studentService.markAsAlumni(1L, command));
+		assertThrows(UpdateStudentException.class, () -> studentService.markAsAlumni(student.getDni().getValue(), command));
 		
 		// VERIFY
-		verify(studentRepository, times(1)).findById(1L);
+		verify(studentRepository, times(1)).findByDni(student.getDni());
 		verify(studentRepository, never()).save(any(Student.class));
 	}
 	
@@ -465,31 +424,31 @@ class StudentServiceTest {
 		// ARRANGE
 		Student student = createTestStudent("00000014Z", "test@email.com");
 		
-		when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+		when(studentRepository.findByDni(student.getDni())).thenReturn(Optional.of(student));
 		when(studentRepository.save(any(Student.class))).thenReturn(student);
 		
 		// ACT
-		studentService.deleteStudent(1L);
+		studentService.deleteStudent(student.getDni().getValue());
 		
 		// ASSERT
 		assertFalse(student.isActive());
 		assertTrue(student.getDeletedAt().isPresent());
 		
 		// VERIFY
-		verify(studentRepository, times(1)).findById(1L);
+		verify(studentRepository, times(1)).findByDni(student.getDni());
 		verify(studentRepository, times(1)).save(any(Student.class));
 	}
 	
 	@Test
 	void shouldThrowExceptionWhenDeletingNonExistentStudent() {
 		// ARRANGE
-		when(studentRepository.findById(999L)).thenReturn(Optional.empty());
+		when(studentRepository.findByDni(Dni.of("12345678Z"))).thenReturn(Optional.empty());
 		
 		// ACT + ASSERT
-		assertThrows(StudentNotFoundException.class, () -> studentService.deleteStudent(999L));
+		assertThrows(StudentNotFoundException.class, () -> studentService.deleteStudent("12345678Z"));
 		
 		// VERIFY
-		verify(studentRepository, times(1)).findById(999L);
+		verify(studentRepository, times(1)).findByDni(Dni.of("12345678Z"));
 		verify(studentRepository, never()).save(any(Student.class));
 	}
 

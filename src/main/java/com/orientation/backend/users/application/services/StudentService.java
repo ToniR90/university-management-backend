@@ -54,7 +54,7 @@ public class StudentService {
 		
 		Student student = Student.builder()
 				.dni(dni)
-				.fullName(FullName.of(command.name(), command.firstSurname(), command.secondSurname()))
+				.fullName(FullName.of(command.name(), command.surname()))
 				.email(Optional.ofNullable(command.email()).map(Email::of))
 				.phone(Optional.ofNullable(command.phone()).map(Phone::of))
 				.degree(Degree.fromString(command.degree()))
@@ -67,16 +67,13 @@ public class StudentService {
 	}
 	
 	@Transactional
-	public void deleteStudent(Long id) {
-		Student student = findById(id);
+	public void deleteStudent(String dni) {
+		Student student = findByDni(dni);
 		student.deactivate();
 		studentRepository.save(student);
 	}
 	
-	public Student findById(Long id) {
-		return studentRepository.findById(id).orElseThrow(() -> new StudentNotFoundException(id));
-	}
-	
+
 	public Student findByDni(String dni) {
 		return studentRepository.findByDni(Dni.of(dni)).orElseThrow(() -> new StudentNotFoundException(dni));
 	}
@@ -86,7 +83,7 @@ public class StudentService {
 	}
 	
 	@Transactional
-	public Student updateContactInfo(Long id, UpdateContactCommand command) {
+	public Student updateContactInfo(String dni, UpdateContactCommand command) {
 		List<BusinessViolation> violations = new ArrayList<>();
 		
 		if (command.email() == null && command.phone() == null) {
@@ -94,7 +91,7 @@ public class StudentService {
 					ErrorCode.BUSINESS_RULE_VIOLATION));
 		}
 		
-		Student student = findById(id);
+		Student student = findByDni(dni);
 		
 		if (command.email() != null) {
 			Email email = Email.of(command.email());
@@ -122,10 +119,10 @@ public class StudentService {
 	}
 	
 	@Transactional
-	public Student updateRgpdConsent(Long id, UpdateRgpdConsentCommand command) {
+	public Student updateRgpdConsent(String dni, UpdateRgpdConsentCommand command) {
 		List<BusinessViolation> violations = new ArrayList<>();
 		
-		Student student = findById(id);
+		Student student = findByDni(dni);
 		
 		RgpdConsent consent = null;
 		switch (command.rgpdConsentStatus()) {
@@ -159,9 +156,9 @@ public class StudentService {
 	}
 	
 	@Transactional
-	public Student markAsAlumni(Long id, MarkAsAlumniCommand command) {
+	public Student markAsAlumni(String dni, MarkAsAlumniCommand command) {
 		List<BusinessViolation> violations = new ArrayList<>();
-		Student student = findById(id);
+		Student student = findByDni(dni);
 		
 		if (command.graduationYear() < 1900 || command.graduationYear() > LocalDateTime.now().getYear()) {
 			violations.add(new BusinessViolation("graduationYear", "L'any de graduació no és correcte", ErrorCode.BUSINESS_RULE_VIOLATION));

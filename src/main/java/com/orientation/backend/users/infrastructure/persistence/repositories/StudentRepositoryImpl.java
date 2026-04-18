@@ -34,11 +34,6 @@ public class StudentRepositoryImpl implements StudentRepository {
     }
 
     @Override
-    public Optional<Student> findById(Long id) {
-        return jpaRepository.findByIdAndActiveTrue(id).map(StudentJpaMapper::toDomain);
-    }
-
-    @Override
     public Optional<Student> findByDni(Dni dni) {
         return jpaRepository.findByDniAndActiveTrue(dni.getValue()).map(StudentJpaMapper::toDomain);
     }

@@ -2,7 +2,7 @@ package com.orientation.backend.users.domain.model.enums;
 
 // TODO: Review with client in Sprint 2 - temporary values
 
-public enum DiscoveryChannel {
+public enum DiscoveryOption {
     WEBSITE("Pàgina web"),
     SOCIAL_MEDIA("Xarxes socials"),
     REFERRAL("Recomanació"),
@@ -12,7 +12,7 @@ public enum DiscoveryChannel {
 
     private final String displayName;
 
-    DiscoveryChannel(String displayName) {
+    DiscoveryOption(String displayName) {
         this.displayName = displayName;
     }
 

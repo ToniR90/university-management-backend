@@ -9,11 +9,9 @@ import java.time.LocalDateTime;
  * Flat structure matching the API contract.
  */
 public record StudentResponse(
-        Long id,
         String dni,
         String name,
-        String firstSurname,
-        String secondSurname,
+        String surname,
         String email,
         String phone,
         String degree,
@@ -37,11 +35,9 @@ public record StudentResponse(
      */
     public static StudentResponse fromDomain(Student student) {
         return new StudentResponse(
-                student.getId(),
                 student.getDni().getValue(),
                 student.getFullName().getName(),
-                student.getFullName().getFirstSurname(),
-                student.getFullName().getSecondSurname().orElse(null),
+                student.getFullName().getSurname(),
                 student.getEmail().map(e -> e.getValue()).orElse(null),
                 student.getPhone().map(p -> p.getValue()).orElse(null),
                 student.getDegree().name(),

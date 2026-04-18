@@ -36,7 +36,7 @@ class StudentRepositoryImplTest extends BaseIntegrationTest {
     private Student createTestStudent(String dni, String email) {
         return Student.builder()
                 .dni(Dni.of(dni))
-                .fullName(FullName.of("Test_Name", "Test_Surname1", "Test_Surname2"))
+                .fullName(FullName.of("Test_Name", "Test_Surname"))
                 .email(Optional.of(Email.of(email)))
                 .phone(Optional.of(Phone.of("+34612345678")))
                 .degree(Degree.VIDEOGAME_DESIGN)
@@ -50,7 +50,7 @@ class StudentRepositoryImplTest extends BaseIntegrationTest {
                                              Degree degree, CurrentYear year, boolean alumni) {
         return Student.builder()
                 .dni(Dni.of(dni))
-                .fullName(FullName.of(name, surname, null))
+                .fullName(FullName.of(name, surname))
                 .degree(degree)
                 .currentYear(year)
                 .alumniInfo(alumni ? AlumniInfo.createAlumni(AlumniType.BACHELOR, 2023) : AlumniInfo.notAlumni())
@@ -72,27 +72,6 @@ class StudentRepositoryImplTest extends BaseIntegrationTest {
         assertThat(saved.getDni().getValue()).isEqualTo("00000000T");
         assertThat(saved.getEmail()).isPresent();
         assertThat(saved.getEmail().get().getValue()).isEqualTo("test@example.com");
-    }
-
-    @Test
-    @DisplayName("Should find Student by ID")
-    void shouldFindStudentById() {
-        Student student = createTestStudent("00000001R", "test@email.com");
-
-        Student saved = studentRepository.save(student);
-
-        Optional<Student> found = studentRepository.findById(saved.getId());
-
-        assertThat(found).isPresent();
-        assertThat(found.get().getDni().getValue()).isEqualTo("00000001R");
-    }
-
-    @Test
-    @DisplayName("Should return empty when not found by ID")
-    void shouldReturnEmptyWhenNotFoundById() {
-        Optional<Student> found = studentRepository.findById(999L);
-
-        assertThat(found).isEmpty();
     }
 
     @Test
@@ -148,7 +127,7 @@ class StudentRepositoryImplTest extends BaseIntegrationTest {
 
         Student updated = studentRepository.save(saved);
 
-        Optional<Student> found = studentRepository.findById(updated.getId());
+        Optional<Student> found = studentRepository.findByDni(Dni.of(updated.getDni().getValue()));
         assertThat(found).isPresent();
         assertThat(found.get().getEmail()).isPresent();
         assertThat(found.get().getEmail().get().getValue()).isEqualTo("new_email@example.com");
@@ -159,7 +138,7 @@ class StudentRepositoryImplTest extends BaseIntegrationTest {
     void shouldAllowNullEmail() {
         Student student = Student.builder()
                 .dni(Dni.of("00000007F"))
-                .fullName(FullName.of("Test_name", "Test_FirstSurname", "Test_SecondSurname"))
+                .fullName(FullName.of("Test_name", "Test_surname"))
                 .degree(Degree.VIDEOGAME_DESIGN)
                 .currentYear(CurrentYear.FIRST)
                 .alumniInfo(AlumniInfo.notAlumni())
@@ -168,7 +147,7 @@ class StudentRepositoryImplTest extends BaseIntegrationTest {
 
         Student saved = studentRepository.save(student);
 
-        Optional<Student> found = studentRepository.findById(saved.getId());
+        Optional<Student> found = studentRepository.findByDni(Dni.of(saved.getDni().getValue()));
         assertThat(found).isPresent();
         assertThat(found.get().getEmail()).isEmpty();
     }
@@ -178,7 +157,7 @@ class StudentRepositoryImplTest extends BaseIntegrationTest {
     void shouldAllowNullPhone() {
         Student student = Student.builder()
                 .dni(Dni.of("00000008P"))
-                .fullName(FullName.of("Test_name", "Test_FirstSurname", "Test_SecondSurname"))
+                .fullName(FullName.of("Test_name", "Test_surname"))
                 .degree(Degree.VIDEOGAME_DESIGN)
                 .currentYear(CurrentYear.FIRST)
                 .alumniInfo(AlumniInfo.notAlumni())
@@ -187,7 +166,7 @@ class StudentRepositoryImplTest extends BaseIntegrationTest {
 
         Student saved = studentRepository.save(student);
 
-        Optional<Student> found = studentRepository.findById(saved.getId());
+        Optional<Student> found = studentRepository.findByDni(Dni.of(saved.getDni().getValue()));
         assertThat(found).isPresent();
         assertThat(found.get().getPhone()).isEmpty();
     }
@@ -197,25 +176,18 @@ class StudentRepositoryImplTest extends BaseIntegrationTest {
     void shouldFailWhenSavingDuplicateDni() {
         Student student1 = createTestStudent("00000009D", "test@example.com");
         studentRepository.save(student1);
+        entityManager.flush();
 
         Student student2 = createTestStudent("00000009D", "test2@example.com");
 
-        assertThatThrownBy(() -> studentRepository.save(student2)).isInstanceOf(Exception.class);
+        assertThatThrownBy(() -> {
+            studentRepository.save(student2);
+            entityManager.flush();
+        }).isInstanceOf(Exception.class);
     }
 
     // ========== Soft Delete Tests ==========
 
-    @Test
-    @DisplayName("Should not find student by ID after deactivation")
-    void shouldNotFindByIdAfterDeactivation() {
-        Student student = createTestStudent("00000010X", "test@example.com");
-        Student saved = studentRepository.save(student);
-
-        saved.deactivate();
-        studentRepository.save(saved);
-
-        assertThat(studentRepository.findById(saved.getId())).isEmpty();
-    }
 
     @Test
     @DisplayName("Should not find student by DNI after deactivation")
@@ -243,7 +215,7 @@ class StudentRepositoryImplTest extends BaseIntegrationTest {
 
         List<Student> all = studentRepository.findAll();
         assertThat(all).hasSize(1);
-        assertThat(all.get(0).getDni().getValue()).isEqualTo("00000012N");
+        assertThat(all.getFirst().getDni().getValue()).isEqualTo("00000012N");
     }
 
     @Test

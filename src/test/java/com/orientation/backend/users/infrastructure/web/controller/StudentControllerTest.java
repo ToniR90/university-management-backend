@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -47,40 +48,14 @@ class StudentControllerTest {
 	// ========== Helper ==========
 	private Student createTestStudent() {
 		return Student.builder()
-				.id(1L)
+				.id(UUID.randomUUID())
 				.dni(Dni.of("12345678Z"))
-				.fullName(FullName.of("Joan", "García", "López"))
+				.fullName(FullName.of("Joan", "García"))
 				.email(Email.of("joan@mail.com"))
 				.phone(Phone.of("600123456"))
 				.degree(Degree.DIGITAL_MARKETING)
 				.currentYear(CurrentYear.FIRST)
 				.build();
-	}
-	
-	// ========== GET /{id} ==========
-	@Test
-	void shouldGetStudentById() throws Exception {
-		Student student = createTestStudent();
-		when(studentService.findById(1L)).thenReturn(student);
-		
-		mockMvc.perform(get("/api/v1/students/1"))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.id").value(1))
-				.andExpect(jsonPath("$.dni").value("12345678Z"))
-				.andExpect(jsonPath("$.name").value("Joan"));
-	}
-	
-	@Test
-	void shouldReturn404WhenStudentNotFoundById() throws Exception {
-		when(studentService.findById(999L)).thenThrow(new StudentNotFoundException(999L));
-		
-		mockMvc.perform(get("/api/v1/students/999"))
-				.andExpect(status().isNotFound())
-				.andExpect(jsonPath("$.status").value(404))
-				.andExpect(jsonPath("$.errorCode").value("USER_NOT_FOUND"))
-				.andExpect(jsonPath("$.message").value("Multiple business rule violations"))
-				.andExpect(jsonPath("$.errors[0].field").value("id"))
-				.andExpect(jsonPath("$.errors[0].message").value("User not found with id 999"));
 	}
 	
 	// ========== GET /dni/{dni} ==========
@@ -91,7 +66,6 @@ class StudentControllerTest {
 		
 		mockMvc.perform(get("/api/v1/students/dni/12345678Z"))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.id").value(1))
 				.andExpect(jsonPath("$.dni").value("12345678Z"))
 				.andExpect(jsonPath("$.name").value("Joan"));
 	}
@@ -235,7 +209,7 @@ class StudentControllerTest {
 		Map<String, Object> request = Map.of(
 				"dni", "12345678Z",
 				"name", "Joan",
-				"firstSurname", "García",
+				"surname", "García",
 				"degree", "Informàtica",
 				"currentYear", "FIRST"
 		);
@@ -257,7 +231,7 @@ class StudentControllerTest {
 		Map<String, Object> request = Map.of(
 				"dni", "12345678Z",
 				"name", "Joan",
-				"firstSurname", "García",
+				"surname", "García",
 				"degree", "Informàtica",
 				"currentYear", "FIRST"
 		);
@@ -288,14 +262,14 @@ class StudentControllerTest {
 	@Test
 	void shouldUpdateContact() throws Exception {
 		Student student = createTestStudent();
-		when(studentService.updateContactInfo(eq(1L), any())).thenReturn(student);
+		when(studentService.updateContactInfo(eq("12345678Z"), any())).thenReturn(student);
 		
 		Map<String, Object> request = Map.of(
 				"email", "nou@mail.com",
 				"phone", "600654321"
 		);
 		
-		mockMvc.perform(patch("/api/v1/students/1/contact")
+		mockMvc.perform(patch("/api/v1/students/12345678Z/contact")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(request)))
 				.andExpect(status().isOk())
@@ -307,12 +281,12 @@ class StudentControllerTest {
 		BusinessViolation violation = new BusinessViolation("contact", "No es pot actualitzar sense cap dada de " +
 				"contacte",
 				ErrorCode.BUSINESS_RULE_VIOLATION);
-		when(studentService.updateContactInfo(eq(1L), any()))
+		when(studentService.updateContactInfo(eq("12345678Z"), any()))
 				.thenThrow(new UpdateStudentException(List.of(violation)));
 		
 		String request = "{\"email\": null, \"phone\": null}";
 		
-		mockMvc.perform(patch("/api/v1/students/1/contact")
+		mockMvc.perform(patch("/api/v1/students/12345678Z/contact")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(request))
 				.andExpect(status().isBadRequest())
@@ -323,13 +297,13 @@ class StudentControllerTest {
 	@Test
 	void shouldUpdateRgpd() throws Exception {
 		Student student = createTestStudent();
-		when(studentService.updateRgpdConsent(eq(1L), any())).thenReturn(student);
+		when(studentService.updateRgpdConsent(eq("12345678Z"), any())).thenReturn(student);
 		
 		Map<String, Object> request = Map.of(
 				"rgpdConsentStatus", "SIGNED_IN_PERSON"
 		);
 		
-		mockMvc.perform(patch("/api/v1/students/1/rgpd")
+		mockMvc.perform(patch("/api/v1/students/12345678Z/rgpd")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(request)))
 				.andExpect(status().isOk())
@@ -343,14 +317,14 @@ class StudentControllerTest {
 				"Status RGPD no vàlid: " + 1L,
 				ErrorCode.BUSINESS_RULE_VIOLATION
 		);
-		when(studentService.updateRgpdConsent(eq(1L), any()))
+		when(studentService.updateRgpdConsent(eq("12345678Z"), any()))
 				.thenThrow(new UpdateStudentException(List.of(violation)));
 		
 		Map<String, Object> request = Map.of(
 				"rgpdConsentStatus", "INVALID"
 		);
 		
-		mockMvc.perform(patch("/api/v1/students/1/rgpd")
+		mockMvc.perform(patch("/api/v1/students/12345678Z/rgpd")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(request)))
 				.andExpect(status().isBadRequest())
@@ -361,14 +335,14 @@ class StudentControllerTest {
 	@Test
 	void shouldMarkAsAlumni() throws Exception {
 		Student student = createTestStudent();
-		when(studentService.markAsAlumni(eq(1L), any())).thenReturn(student);
+		when(studentService.markAsAlumni(eq("12345678Z"), any())).thenReturn(student);
 		
 		Map<String, Object> request = Map.of(
 				"alumniType", "BACHELOR",
 				"graduationYear", 2023
 		);
 		
-		mockMvc.perform(patch("/api/v1/students/1/alumni")
+		mockMvc.perform(patch("/api/v1/students/12345678Z/alumni")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(request)))
 				.andExpect(status().isOk())
@@ -382,7 +356,7 @@ class StudentControllerTest {
 				"Tipus d'alumni no vàlid: " + 1L,
 				ErrorCode.BUSINESS_RULE_VIOLATION
 		);
-		when(studentService.markAsAlumni(eq(1L), any()))
+		when(studentService.markAsAlumni(eq("12345678Z"), any()))
 				.thenThrow(new UpdateStudentException(List.of(violation)));
 		
 		Map<String, Object> request = Map.of(
@@ -390,7 +364,7 @@ class StudentControllerTest {
 				"graduationYear", 2023
 		);
 		
-		mockMvc.perform(patch("/api/v1/students/1/alumni")
+		mockMvc.perform(patch("/api/v1/students/12345678Z/alumni")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(request)))
 				.andExpect(status().isBadRequest())
@@ -400,25 +374,24 @@ class StudentControllerTest {
 	// ========== DELETE /{id} ==========
 	@Test
 	void shouldDeleteStudent() throws Exception {
-		doNothing().when(studentService).deleteStudent(1L);
+		doNothing().when(studentService).deleteStudent("12345678Z");
 		
-		mockMvc.perform(delete("/api/v1/students/1"))
+		mockMvc.perform(delete("/api/v1/students/12345678Z"))
 				.andExpect(status().isNoContent());
 		
-		verify(studentService, times(1)).deleteStudent(1L);
+		verify(studentService, times(1)).deleteStudent("12345678Z");
 	}
 	
 	@Test
 	void shouldReturn404WhenDeletingNonExistentStudent() throws Exception {
-		doThrow(new StudentNotFoundException(999L)).when(studentService).deleteStudent(999L);
+		doThrow(new StudentNotFoundException("12345678Z")).when(studentService).deleteStudent("12345678Z");
 		
-		mockMvc.perform(delete("/api/v1/students/999"))
+		mockMvc.perform(delete("/api/v1/students/12345678Z"))
 				.andExpect(status().isNotFound())
 				.andExpect(jsonPath("$.status").value(404))
 				.andExpect(jsonPath("$.errorCode").value("USER_NOT_FOUND"))
 				.andExpect(jsonPath("$.message").value("Multiple business rule violations"))
-				.andExpect(jsonPath("$.errors[0].field").value("id"))
-				.andExpect(jsonPath("$.errors[0].message").value("User not found with id 999"));
+				.andExpect(jsonPath("$.errors[0].message").value("User not found with dni 12345678Z"));
 		
 	}
 

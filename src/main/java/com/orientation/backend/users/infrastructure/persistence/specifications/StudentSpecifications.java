@@ -8,7 +8,7 @@ import lombok.experimental.UtilityClass;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
- * This class includes all the methods for the diferents specifications of the filters
+ * This class includes all the methods for the different specifications of the filters
  */
 @UtilityClass
 public class StudentSpecifications {

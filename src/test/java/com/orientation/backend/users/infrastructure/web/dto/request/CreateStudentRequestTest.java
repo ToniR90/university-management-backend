@@ -10,15 +10,14 @@ class CreateStudentRequestTest {
     @Test
     void shouldCreateRequestWithAllFields() {
         CreateStudentRequest request = new CreateStudentRequest(
-                "12345678Z", "Joan", "García", "López",
+                "12345678Z", "Joan", "García",
                 "joan@mail.com", "600123456", "Informàtica", "FIRST"
         );
 
         assertNotNull(request);
         assertEquals("12345678Z", request.dni());
         assertEquals("Joan", request.name());
-        assertEquals("García", request.firstSurname());
-        assertEquals("López", request.secondSurname());
+        assertEquals("García", request.surname());
         assertEquals("joan@mail.com", request.email());
         assertEquals("600123456", request.phone());
         assertEquals("Informàtica", request.degree());
@@ -26,25 +25,12 @@ class CreateStudentRequestTest {
     }
 
     @Test
-    void shouldNormalizeOptionalFieldsToNull() {
-        CreateStudentRequest request = new CreateStudentRequest(
-                "12345678Z", "Joan", "García", "  ",
-                "", "   ", "Informàtica", "FIRST"
-        );
-
-        assertNull(request.secondSurname());
-        assertNull(request.email());
-        assertNull(request.phone());
-    }
-
-    @Test
     void shouldTrimOptionalFields() {
         CreateStudentRequest request = new CreateStudentRequest(
-                "12345678Z", "Joan", "García", "  López  ",
+                "12345678Z", "Joan", "García",
                 "  joan@mail.com  ", "  600123456  ", "Informàtica", "FIRST"
         );
 
-        assertEquals("López", request.secondSurname());
         assertEquals("joan@mail.com", request.email());
         assertEquals("600123456", request.phone());
     }
@@ -52,11 +38,10 @@ class CreateStudentRequestTest {
     @Test
     void shouldAllowNullOptionalFields() {
         CreateStudentRequest request = new CreateStudentRequest(
-                "12345678Z", "Joan", "García", null,
+                "12345678Z", "Joan", "García",
                 null, null, "Informàtica", "FIRST"
         );
 
-        assertNull(request.secondSurname());
         assertNull(request.email());
         assertNull(request.phone());
     }
