@@ -5,10 +5,11 @@ import com.orientation.backend.users.application.exceptions.core.BusinessViolati
 import com.orientation.backend.users.application.exceptions.core.ErrorCode;
 
 import java.util.List;
+import java.util.UUID;
 
 public class StudentNotFoundException extends BusinessValidationException {
 
-	public StudentNotFoundException(Long id) {
+	public StudentNotFoundException(UUID id) {
 		super(
 				List.of(new BusinessViolation("id", "User not found with id " + id, ErrorCode.USER_NOT_FOUND)),
 				ErrorCode.USER_NOT_FOUND);

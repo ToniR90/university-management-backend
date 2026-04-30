@@ -11,7 +11,6 @@ import java.util.Optional;
 
 public interface StudentRepository {
     Student save(Student student);
-    Optional<Student> findById(Long id);
     Optional<Student> findByDni(Dni dni);
     boolean existsByDni(Dni dni);
     List<Student> findAll();

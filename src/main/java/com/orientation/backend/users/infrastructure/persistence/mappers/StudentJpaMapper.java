@@ -20,7 +20,7 @@ public class StudentJpaMapper {
         Optional<Email> email = Optional.ofNullable(jpaEntity.getEmail()).map(Email::of);
         Optional<Phone> phone = Optional.ofNullable(jpaEntity.getPhone()).map(Phone::of);
 
-        FullName fullName = FullName.of(jpaEntity.getName(), jpaEntity.getFirstSurname(), jpaEntity.getSecondSurname());
+        FullName fullName = FullName.of(jpaEntity.getName(), jpaEntity.getSurname());
 
         AlumniInfo alumniInfo;
         if (jpaEntity.getIsAlumni()) {
@@ -44,8 +44,8 @@ public class StudentJpaMapper {
 
         CurrentYear currentYear = CurrentYear.valueOf(jpaEntity.getCurrentYear());
 
-        Optional<DiscoveryChannel> howDidYouKnowUs = Optional.ofNullable(jpaEntity.getHowDidYouKnowUs()).map(DiscoveryChannel::valueOf);
-        Optional<ContactMethod> howDidYouContactUs = Optional.ofNullable(jpaEntity.getHowDidYouContactUs()).map(ContactMethod::valueOf);
+        Optional<DiscoveryOption> howDidYouKnowUs = Optional.ofNullable(jpaEntity.getHowDidYouKnowUs()).map(DiscoveryOption::valueOf);
+        Optional<ContactOption> howDidYouContactUs = Optional.ofNullable(jpaEntity.getHowDidYouContactUs()).map(ContactOption::valueOf);
 
         Optional<String> counselorNotes = Optional.ofNullable(jpaEntity.getCounselorNotes());
 
@@ -76,8 +76,7 @@ public class StudentJpaMapper {
         boolean active = student.isActive();
 
         String name = student.getFullName().getName();
-        String firstSurname = student.getFullName().getFirstSurname();
-        String secondSurname = student.getFullName().getSecondSurname().orElse(null);
+        String surname = student.getFullName().getSurname();
 
         String email = student.getEmail().map(Email::getValue).orElse(null);
         String phone = student.getPhone().map(Phone::getValue).orElse(null);
@@ -94,8 +93,8 @@ public class StudentJpaMapper {
         LocalDateTime rgpdSignedDate = student.getRgpdConsent().getSignedDate().orElse(null);
         Integer rgpdSignedYear = student.getRgpdConsent().getSignedYear().orElse(null);
 
-        String howDidYouKnowUs = student.getHowDidYouKnowUs().map(DiscoveryChannel::name).orElse(null);
-        String howDidYouContactUs = student.getHowDidYouContactUs().map(ContactMethod::name).orElse(null);
+        String howDidYouKnowUs = student.getHowDidYouKnowUs().map(DiscoveryOption::name).orElse(null);
+        String howDidYouContactUs = student.getHowDidYouContactUs().map(ContactOption::name).orElse(null);
 
         String counselorNotes = student.getCounselorNotes().orElse(null);
 
@@ -109,8 +108,7 @@ public class StudentJpaMapper {
         jpaEntity.setActive(active);
         jpaEntity.setDni(dni);
         jpaEntity.setName(name);
-        jpaEntity.setFirstSurname(firstSurname);
-        jpaEntity.setSecondSurname(secondSurname);
+        jpaEntity.setSurname(surname);
         jpaEntity.setEmail(email);
         jpaEntity.setPhone(phone);
         jpaEntity.setDegree(degree);

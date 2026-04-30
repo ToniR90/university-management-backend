@@ -10,7 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface SpringDataStudentRepository extends JpaRepository<StudentJpaEntity, Long>, JpaSpecificationExecutor<StudentJpaEntity> {
-    Optional<StudentJpaEntity> findByIdAndActiveTrue(Long id);
     Optional<StudentJpaEntity> findByDniAndActiveTrue(String dni);
     List<StudentJpaEntity> findAllByActiveTrue();
     boolean existsByDniAndActiveTrue(String dni);

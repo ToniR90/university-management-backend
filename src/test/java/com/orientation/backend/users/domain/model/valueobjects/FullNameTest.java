@@ -9,115 +9,86 @@ class FullNameTest {
     // ========== Validation Tests ==========
    @Test
     void shouldCreateFullNameWithAllFields() {
-       FullName fullName = FullName.of("Dante", "Alighiero", "Alighieri");
+       FullName fullName = FullName.of("Dante", "Alighiero");
 
        assertNotNull(fullName);
        assertEquals("Dante", fullName.getName());
-       assertEquals("Alighiero", fullName.getFirstSurname());
-       assertTrue(fullName.getSecondSurname().isPresent());
-       assertEquals("Alighieri", fullName.getSecondSurname().get());
-   }
-
-   @Test
-    void shouldCreateFullNameWithoutSecondSurname() {
-       FullName fullName = FullName.of("Dante", "Alighiero", null);
-
-       assertNotNull(fullName);
-       assertEquals("Dante", fullName.getName());
-       assertEquals("Alighiero", fullName.getFirstSurname());
-       assertTrue(fullName.getSecondSurname().isEmpty());
+       assertEquals("Alighiero", fullName.getSurname());
    }
 
    @Test
    void shouldGetFullNameString() {
-       FullName fullName = FullName.of("Dante", "Alighiero", "Alighieri");
+       FullName fullName = FullName.of("Dante", "Alighiero");
 
-       assertEquals("Dante Alighiero Alighieri" , fullName.getFullName());
+       assertEquals("Dante Alighiero" , fullName.getFullName());
    }
 
    // ========== Normalize Test ==========
    @Test
     void shouldTrimAllFields() {
-       FullName fullName = FullName.of("    Dante    ", "     Alighiero    ", "    Alighieri   ");
+       FullName fullName = FullName.of("    Dante    ", "     Alighiero    ");
 
        assertNotNull(fullName);
        assertEquals("Dante", fullName.getName());
-       assertEquals("Alighiero", fullName.getFirstSurname());
-       assertTrue(fullName.getSecondSurname().isPresent());
-       assertEquals("Alighieri", fullName.getSecondSurname().get());
+       assertEquals("Alighiero", fullName.getSurname());
    }
 
    // ========== Exception Test ==========
     @Test
     void shouldThrowExceptionForNullName() {
         assertThrows(NullPointerException.class, () -> {
-           FullName.of(null, "Alighiero", "Alighieri");
+           FullName.of(null, "Alighiero");
         });
     }
 
     @Test
     void shouldThrowExceptionForEmptyName() {
        assertThrows(IllegalArgumentException.class, () -> {
-           FullName.of("", "Alighiero", "Alighieri");
+           FullName.of("", "Alighiero");
        });
     }
 
     @Test
     void shouldThrowExceptionForBlankName(){
         assertThrows(IllegalArgumentException.class, () -> {
-            FullName.of(" ", "Alighiero", "Alighieri");
+            FullName.of(" ", "Alighiero");
         });
     }
 
     @Test
-    void shouldThrowExceptionForNullFirstSurname() {
+    void shouldThrowExceptionForNullSurname() {
         assertThrows(NullPointerException.class, () -> {
-            FullName.of("Dante", null, "Alighieri");
+            FullName.of("Dante", null);
         });
     }
 
     @Test
-    void shouldThrowExceptionForEmptyFirstSurname() {
+    void shouldThrowExceptionForEmptySurname() {
         assertThrows(IllegalArgumentException.class, () -> {
-            FullName.of("Dante", "", "Alighieri");
+            FullName.of("Dante", "");
         });
     }
 
     @Test
-    void shouldThrowExceptionForBlankFirstSurname() {
+    void shouldThrowExceptionForBlankSurname() {
         assertThrows(IllegalArgumentException.class, () -> {
-            FullName.of("Dante", " ", "Alighieri");
+            FullName.of("Dante", " ");
         });
-    }
-
-    @Test
-    void shouldAllowNullSecondSurname() {
-        FullName fullName = FullName.of("Dante", "Alighiero", null);
-
-        assertNotNull(fullName);
-    }
-
-    @Test
-    void shouldGetFullNameStringWithoutSecondSurname() {
-        FullName fullName = FullName.of("Dante", "Alighiero", null);
-
-        assertNotNull(fullName);
-        assertEquals("Dante Alighiero", fullName.getFullName());
     }
 
     // ========== Equals & HashCode ==========
     @Test
     void shouldBeEqualByValue() {
-        FullName fullName1 = FullName.of("Dante", "Alighiero", "Alighieri");
-        FullName fullName2 = FullName.of("Dante", "Alighiero", "Alighieri");
+        FullName fullName1 = FullName.of("Dante", "Alighiero");
+        FullName fullName2 = FullName.of("Dante", "Alighiero");
 
         assertEquals(fullName1, fullName2);
     }
 
     @Test
     void shouldHaveSameHashCodeForSameValue() {
-        FullName fullName1 = FullName.of("Dante", "Alighiero", "Alighieri");
-        FullName fullName2 = FullName.of("Dante", "Alighiero", "Alighieri");
+        FullName fullName1 = FullName.of("Dante", "Alighiero");
+        FullName fullName2 = FullName.of("Dante", "Alighiero");
 
         assertEquals(fullName1.hashCode(), fullName2.hashCode());
     }

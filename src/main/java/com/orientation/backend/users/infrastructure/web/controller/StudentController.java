@@ -30,13 +30,6 @@ public class StudentController {
 
     private final StudentService studentService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<StudentResponse> getStudentById(@PathVariable Long id){
-        Student student = studentService.findById(id);
-        StudentResponse response = StudentResponse.fromDomain(student);
-        return ResponseEntity.ok(response);
-    }
-
     @GetMapping("/dni/{dni}")
     public ResponseEntity<StudentResponse> getStudentByDni(@PathVariable String dni){
         Student student = studentService.findByDni(dni);
@@ -65,8 +58,7 @@ public class StudentController {
         CreateStudentCommand command = new CreateStudentCommand(
                 request.dni(),
                 request.name(),
-                request.firstSurname(),
-                request.secondSurname(),
+                request.surname(),
                 request.email(),
                 request.phone(),
                 request.degree(),
@@ -78,48 +70,48 @@ public class StudentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PatchMapping("/{id}/contact")
-    public ResponseEntity<StudentResponse> updateContact(@PathVariable Long id, @Valid @RequestBody UpdateContactRequest request){
+    @PatchMapping("/{dni}/contact")
+    public ResponseEntity<StudentResponse> updateContact(@PathVariable String dni, @Valid @RequestBody UpdateContactRequest request){
         UpdateContactCommand command = new UpdateContactCommand(
                 request.email(),
                 request.phone()
         );
 
-        Student student = studentService.updateContactInfo(id, command);
+        Student student = studentService.updateContactInfo(dni, command);
         StudentResponse response = StudentResponse.fromDomain(student);
 
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{id}/rgpd")
-    public ResponseEntity<StudentResponse> updateRgpd(@PathVariable Long id, @Valid @RequestBody UpdateRgpdRequest request){
+    @PatchMapping("/{dni}/rgpd")
+    public ResponseEntity<StudentResponse> updateRgpd(@PathVariable String dni, @Valid @RequestBody UpdateRgpdRequest request){
         UpdateRgpdConsentCommand command = new UpdateRgpdConsentCommand(
                 request.rgpdConsentStatus(),
                 request.signedYear()
         );
 
-        Student student = studentService.updateRgpdConsent(id, command);
+        Student student = studentService.updateRgpdConsent(dni, command);
         StudentResponse response = StudentResponse.fromDomain(student);
 
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{id}/alumni")
-    public ResponseEntity<StudentResponse> updateAlumni(@PathVariable Long id, @Valid @RequestBody MarkAlumniRequest request){
+    @PatchMapping("/{dni}/alumni")
+    public ResponseEntity<StudentResponse> updateAlumni(@PathVariable String dni, @Valid @RequestBody MarkAlumniRequest request){
         MarkAsAlumniCommand command = new MarkAsAlumniCommand(
                 request.alumniType(),
                 request.graduationYear()
         );
 
-        Student student = studentService.markAsAlumni(id, command);
+        Student student = studentService.markAsAlumni(dni, command);
         StudentResponse response = StudentResponse.fromDomain(student);
 
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteStudent(@PathVariable Long id){
-        studentService.deleteStudent(id);
+    @DeleteMapping("/{dni}")
+    public ResponseEntity<Void> deleteStudent(@PathVariable String dni){
+        studentService.deleteStudent(dni);
 
         return ResponseEntity.noContent().build();
     }

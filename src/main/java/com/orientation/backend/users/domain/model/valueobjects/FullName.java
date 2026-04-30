@@ -19,19 +19,17 @@ public final class FullName {
     private static final int MAX_LENGTH = 100;
 
     private final String name;
-    private final String firstSurname;
-    private final String secondSurname; // Nullable
+    private final String surname;
 
     // Private constructor
-    private FullName(String name, String firstSurname, String secondSurname) {
+    private FullName(String name, String surname) {
         this.name = validateRequired(name, "Nom");
-        this.firstSurname = validateRequired(firstSurname, "Primer cognom");
-        this.secondSurname = validateOptional(secondSurname, "Segon cognom");
+        this.surname = validateRequired(surname, "Cognom");
     }
 
     // Factory method
-    public static FullName of(String name, String firstSurname, String secondSurname) {
-        return new FullName(name, firstSurname, secondSurname);
+    public static FullName of(String name, String surname) {
+        return new FullName(name, surname);
     }
 
     // Validate required field
@@ -51,33 +49,19 @@ public final class FullName {
         return trimmed;
     }
 
-    // Validate optional field
-    private static String validateOptional(String value, String fieldName) {
-        if (value == null) {
-            return null;
-        }
-        return validateRequired(value, fieldName);
-    }
 
     // Getters
     public String getName() {
         return name;
     }
 
-    public String getFirstSurname() {
-        return firstSurname;
-    }
-
-    public Optional<String> getSecondSurname() {
-        return Optional.ofNullable(secondSurname);
+    public String getSurname() {
+        return surname;
     }
 
     // Utility method
     public String getFullName() {
-        if (secondSurname == null) {
-            return name + " " + firstSurname;
-        }
-        return name + " " + firstSurname + " " + secondSurname;
+        return name + " " + surname;
     }
 
     @Override
@@ -85,13 +69,12 @@ public final class FullName {
         if (this == o) return true;
         if (!(o instanceof FullName fullName)) return false;
         return Objects.equals(name, fullName.name) &&
-                Objects.equals(firstSurname, fullName.firstSurname) &&
-                Objects.equals(secondSurname, fullName.secondSurname);
+                Objects.equals(surname, fullName.surname);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, firstSurname, secondSurname);
+        return Objects.hash(name, surname);
     }
 
     @Override

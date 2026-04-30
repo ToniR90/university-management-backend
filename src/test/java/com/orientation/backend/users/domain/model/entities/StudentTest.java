@@ -1,7 +1,7 @@
 package com.orientation.backend.users.domain.model.entities;
 
 import com.orientation.backend.users.domain.model.enums.*;
-import com.orientation.backend.users.domain.model.exceptions.StudentAlreadyInactiveException;
+import com.orientation.backend.users.domain.model.exceptions.PersonAlreadyInactiveException;
 import com.orientation.backend.users.domain.model.valueobjects.Dni;
 import com.orientation.backend.users.domain.model.valueobjects.Email;
 import com.orientation.backend.users.domain.model.valueobjects.FullName;
@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,7 +22,7 @@ class StudentTest {
     @BeforeEach
     void setUp() {
         testDni = Dni.of("12345678Z");
-        testFullName = FullName.of("Dante", "Alighiero", "Alighieri");
+        testFullName = FullName.of("Dante", "Alighiero");
     }
 
     // ========== Helper Method ==========
@@ -295,20 +296,20 @@ class StudentTest {
     void shouldRegisterDiscoveryChannel() {
         Student student = createStudent();
 
-        student.registerDiscoveryChannel(DiscoveryChannel.WEBSITE);
+        student.registerDiscoveryChannel(DiscoveryOption.WEBSITE);
 
         assertTrue(student.getHowDidYouKnowUs().isPresent());
-        assertEquals(DiscoveryChannel.WEBSITE, student.getHowDidYouKnowUs().get());
+        assertEquals(DiscoveryOption.WEBSITE, student.getHowDidYouKnowUs().get());
     }
 
     @Test
     void shouldRegisterContactMethod() {
         Student student = createStudent();
 
-        student.registerContactMethod(ContactMethod.EMAIL);
+        student.registerContactMethod(ContactOption.EMAIL);
 
         assertTrue(student.getHowDidYouContactUs().isPresent());
-        assertEquals(ContactMethod.EMAIL, student.getHowDidYouContactUs().get());
+        assertEquals(ContactOption.EMAIL, student.getHowDidYouContactUs().get());
     }
 
     // ========== Notes Management Tests ==========
@@ -362,7 +363,7 @@ class StudentTest {
     @Test
     void shouldBeEqualById() {
         Student student1 = Student.builder()
-                .id(1L)
+                .id(UUID.randomUUID())
                 .dni(testDni)
                 .fullName(testFullName)
                 .degree(Degree.VIDEOGAME_DESIGN)
@@ -370,9 +371,9 @@ class StudentTest {
                 .build();
 
         Student student2 = Student.builder()
-                .id(1L)
+                .id(student1.id)
                 .dni(Dni.of("00000000T"))
-                .fullName(FullName.of("Jason", "Vorgees", null))
+                .fullName(FullName.of("Jason", "Vorgees"))
                 .degree(Degree.AUDIOVISUAL_MEDIA)
                 .currentYear(CurrentYear.SECOND)
                 .build();
@@ -391,7 +392,7 @@ class StudentTest {
 
         Student student2 = Student.builder()
                 .dni(testDni)
-                .fullName(FullName.of("Jason", "Vorgees", null))
+                .fullName(FullName.of("Jason", "Vorgees"))
                 .degree(Degree.AUDIOVISUAL_MEDIA)
                 .currentYear(CurrentYear.SECOND)
                 .build();
@@ -402,7 +403,7 @@ class StudentTest {
     @Test
     void shouldNotBeEqualWithDifferentId() {
         Student student1 = Student.builder()
-                .id(1L)
+                .id(UUID.randomUUID())
                 .dni(testDni)
                 .fullName(testFullName)
                 .degree(Degree.VIDEOGAME_DESIGN)
@@ -410,7 +411,7 @@ class StudentTest {
                 .build();
 
         Student student2 = Student.builder()
-                .id(2L)
+                .id(UUID.randomUUID())
                 .dni(testDni)
                 .fullName(testFullName)
                 .degree(Degree.VIDEOGAME_DESIGN)
@@ -448,6 +449,6 @@ class StudentTest {
         student.deactivate();
 
         // ACT + ASSERT
-        assertThrows(StudentAlreadyInactiveException.class, student::deactivate);
+        assertThrows(PersonAlreadyInactiveException.class, student::deactivate);
     }
 }

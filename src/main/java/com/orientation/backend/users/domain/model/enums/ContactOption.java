@@ -2,7 +2,7 @@ package com.orientation.backend.users.domain.model.enums;
 
 // TODO: Review with client in Sprint 2 - temporary values
 
-public enum ContactMethod {
+public enum ContactOption {
     EMAIL("Correu electrònic"),
     PHONE("Telèfon"),
     IN_PERSON("Presencial"),
@@ -12,7 +12,7 @@ public enum ContactMethod {
 
     private final String displayName;
 
-    ContactMethod(String displayName) {
+    ContactOption(String displayName) {
         this.displayName = displayName;
     }
 
