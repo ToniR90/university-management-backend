@@ -11,6 +11,7 @@ public class Collaborator extends Person{
     private Collaborator(Builder builder){
         super(builder);
         this.external = builder.external;
+        this.organization = builder.organization;
     }
 
     // ============================================
@@ -21,11 +22,30 @@ public class Collaborator extends Person{
         return new Builder();
     }
 
+    public boolean isExternal() {
+        return external;
+    }
+
+    public Organization getOrganization() {
+        return organization;
+    }
+
     // ============================================
     // BUILDER (Inner Static Class)
     // ============================================
     public static class Builder extends Person.Builder<Builder>{
         private boolean external;
+        private Organization organization;
+
+        public Builder external(boolean external){
+            this.external = external;
+            return this;
+        }
+
+        public Builder organization(Organization organization){
+            this.organization = organization;
+            return this;
+        }
 
         public Collaborator build() {
             return new Collaborator(this);
