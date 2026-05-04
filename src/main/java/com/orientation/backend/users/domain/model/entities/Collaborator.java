@@ -2,11 +2,15 @@ package com.orientation.backend.users.domain.model.entities;
 
 import java.util.Objects;
 
-public class Advisor extends Person{
+public class Collaborator extends Person{
+
+    private boolean external;
+    private Organization organization;
 
     // CONSTRUCTOR (Private - use Builder)
-    private Advisor(Builder builder){
+    private Collaborator(Builder builder){
         super(builder);
+        this.external = builder.external;
     }
 
     // ============================================
@@ -18,19 +22,30 @@ public class Advisor extends Person{
     }
 
     // ============================================
+    // BUILDER (Inner Static Class)
+    // ============================================
+    public static class Builder extends Person.Builder<Builder>{
+        private boolean external;
+
+        public Collaborator build() {
+            return new Collaborator(this);
+        }
+    }
+
+    // ============================================
     // EQUALS & HASHCODE (By ID - Entity)
     // ============================================
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Advisor advisor)) return false;
+        if (!(o instanceof Collaborator collaborator)) return false;
 
-        if (id != null && advisor.id != null) {
-            return Objects.equals(id, advisor.id);
+        if (id != null && collaborator.id != null) {
+            return Objects.equals(id, collaborator.id);
         }
 
-        return Objects.equals(dni, advisor.dni);
+        return Objects.equals(dni, collaborator.dni);
     }
 
     @Override
@@ -40,17 +55,8 @@ public class Advisor extends Person{
 
     @Override
     public String toString() {
-        return "Advisor: " + fullName + "\n" +
+        return "Collaborator: " + fullName + "\n" +
                 "Dni: " + dni + "\n" +
                 "Email: " + email + "\n";
-    }
-
-    // ============================================
-    // BUILDER (Inner Static Class)
-    // ============================================
-    public static class Builder extends Person.Builder<Builder> {
-        public Advisor build() {
-            return new Advisor(this);
-        }
     }
 }
