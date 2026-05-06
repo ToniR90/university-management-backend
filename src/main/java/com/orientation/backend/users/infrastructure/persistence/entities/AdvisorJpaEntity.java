@@ -12,8 +12,6 @@ import lombok.Setter;
 @Table(name = "advisor")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @PrimaryKeyJoinColumn(name = "person_id")
 public class AdvisorJpaEntity extends PersonJpaEntity{
 }
