@@ -7,16 +7,16 @@ import java.util.UUID;
 public class Note {
 
     private UUID id;
-    private Person person;
-    private Advisor advisor;
+    private UUID personId;
+    private UUID advisorId;
     private String content;
     private LocalDateTime createdAt;
 
     // CONSTRUCTOR (Private - use Builder)
     private Note(Builder builder) {
         this.id = builder.id;
-        this.person = builder.person;
-        this.advisor = builder.advisor;
+        this.personId = builder.personId;
+        this.advisorId = builder.advisorId;
         this.content = Objects.requireNonNull(builder.content);
         this.createdAt = (builder.createdAt != null) ? builder.createdAt : LocalDateTime.now();
     }
@@ -25,12 +25,12 @@ public class Note {
         return id;
     }
 
-    public Person getPerson() {
-        return person;
+    public UUID getPersonId() {
+        return personId;
     }
 
-    public Advisor getAdvisor() {
-        return advisor;
+    public UUID getAdvisorId() {
+        return advisorId;
     }
 
     public String getContent() {
@@ -53,8 +53,8 @@ public class Note {
     // ============================================
     public static class Builder {
         private UUID id;
-        private Person person;
-        private Advisor advisor;
+        private UUID personId;
+        private UUID advisorId;
         private String content;
         private LocalDateTime createdAt;
 
@@ -63,13 +63,13 @@ public class Note {
             return this;
         }
 
-        public Builder person(Person person) {
-            this.person = person;
+        public Builder personId(UUID personId) {
+            this.personId = personId;
             return this;
         }
 
-        public Builder advisor(Advisor advisor) {
-            this.advisor = advisor;
+        public Builder advisorId(UUID advisorId) {
+            this.advisorId = advisorId;
             return this;
         }
 
