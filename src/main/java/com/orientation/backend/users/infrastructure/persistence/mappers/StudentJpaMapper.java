@@ -15,12 +15,8 @@ public class StudentJpaMapper {
 
     // ========== JPA -> Domain ==========
     public static Student toDomain(StudentJpaEntity jpaEntity) {
-        Dni dni = Dni.of(jpaEntity.getDni());
-
-        Optional<Email> email = Optional.ofNullable(jpaEntity.getEmail()).map(Email::of);
-        Optional<Phone> phone = Optional.ofNullable(jpaEntity.getPhone()).map(Phone::of);
-
-        FullName fullName = FullName.of(jpaEntity.getName(), jpaEntity.getSurname());
+        Student.Builder builder = Student.builder();
+        PersonJpaMapper.fillBuilder(jpaEntity, builder);
 
         AlumniInfo alumniInfo;
         if (jpaEntity.getIsAlumni()) {
@@ -31,55 +27,23 @@ public class StudentJpaMapper {
             alumniInfo = AlumniInfo.notAlumni();
         }
 
-        RgpdConsent rgpdConsent;
-        RgpdConsentStatus status = RgpdConsentStatus.valueOf(jpaEntity.getRgpdConsentStatus());
-
-        switch (status) {
-            case PENDING -> rgpdConsent = RgpdConsent.pending();
-            case SIGNED_IN_PERSON -> rgpdConsent = RgpdConsent.signedInPerson(jpaEntity.getRgpdSignedDate());
-            case SIGNED_ONLINE -> rgpdConsent = RgpdConsent.signedOnline(jpaEntity.getRgpdSignedDate());
-            case ALREADY_SIGNED -> rgpdConsent = RgpdConsent.alreadySigned(jpaEntity.getRgpdSignedYear());
-            default -> throw new IllegalStateException("Unknown RGPD status: " + status);
-        }
-
         CurrentYear currentYear = CurrentYear.valueOf(jpaEntity.getCurrentYear());
-
-        Optional<DiscoveryOption> howDidYouKnowUs = Optional.ofNullable(jpaEntity.getHowDidYouKnowUs()).map(DiscoveryOption::valueOf);
-        Optional<ContactOption> howDidYouContactUs = Optional.ofNullable(jpaEntity.getHowDidYouContactUs()).map(ContactOption::valueOf);
 
         Optional<String> counselorNotes = Optional.ofNullable(jpaEntity.getCounselorNotes());
 
-        return Student.builder()
-                .id(jpaEntity.getId())
-                .active(jpaEntity.isActive())
-                .dni(dni)
-                .fullName(fullName)
-                .email(email)
-                .phone(phone)
-                .degree(Degree.fromString(jpaEntity.getDegree()))
-                .currentYear(currentYear)
-                .alumniInfo(alumniInfo)
-                .rgpdConsent(rgpdConsent)
-                .howDidYouKnowUs(howDidYouKnowUs)
-                .howDidYouContactUs(howDidYouContactUs)
-                .counselorNotes(counselorNotes)
-                .createdAt(jpaEntity.getCreatedAt())
-                .updatedAt(jpaEntity.getUpdatedAt())
-                .deletedAt(jpaEntity.getDeletedAt())
-                .build();
+        builder
+            .degree(Degree.fromString(jpaEntity.getDegree()))
+            .currentYear(currentYear)
+            .alumniInfo(alumniInfo)
+            .counselorNotes(counselorNotes);
+
+        return builder.build();
     }
 
     // ========== Domain -> Jpa ==========
     public static StudentJpaEntity toJpaEntity(Student student) {
-
-        String dni = student.getDni().getValue();
-        boolean active = student.isActive();
-
-        String name = student.getFullName().getName();
-        String surname = student.getFullName().getSurname();
-
-        String email = student.getEmail().map(Email::getValue).orElse(null);
-        String phone = student.getPhone().map(Phone::getValue).orElse(null);
+        StudentJpaEntity jpaEntity = new StudentJpaEntity();
+        PersonJpaMapper.fillJpaEntity(student, jpaEntity);
 
         String degree = student.getDegree().name();
 
@@ -89,42 +53,15 @@ public class StudentJpaMapper {
         String alumniType = student.getAlumniInfo().getType().map(AlumniType::name).orElse(null);
         Integer graduationYear = student.getAlumniInfo().getGraduationYear().orElse(null);
 
-        String rgpdConsentStatus = student.getRgpdConsent().getStatus().name();
-        LocalDateTime rgpdSignedDate = student.getRgpdConsent().getSignedDate().orElse(null);
-        Integer rgpdSignedYear = student.getRgpdConsent().getSignedYear().orElse(null);
-
-        String howDidYouKnowUs = student.getHowDidYouKnowUs().map(DiscoveryOption::name).orElse(null);
-        String howDidYouContactUs = student.getHowDidYouContactUs().map(ContactOption::name).orElse(null);
-
         String counselorNotes = student.getCounselorNotes().orElse(null);
 
-        LocalDateTime createdAt = student.getCreatedAt();
-        LocalDateTime updatedAt = student.getUpdatedAt();
-        LocalDateTime deletedAt = student.getDeletedAt().orElse(null);
 
-        StudentJpaEntity jpaEntity = new StudentJpaEntity();
-
-        jpaEntity.setId(student.getId());
-        jpaEntity.setActive(active);
-        jpaEntity.setDni(dni);
-        jpaEntity.setName(name);
-        jpaEntity.setSurname(surname);
-        jpaEntity.setEmail(email);
-        jpaEntity.setPhone(phone);
         jpaEntity.setDegree(degree);
         jpaEntity.setCurrentYear(currentYear);
         jpaEntity.setIsAlumni(isAlumni);
         jpaEntity.setAlumniType(alumniType);
         jpaEntity.setGraduationYear(graduationYear);
-        jpaEntity.setRgpdConsentStatus(rgpdConsentStatus);
-        jpaEntity.setRgpdSignedDate(rgpdSignedDate);
-        jpaEntity.setRgpdSignedYear(rgpdSignedYear);
-        jpaEntity.setHowDidYouKnowUs(howDidYouKnowUs);
-        jpaEntity.setHowDidYouContactUs(howDidYouContactUs);
         jpaEntity.setCounselorNotes(counselorNotes);
-        jpaEntity.setCreatedAt(createdAt);
-        jpaEntity.setUpdatedAt(updatedAt);
-        jpaEntity.setDeletedAt(deletedAt);
 
         return jpaEntity;
     }

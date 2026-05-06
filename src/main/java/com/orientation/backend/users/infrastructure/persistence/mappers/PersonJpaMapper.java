@@ -47,7 +47,7 @@ public class PersonJpaMapper {
     }
 
     // ========== Domain -> Jpa ==========
-    public static PersonJpaEntity fillJpaEntity(Person person){
+    public static void fillJpaEntity(Person person, PersonJpaEntity jpaEntity){
 
         boolean active = person.isActive();
         String dni = person.getDni().getValue();
@@ -70,8 +70,6 @@ public class PersonJpaMapper {
         LocalDateTime deletedAt = person.getDeletedAt().orElse(null);
 
 
-        PersonJpaEntity jpaEntity = new PersonJpaEntity();
-
         jpaEntity.setId(person.getId());
         jpaEntity.setActive(active);
         jpaEntity.setDni(dni);
@@ -87,7 +85,5 @@ public class PersonJpaMapper {
         jpaEntity.setCreatedAt(createdAt);
         jpaEntity.setUpdatedAt(updateAt);
         jpaEntity.setDeletedAt(deletedAt);
-
-        return jpaEntity;
     }
 }
