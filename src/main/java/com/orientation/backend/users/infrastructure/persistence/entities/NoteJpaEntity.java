@@ -24,7 +24,7 @@ public class NoteJpaEntity {
     @Column(name = "person_id")
     private UUID personId;
 
-    @Column(name = "advisor_id")
+    @Column(name = "created_by")
     private UUID advisorId;
 
     @Column(name = "content")
