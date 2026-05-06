@@ -31,7 +31,7 @@ public class Organization {
     // ============================================
     // BUILDER (Inner Static Class)
     // ============================================
-    public static class Builder{
+    public static class Builder {
         private UUID id;
         private String name;
 
