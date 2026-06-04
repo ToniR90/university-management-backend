@@ -2,6 +2,8 @@ package com.orientation.backend.sessions.domain.model.entities;
 
 import com.orientation.backend.sessions.domain.model.enums.SessionOrigin;
 import com.orientation.backend.sessions.domain.model.enums.SessionType;
+import com.orientation.backend.sessions.domain.model.exceptions.InvalidCancellationReasonException;
+import com.orientation.backend.sessions.domain.model.exceptions.SessionAlreadyInactiveException;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -104,6 +106,24 @@ public class Session {
 
     public String getSummary() {
         return summary;
+    }
+
+
+    // ============================================
+    // BUSINESS METHODS - Cancel Session Method
+    // ============================================
+
+    public void cancel(String cancelledReason){
+        if(this.cancelledAt != null){
+            throw new SessionAlreadyInactiveException();
+        }
+
+        if(cancelledReason == null || cancelledReason.isBlank()){
+            throw new InvalidCancellationReasonException();
+        }
+
+        this.cancelledAt = LocalDateTime.now();
+        this.cancelledReason = cancelledReason;
     }
 
     // ============================================
