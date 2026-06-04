@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
@@ -39,5 +41,11 @@ public class SessionRepositoryImpl implements SessionRepository {
                 .stream()
                 .map(SessionJpaMapper::toDomain)
                 .toList();
+    }
+
+    @Override
+    public Optional<Session> findById(UUID id) {
+        return jpaRepository.findById(id)
+                .map(SessionJpaMapper::toDomain);
     }
 }

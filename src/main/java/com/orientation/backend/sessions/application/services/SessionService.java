@@ -1,13 +1,18 @@
 package com.orientation.backend.sessions.application.services;
 
+import com.orientation.backend.sessions.application.commands.CancelSessionCommand;
 import com.orientation.backend.sessions.application.commands.CreateSessionCommand;
 import com.orientation.backend.sessions.domain.model.entities.Session;
 import com.orientation.backend.sessions.domain.model.enums.SessionOrigin;
 import com.orientation.backend.sessions.domain.model.enums.SessionType;
+import com.orientation.backend.sessions.domain.model.exceptions.SessionNotFoundException;
+import com.orientation.backend.sessions.domain.model.query.SessionSearchCriteria;
 import com.orientation.backend.sessions.domain.repository.SessionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -29,5 +34,19 @@ public class SessionService {
                 .build();
 
         return sessionRepository.save(session);
+    }
+
+    public List<Session> findCancellable(String title){
+        SessionSearchCriteria criteria = new SessionSearchCriteria(title);
+        return sessionRepository.findCancellable(criteria);
+    }
+
+    @Transactional
+    public void cancelSession(CancelSessionCommand command){
+        Session session = sessionRepository.findById(command.id())
+                .orElseThrow(() -> new SessionNotFoundException());
+
+        session.cancel(command.cancelReason());
+        sessionRepository.save(session);
     }
 }
