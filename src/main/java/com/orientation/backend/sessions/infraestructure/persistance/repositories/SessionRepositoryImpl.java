@@ -1,6 +1,7 @@
 package com.orientation.backend.sessions.infraestructure.persistance.repositories;
 
 import com.orientation.backend.sessions.domain.model.entities.Session;
+import com.orientation.backend.sessions.domain.model.query.SessionSearchCriteria;
 import com.orientation.backend.sessions.domain.repository.SessionRepository;
 import com.orientation.backend.sessions.infraestructure.persistance.entities.SessionJpaEntity;
 import com.orientation.backend.sessions.infraestructure.persistance.mappers.SessionJpaMapper;
@@ -27,6 +28,14 @@ public class SessionRepositoryImpl implements SessionRepository {
     @Override
     public List<Session> findAll() {
         return jpaRepository.findAll()
+                .stream()
+                .map(SessionJpaMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<Session> findCancellable(SessionSearchCriteria criteria) {
+        return jpaRepository.findCancellable(criteria.getTitle())
                 .stream()
                 .map(SessionJpaMapper::toDomain)
                 .toList();
