@@ -5,7 +5,9 @@ import com.orientation.backend.sessions.domain.model.query.SessionSearchCriteria
 import com.orientation.backend.sessions.domain.repository.SessionRepository;
 import com.orientation.backend.sessions.infraestructure.persistance.entities.SessionJpaEntity;
 import com.orientation.backend.sessions.infraestructure.persistance.mappers.SessionJpaMapper;
+import com.orientation.backend.sessions.infraestructure.persistance.specifications.SessionSpecifications;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -37,7 +39,13 @@ public class SessionRepositoryImpl implements SessionRepository {
 
     @Override
     public List<Session> findCancellable(SessionSearchCriteria criteria) {
-        return jpaRepository.findCancellable(criteria.getTitle())
+        Specification<SessionJpaEntity> spec = SessionSpecifications.isCancellable();
+
+        if (criteria.getTitle() != null) {
+            spec = spec.and(SessionSpecifications.hasTitle(criteria.getTitle()));
+        }
+
+        return jpaRepository.findAll(spec)
                 .stream()
                 .map(SessionJpaMapper::toDomain)
                 .toList();

@@ -31,6 +31,7 @@ public class SessionService {
                 .sessionType(SessionType.fromString(command.sessionType()))
                 .sessionOrigin(SessionOrigin.fromString(command.sessionOrigin()))
                 .allWelcome(command.allWelcome())
+                .startDateTime(command.startDateTime())
                 .build();
 
         return sessionRepository.save(session);

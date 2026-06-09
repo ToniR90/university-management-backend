@@ -2,6 +2,8 @@ package com.orientation.backend.sessions.infraestructure.web.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 
+import java.time.LocalDateTime;
+
 public record CreateSessionRequest (
 
         @NotBlank(message = "Title is required")
@@ -17,5 +19,7 @@ public record CreateSessionRequest (
         @NotBlank(message = "Session origin is required")
         String sessionOrigin,
 
-        boolean allWelcome
+        boolean allWelcome,
+
+        LocalDateTime startDateTime
 ){}
