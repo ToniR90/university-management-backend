@@ -10,7 +10,7 @@ import com.orientation.backend.users.application.services.StudentService;
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;
 import com.orientation.backend.users.domain.model.enums.Degree;
-import com.orientation.backend.users.domain.model.query.PageResult;
+import com.orientation.backend.shared.domain.model.query.PageResult;
 import com.orientation.backend.users.domain.model.valueobjects.Dni;
 import com.orientation.backend.users.domain.model.valueobjects.Email;
 import com.orientation.backend.users.domain.model.valueobjects.FullName;

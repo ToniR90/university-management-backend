@@ -1,5 +1,6 @@
 package com.orientation.backend.sessions.infraestructure.persistance.specifications;
 
+import com.orientation.backend.sessions.domain.model.query.SessionSearchCriteria;
 import com.orientation.backend.sessions.infraestructure.persistance.entities.SessionJpaEntity;
 import lombok.experimental.UtilityClass;
 import org.springframework.data.jpa.domain.Specification;
@@ -22,5 +23,15 @@ public class SessionSpecifications {
                         cb.lower(root.get("title")),
                         "%" + title.toLowerCase() + "%"
                 );
+    }
+
+    public static Specification<SessionJpaEntity> fromCriteria(SessionSearchCriteria criteria) {
+        Specification<SessionJpaEntity> specification = Specification.where(null);
+
+        if (criteria.getTitle() != null) {
+            specification = specification.and(hasTitle(criteria.getTitle()));
+        }
+
+        return specification;
     }
 }

@@ -4,10 +4,14 @@ import com.orientation.backend.sessions.application.commands.CancelSessionComman
 import com.orientation.backend.sessions.application.commands.CreateSessionCommand;
 import com.orientation.backend.sessions.application.services.SessionService;
 import com.orientation.backend.sessions.domain.model.entities.Session;
+import com.orientation.backend.sessions.domain.model.query.SessionSearchCriteria;
 import com.orientation.backend.sessions.infraestructure.web.dto.request.CancelSessionRequest;
 import com.orientation.backend.sessions.infraestructure.web.dto.request.CreateSessionRequest;
 import com.orientation.backend.sessions.infraestructure.web.dto.response.CancellableSessionResponse;
+import com.orientation.backend.sessions.infraestructure.web.dto.response.PagedSessionResponse;
 import com.orientation.backend.sessions.infraestructure.web.dto.response.SessionResponse;
+import com.orientation.backend.shared.domain.model.query.PageResult;
+import com.orientation.backend.shared.domain.model.query.Pagination;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -39,6 +43,17 @@ public class SessionController {
         SessionResponse response = SessionResponse.fromDomain(session);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<PagedSessionResponse> getAllSessions(@RequestParam (defaultValue = "0") int page,
+                                                               @RequestParam (defaultValue = "20") int size,
+                                                               @RequestParam (required = false) String title) {
+        Pagination pagination = new Pagination(page, size);
+        SessionSearchCriteria criteria = new SessionSearchCriteria(title);
+        PageResult<Session> sessions = sessionService.searchSessions(criteria, pagination);
+
+        return ResponseEntity.ok(PagedSessionResponse.fromDomain(sessions));
     }
 
     @GetMapping("/cancellable")

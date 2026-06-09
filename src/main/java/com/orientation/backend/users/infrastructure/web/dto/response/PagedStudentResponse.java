@@ -1,7 +1,7 @@
 package com.orientation.backend.users.infrastructure.web.dto.response;
 
 import com.orientation.backend.users.domain.model.entities.Student;
-import com.orientation.backend.users.domain.model.query.PageResult;
+import com.orientation.backend.shared.domain.model.query.PageResult;
 
 import java.util.List;
 
