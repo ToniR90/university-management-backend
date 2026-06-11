@@ -7,8 +7,8 @@ import com.orientation.backend.users.application.commands.UpdateRgpdConsentComma
 import com.orientation.backend.users.application.exceptions.CreatedStudentException;
 import com.orientation.backend.users.application.exceptions.UpdateStudentException;
 import com.orientation.backend.users.application.exceptions.StudentNotFoundException;
-import com.orientation.backend.users.application.exceptions.core.BusinessViolation;
-import com.orientation.backend.users.application.exceptions.core.ErrorCode;
+import com.orientation.backend.shared.application.exceptions.core.BusinessViolation;
+import com.orientation.backend.shared.application.exceptions.core.ErrorCode;
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.enums.AlumniType;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;

@@ -1,10 +1,13 @@
 package com.orientation.backend.sessions.infraestructure.web.controller;
 
+import com.orientation.backend.sessions.application.commands.AddAssistantCommand;
 import com.orientation.backend.sessions.application.commands.CancelSessionCommand;
 import com.orientation.backend.sessions.application.commands.CreateSessionCommand;
+import com.orientation.backend.sessions.application.commands.RemoveAssistantCommand;
 import com.orientation.backend.sessions.application.services.SessionService;
 import com.orientation.backend.sessions.domain.model.entities.Session;
 import com.orientation.backend.sessions.domain.model.query.SessionSearchCriteria;
+import com.orientation.backend.sessions.infraestructure.web.dto.request.AddAssistantRequest;
 import com.orientation.backend.sessions.infraestructure.web.dto.request.CancelSessionRequest;
 import com.orientation.backend.sessions.infraestructure.web.dto.request.CreateSessionRequest;
 import com.orientation.backend.sessions.infraestructure.web.dto.response.CancellableSessionResponse;
@@ -43,6 +46,20 @@ public class SessionController {
         SessionResponse response = SessionResponse.fromDomain(session);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/{sessionId}/assistants")
+    public ResponseEntity<Void> addAssistant(@PathVariable UUID sessionId, @Valid @RequestBody AddAssistantRequest request) {
+        AddAssistantCommand command = new AddAssistantCommand(sessionId, request.personDni());
+        sessionService.addAssistant(command);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @DeleteMapping("/{sessionId}/assistants/{dni}")
+    public ResponseEntity<Void> removeAssistant(@PathVariable UUID sessionId, @PathVariable String dni) {
+        RemoveAssistantCommand command = new RemoveAssistantCommand(sessionId, dni);
+        sessionService.removeAssistant(command);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping

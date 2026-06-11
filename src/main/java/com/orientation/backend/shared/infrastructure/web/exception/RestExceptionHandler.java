@@ -1,12 +1,17 @@
-package com.orientation.backend.users.infrastructure.web.exception;
+package com.orientation.backend.shared.infrastructure.web.exception;
 
-import com.orientation.backend.users.infrastructure.web.dto.response.ApiError;
+import com.orientation.backend.sessions.domain.model.exceptions.AssistantNotFoundException;
+import com.orientation.backend.sessions.domain.model.exceptions.InvalidCancellationReasonException;
+import com.orientation.backend.sessions.domain.model.exceptions.PersonNotFoundException;
+import com.orientation.backend.sessions.domain.model.exceptions.SessionAlreadyInactiveException;
+import com.orientation.backend.sessions.domain.model.exceptions.SessionNotFoundException;
+import com.orientation.backend.shared.infrastructure.web.dto.response.ApiError;
 import com.orientation.backend.users.application.exceptions.CreatedStudentException;
 import com.orientation.backend.users.application.exceptions.StudentNotFoundException;
 import com.orientation.backend.users.application.exceptions.UpdateStudentException;
-import com.orientation.backend.users.application.exceptions.core.BusinessValidationException;
-import com.orientation.backend.users.application.exceptions.core.FieldErrorDetail;
-import com.orientation.backend.users.application.exceptions.core.ErrorCode;
+import com.orientation.backend.shared.application.exceptions.core.BusinessValidationException;
+import com.orientation.backend.shared.application.exceptions.core.FieldErrorDetail;
+import com.orientation.backend.shared.application.exceptions.core.ErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -39,13 +44,40 @@ public class RestExceptionHandler {
 		return handleBusinessValidation(ex, HttpStatus.BAD_REQUEST);
 	}
 
+	// ========== Sessions Exceptions ==========
+
+	@ExceptionHandler(SessionNotFoundException.class)
+	public ResponseEntity<ApiError> handleSessionNotFound(SessionNotFoundException ex) {
+		return buildErrorResponse(HttpStatus.NOT_FOUND, null, ex.getMessage(), List.of());
+	}
+
+	@ExceptionHandler(PersonNotFoundException.class)
+	public ResponseEntity<ApiError> handlePersonNotFound(PersonNotFoundException ex) {
+		return buildErrorResponse(HttpStatus.NOT_FOUND, null, ex.getMessage(), List.of());
+	}
+
+	@ExceptionHandler(AssistantNotFoundException.class)
+	public ResponseEntity<ApiError> handleAssistantNotFound(AssistantNotFoundException ex) {
+		return buildErrorResponse(HttpStatus.NOT_FOUND, null, ex.getMessage(), List.of());
+	}
+
+	@ExceptionHandler(SessionAlreadyInactiveException.class)
+	public ResponseEntity<ApiError> handleSessionAlreadyInactive(SessionAlreadyInactiveException ex) {
+		return buildErrorResponse(HttpStatus.CONFLICT, null, ex.getMessage(), List.of());
+	}
+
+	@ExceptionHandler(InvalidCancellationReasonException.class)
+	public ResponseEntity<ApiError> handleInvalidCancellationReason(InvalidCancellationReasonException ex) {
+		return buildErrorResponse(HttpStatus.BAD_REQUEST, null, ex.getMessage(), List.of());
+	}
+
 	@ExceptionHandler(BusinessValidationException.class)
 	public ResponseEntity<ApiError> handleBusinessValidationException(BusinessValidationException exception) {
 		return handleBusinessValidation(exception, HttpStatus.BAD_REQUEST);
 	}
 
 	private ResponseEntity<ApiError> handleBusinessValidation(BusinessValidationException exception,
-			HttpStatus status) {
+	                                                          HttpStatus status) {
 		List<FieldErrorDetail> fieldErrors = exception.getViolations().stream()
 				.map(v -> new FieldErrorDetail(v.field(), v.message()))
 				.toList();
@@ -86,7 +118,7 @@ public class RestExceptionHandler {
 	}
 
 	private ResponseEntity<ApiError> buildErrorResponse(HttpStatus status, ErrorCode errorCode, String message,
-			List<FieldErrorDetail> errors) {
+	                                                    List<FieldErrorDetail> errors) {
 		ApiError apiError = new ApiError(
 				LocalDateTime.now(),
 				status.value(),
