@@ -1,5 +1,6 @@
 package com.orientation.backend.users.domain.model.query;
 
+import com.orientation.backend.shared.domain.model.query.PageResult;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

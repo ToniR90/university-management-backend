@@ -1,4 +1,4 @@
-package com.orientation.backend.users.application.exceptions.core;
+package com.orientation.backend.shared.application.exceptions.core;
 
 public enum ErrorCode {
     VALIDATION_ERROR,

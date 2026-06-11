@@ -1,8 +1,8 @@
 package com.orientation.backend.users.application.exceptions;
 
-import com.orientation.backend.users.application.exceptions.core.BusinessValidationException;
-import com.orientation.backend.users.application.exceptions.core.BusinessViolation;
-import com.orientation.backend.users.application.exceptions.core.ErrorCode;
+import com.orientation.backend.shared.application.exceptions.core.BusinessValidationException;
+import com.orientation.backend.shared.application.exceptions.core.BusinessViolation;
+import com.orientation.backend.shared.application.exceptions.core.ErrorCode;
 
 import java.util.List;
 import java.util.UUID;

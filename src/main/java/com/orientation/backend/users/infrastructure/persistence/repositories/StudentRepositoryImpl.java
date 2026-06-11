@@ -1,8 +1,8 @@
 package com.orientation.backend.users.infrastructure.persistence.repositories;
 
 import com.orientation.backend.users.domain.model.entities.Student;
-import com.orientation.backend.users.domain.model.query.PageResult;
-import com.orientation.backend.users.domain.model.query.Pagination;
+import com.orientation.backend.shared.domain.model.query.PageResult;
+import com.orientation.backend.shared.domain.model.query.Pagination;
 import com.orientation.backend.users.domain.model.query.StudentSearchCriteria;
 import com.orientation.backend.users.domain.model.valueobjects.Dni;
 import com.orientation.backend.users.domain.repository.StudentRepository;

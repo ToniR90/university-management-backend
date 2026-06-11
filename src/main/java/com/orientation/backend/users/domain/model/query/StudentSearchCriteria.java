@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public class StudentSearchCriteria {
-
     private final String name;
     private final String dni;
     private final CurrentYear currentYear;

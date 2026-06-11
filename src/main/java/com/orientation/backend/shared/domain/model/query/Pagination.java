@@ -1,4 +1,4 @@
-package com.orientation.backend.users.domain.model.query;
+package com.orientation.backend.shared.domain.model.query;
 
 import lombok.Getter;
 
