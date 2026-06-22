@@ -1,9 +1,9 @@
 package com.orientation.backend.users.application.services;
 
-import com.orientation.backend.users.application.commands.CreateStudentCommand;
-import com.orientation.backend.users.application.commands.MarkAsAlumniCommand;
-import com.orientation.backend.users.application.commands.UpdateContactCommand;
-import com.orientation.backend.users.application.commands.UpdateRgpdConsentCommand;
+import com.orientation.backend.users.application.commands.students.CreateStudentCommand;
+import com.orientation.backend.users.application.commands.students.MarkAsAlumniCommand;
+import com.orientation.backend.users.application.commands.students.UpdateContactCommand;
+import com.orientation.backend.users.application.commands.students.UpdateRgpdConsentCommand;
 import com.orientation.backend.users.application.exceptions.CreatedStudentException;
 import com.orientation.backend.users.application.exceptions.StudentNotFoundException;
 import com.orientation.backend.users.application.exceptions.UpdateStudentException;

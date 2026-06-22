@@ -1,4 +1,4 @@
-package com.orientation.backend.users.application.commands;
+package com.orientation.backend.users.application.commands.students;
 
 public record CreateStudentCommand (
     String dni,
