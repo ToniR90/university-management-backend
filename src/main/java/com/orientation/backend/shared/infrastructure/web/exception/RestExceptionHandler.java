@@ -6,9 +6,9 @@ import com.orientation.backend.sessions.domain.model.exceptions.PersonNotFoundEx
 import com.orientation.backend.sessions.domain.model.exceptions.SessionAlreadyInactiveException;
 import com.orientation.backend.sessions.domain.model.exceptions.SessionNotFoundException;
 import com.orientation.backend.shared.infrastructure.web.dto.response.ApiError;
-import com.orientation.backend.users.application.exceptions.CreatedStudentException;
-import com.orientation.backend.users.application.exceptions.StudentNotFoundException;
-import com.orientation.backend.users.application.exceptions.UpdateStudentException;
+import com.orientation.backend.users.application.exceptions.students.CreatedStudentException;
+import com.orientation.backend.users.application.exceptions.students.StudentNotFoundException;
+import com.orientation.backend.users.application.exceptions.students.UpdateStudentException;
 import com.orientation.backend.shared.application.exceptions.core.BusinessValidationException;
 import com.orientation.backend.shared.application.exceptions.core.FieldErrorDetail;
 import com.orientation.backend.shared.application.exceptions.core.ErrorCode;
