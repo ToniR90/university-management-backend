@@ -6,8 +6,8 @@ import com.orientation.backend.shared.application.exceptions.core.ErrorCode;
 
 import java.util.List;
 
-public class CreateAdvisorException extends BusinessValidationException {
-    public CreateAdvisorException(List<BusinessViolation> violations) {
+public class CreatedAdvisorException extends BusinessValidationException {
+    public CreatedAdvisorException(List<BusinessViolation> violations) {
 
         super(violations, ErrorCode.USER_ALREADY_EXISTS);
     }
