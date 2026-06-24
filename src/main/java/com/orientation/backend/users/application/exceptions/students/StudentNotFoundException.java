@@ -1,4 +1,4 @@
-package com.orientation.backend.users.application.exceptions;
+package com.orientation.backend.users.application.exceptions.students;
 
 import com.orientation.backend.shared.application.exceptions.core.BusinessValidationException;
 import com.orientation.backend.shared.application.exceptions.core.BusinessViolation;

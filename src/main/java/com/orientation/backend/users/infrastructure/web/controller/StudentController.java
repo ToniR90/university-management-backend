@@ -1,9 +1,9 @@
 package com.orientation.backend.users.infrastructure.web.controller;
 
-import com.orientation.backend.users.application.commands.CreateStudentCommand;
-import com.orientation.backend.users.application.commands.MarkAsAlumniCommand;
-import com.orientation.backend.users.application.commands.UpdateContactCommand;
-import com.orientation.backend.users.application.commands.UpdateRgpdConsentCommand;
+import com.orientation.backend.users.application.commands.students.CreateStudentCommand;
+import com.orientation.backend.users.application.commands.students.MarkAsAlumniCommand;
+import com.orientation.backend.users.application.commands.students.UpdateContactCommand;
+import com.orientation.backend.users.application.commands.students.UpdateRgpdConsentCommand;
 import com.orientation.backend.users.application.services.StudentService;
 import com.orientation.backend.users.domain.model.entities.Student;
 import com.orientation.backend.users.domain.model.enums.CurrentYear;

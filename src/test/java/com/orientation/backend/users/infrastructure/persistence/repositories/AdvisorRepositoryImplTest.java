@@ -32,7 +32,7 @@ class AdvisorRepositoryImplTest extends BaseIntegrationTest {
         return Advisor.builder()
                 .dni(Dni.of(dni))
                 .fullName(FullName.of("Test", "Advisor"))
-                .email(Email.of(email))
+                .email(Optional.of(Email.of(email)))
                 .build();
     }
 

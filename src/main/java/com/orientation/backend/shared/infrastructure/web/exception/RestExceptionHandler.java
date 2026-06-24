@@ -6,9 +6,11 @@ import com.orientation.backend.sessions.domain.model.exceptions.PersonNotFoundEx
 import com.orientation.backend.sessions.domain.model.exceptions.SessionAlreadyInactiveException;
 import com.orientation.backend.sessions.domain.model.exceptions.SessionNotFoundException;
 import com.orientation.backend.shared.infrastructure.web.dto.response.ApiError;
-import com.orientation.backend.users.application.exceptions.CreatedStudentException;
-import com.orientation.backend.users.application.exceptions.StudentNotFoundException;
-import com.orientation.backend.users.application.exceptions.UpdateStudentException;
+import com.orientation.backend.users.application.exceptions.advisors.AdvisorNotFoundException;
+import com.orientation.backend.users.application.exceptions.advisors.CreatedAdvisorException;
+import com.orientation.backend.users.application.exceptions.students.CreatedStudentException;
+import com.orientation.backend.users.application.exceptions.students.StudentNotFoundException;
+import com.orientation.backend.users.application.exceptions.students.UpdateStudentException;
 import com.orientation.backend.shared.application.exceptions.core.BusinessValidationException;
 import com.orientation.backend.shared.application.exceptions.core.FieldErrorDetail;
 import com.orientation.backend.shared.application.exceptions.core.ErrorCode;
@@ -29,6 +31,8 @@ public class RestExceptionHandler {
 
 	private static final Logger log = LoggerFactory.getLogger(RestExceptionHandler.class);
 
+	// ========== Students Exceptions ==========
+
 	@ExceptionHandler(CreatedStudentException.class)
 	public ResponseEntity<ApiError> handleCreatedStudent(CreatedStudentException ex) {
 		return handleBusinessValidation(ex, HttpStatus.CONFLICT);
@@ -42,6 +46,18 @@ public class RestExceptionHandler {
 	@ExceptionHandler(UpdateStudentException.class)
 	public ResponseEntity<ApiError> handleUpdateStudent(UpdateStudentException ex) {
 		return handleBusinessValidation(ex, HttpStatus.BAD_REQUEST);
+	}
+
+	// ========== Advisors Exceptions ==========
+
+	@ExceptionHandler(CreatedAdvisorException.class)
+	public ResponseEntity<ApiError> handleCreatedAdvisor(CreatedAdvisorException ex) {
+		return handleBusinessValidation(ex, HttpStatus.CONFLICT);
+	}
+
+	@ExceptionHandler(AdvisorNotFoundException.class)
+	public ResponseEntity<ApiError> handleAdvisorNotFound(AdvisorNotFoundException ex) {
+		return handleBusinessValidation(ex, HttpStatus.NOT_FOUND);
 	}
 
 	// ========== Sessions Exceptions ==========

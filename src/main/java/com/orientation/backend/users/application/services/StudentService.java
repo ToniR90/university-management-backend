@@ -1,12 +1,12 @@
 package com.orientation.backend.users.application.services;
 
-import com.orientation.backend.users.application.commands.CreateStudentCommand;
-import com.orientation.backend.users.application.commands.MarkAsAlumniCommand;
-import com.orientation.backend.users.application.commands.UpdateContactCommand;
-import com.orientation.backend.users.application.commands.UpdateRgpdConsentCommand;
-import com.orientation.backend.users.application.exceptions.CreatedStudentException;
-import com.orientation.backend.users.application.exceptions.UpdateStudentException;
-import com.orientation.backend.users.application.exceptions.StudentNotFoundException;
+import com.orientation.backend.users.application.commands.students.CreateStudentCommand;
+import com.orientation.backend.users.application.commands.students.MarkAsAlumniCommand;
+import com.orientation.backend.users.application.commands.students.UpdateContactCommand;
+import com.orientation.backend.users.application.commands.students.UpdateRgpdConsentCommand;
+import com.orientation.backend.users.application.exceptions.students.CreatedStudentException;
+import com.orientation.backend.users.application.exceptions.students.UpdateStudentException;
+import com.orientation.backend.users.application.exceptions.students.StudentNotFoundException;
 import com.orientation.backend.shared.application.exceptions.core.BusinessViolation;
 import com.orientation.backend.shared.application.exceptions.core.ErrorCode;
 import com.orientation.backend.users.domain.model.entities.Student;
