@@ -8,6 +8,8 @@ import com.orientation.backend.sessions.domain.model.exceptions.SessionNotFoundE
 import com.orientation.backend.shared.infrastructure.web.dto.response.ApiError;
 import com.orientation.backend.users.application.exceptions.advisors.AdvisorNotFoundException;
 import com.orientation.backend.users.application.exceptions.advisors.CreatedAdvisorException;
+import com.orientation.backend.users.application.exceptions.collaborators.CollaboratorNotFoundException;
+import com.orientation.backend.users.application.exceptions.collaborators.CreatedCollaboratorException;
 import com.orientation.backend.users.application.exceptions.students.CreatedStudentException;
 import com.orientation.backend.users.application.exceptions.students.StudentNotFoundException;
 import com.orientation.backend.users.application.exceptions.students.UpdateStudentException;
@@ -57,6 +59,18 @@ public class RestExceptionHandler {
 
 	@ExceptionHandler(AdvisorNotFoundException.class)
 	public ResponseEntity<ApiError> handleAdvisorNotFound(AdvisorNotFoundException ex) {
+		return handleBusinessValidation(ex, HttpStatus.NOT_FOUND);
+	}
+
+	// ========== Collaborators Exceptions ==========
+
+	@ExceptionHandler(CreatedCollaboratorException.class)
+	public ResponseEntity<ApiError> handleCreatedCollaborator(CreatedCollaboratorException ex) {
+		return handleBusinessValidation(ex, HttpStatus.CONFLICT);
+	}
+
+	@ExceptionHandler(CollaboratorNotFoundException.class)
+	public ResponseEntity<ApiError> handleCollaboratorNotFound(CollaboratorNotFoundException ex) {
 		return handleBusinessValidation(ex, HttpStatus.NOT_FOUND);
 	}
 
