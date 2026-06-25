@@ -13,5 +13,4 @@ public interface SpringDataCollaboratorRepository extends JpaRepository<Collabor
     Optional<CollaboratorJpaEntity> findByDniAndActiveTrue(String dni);
     List<CollaboratorJpaEntity> findAllByActiveTrue();
     boolean existsByDniAndActiveTrue(String dni);
-
 }
