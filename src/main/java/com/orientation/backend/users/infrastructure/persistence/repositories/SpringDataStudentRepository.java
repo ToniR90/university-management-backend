@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Repository
 public interface SpringDataStudentRepository extends JpaRepository<StudentJpaEntity, UUID>, JpaSpecificationExecutor<StudentJpaEntity> {
     Optional<StudentJpaEntity> findByDniAndActiveTrue(String dni);
     List<StudentJpaEntity> findAllByActiveTrue();

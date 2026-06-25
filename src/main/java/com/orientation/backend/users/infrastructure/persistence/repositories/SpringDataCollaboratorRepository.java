@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Repository
 public interface SpringDataCollaboratorRepository extends JpaRepository<CollaboratorJpaEntity, UUID>, JpaSpecificationExecutor<CollaboratorJpaEntity> {
     Optional<CollaboratorJpaEntity> findByDniAndActiveTrue(String dni);
     List<CollaboratorJpaEntity> findAllByActiveTrue();
