@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 import java.util.UUID;
 
-@Repository
 public interface SpringDataPersonRepository extends JpaRepository<PersonJpaEntity, UUID> {
     Optional<PersonJpaEntity> findByDniAndActiveTrue(String dni);
 }

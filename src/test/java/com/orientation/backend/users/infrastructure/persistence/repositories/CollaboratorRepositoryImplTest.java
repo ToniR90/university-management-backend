@@ -32,7 +32,7 @@ class CollaboratorRepositoryImplTest extends BaseIntegrationTest {
         return Collaborator.builder()
                 .dni(Dni.of(dni))
                 .fullName(FullName.of("Test", "Collaborator"))
-                .email(Email.of(email))
+                .email(Optional.of(Email.of(email)))
                 .external(false)
                 .build();
     }
@@ -103,7 +103,7 @@ class CollaboratorRepositoryImplTest extends BaseIntegrationTest {
         Collaborator collaborator = Collaborator.builder()
                 .dni(Dni.of("00000020C"))
                 .fullName(FullName.of("External", "Collaborator"))
-                .email(Email.of("external@mail.com"))
+                .email(Optional.of(Email.of("external@mail.com")))
                 .external(true)
                 .build();
 
