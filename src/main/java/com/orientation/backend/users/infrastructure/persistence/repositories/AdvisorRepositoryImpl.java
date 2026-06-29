@@ -17,6 +17,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
@@ -71,5 +72,10 @@ public class AdvisorRepositoryImpl implements AdvisorRepository {
         List<Advisor> advisors = page.getContent().stream().map(AdvisorJpaMapper::toDomain).toList();
 
         return new PageResult<>(advisors, page.getNumber(), page.getSize(), page.getTotalElements(), page.getTotalPages());
+    }
+
+    @Override
+    public Optional<UUID> findAdvisorIdByDni(Dni dni) {
+        return jpaRepository.findAdvisorIdByDni(dni.getValue());
     }
 }

@@ -1,12 +1,10 @@
 package com.orientation.backend.sessions.infraestructure.web.controller;
 
-import com.orientation.backend.sessions.application.commands.AddAssistantCommand;
-import com.orientation.backend.sessions.application.commands.CancelSessionCommand;
-import com.orientation.backend.sessions.application.commands.CreateSessionCommand;
-import com.orientation.backend.sessions.application.commands.RemoveAssistantCommand;
+import com.orientation.backend.sessions.application.commands.*;
 import com.orientation.backend.sessions.application.services.SessionService;
 import com.orientation.backend.sessions.domain.model.entities.Session;
 import com.orientation.backend.sessions.domain.model.query.SessionSearchCriteria;
+import com.orientation.backend.sessions.infraestructure.web.dto.request.AddAdvisorToSessionRequest;
 import com.orientation.backend.sessions.infraestructure.web.dto.request.AddAssistantRequest;
 import com.orientation.backend.sessions.infraestructure.web.dto.request.CancelSessionRequest;
 import com.orientation.backend.sessions.infraestructure.web.dto.request.CreateSessionRequest;
@@ -59,6 +57,20 @@ public class SessionController {
     public ResponseEntity<Void> removeAssistant(@PathVariable UUID sessionId, @PathVariable String dni) {
         RemoveAssistantCommand command = new RemoveAssistantCommand(sessionId, dni);
         sessionService.removeAssistant(command);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{sessionId}/advisors")
+    public ResponseEntity<Void> addAdvisor(@PathVariable UUID sessionId, @Valid @RequestBody AddAdvisorToSessionRequest request) {
+        AddAdvisorToSessionCommand command = new AddAdvisorToSessionCommand(sessionId, request.advisorDni());
+        sessionService.addAdvisor(command);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @DeleteMapping("/{sessionId}/advisors/{dni}")
+    public ResponseEntity<Void> removeAdvisor(@PathVariable UUID sessionId, @PathVariable String dni) {
+        RemoveAdvisorFromSessionCommand command = new RemoveAdvisorFromSessionCommand(sessionId, dni);
+        sessionService.removeAdvisor(command);
         return ResponseEntity.noContent().build();
     }
 
