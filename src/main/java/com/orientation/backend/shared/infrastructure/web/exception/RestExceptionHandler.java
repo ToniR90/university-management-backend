@@ -1,10 +1,6 @@
 package com.orientation.backend.shared.infrastructure.web.exception;
 
-import com.orientation.backend.sessions.domain.model.exceptions.AssistantNotFoundException;
-import com.orientation.backend.sessions.domain.model.exceptions.InvalidCancellationReasonException;
-import com.orientation.backend.sessions.domain.model.exceptions.PersonNotFoundException;
-import com.orientation.backend.sessions.domain.model.exceptions.SessionAlreadyInactiveException;
-import com.orientation.backend.sessions.domain.model.exceptions.SessionNotFoundException;
+import com.orientation.backend.sessions.domain.model.exceptions.*;
 import com.orientation.backend.shared.infrastructure.web.dto.response.ApiError;
 import com.orientation.backend.users.application.exceptions.advisors.AdvisorNotFoundException;
 import com.orientation.backend.users.application.exceptions.advisors.CreatedAdvisorException;
@@ -88,6 +84,11 @@ public class RestExceptionHandler {
 
 	@ExceptionHandler(AssistantNotFoundException.class)
 	public ResponseEntity<ApiError> handleAssistantNotFound(AssistantNotFoundException ex) {
+		return buildErrorResponse(HttpStatus.NOT_FOUND, null, ex.getMessage(), List.of());
+	}
+
+	@ExceptionHandler(AdvisorInSessionNotFoundException.class)
+	public ResponseEntity<ApiError> handleAdvisorInSessionNotFound(AdvisorInSessionNotFoundException ex) {
 		return buildErrorResponse(HttpStatus.NOT_FOUND, null, ex.getMessage(), List.of());
 	}
 

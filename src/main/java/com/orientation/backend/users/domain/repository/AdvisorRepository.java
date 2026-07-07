@@ -8,6 +8,7 @@ import com.orientation.backend.users.domain.model.valueobjects.Dni;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface AdvisorRepository {
     Advisor save(Advisor advisor);
@@ -15,4 +16,5 @@ public interface AdvisorRepository {
     boolean existsByDni(Dni dni);
     List<Advisor> findAll();
     PageResult<Advisor> search(AdvisorSearchCriteria criteria, Pagination pagination);
+    Optional<UUID> findAdvisorIdByDni(Dni dni);
 }

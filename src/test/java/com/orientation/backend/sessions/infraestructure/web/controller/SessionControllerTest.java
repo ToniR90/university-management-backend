@@ -6,12 +6,10 @@ import com.orientation.backend.sessions.application.services.SessionService;
 import com.orientation.backend.sessions.domain.model.entities.Session;
 import com.orientation.backend.sessions.domain.model.enums.SessionOrigin;
 import com.orientation.backend.sessions.domain.model.enums.SessionType;
-import com.orientation.backend.sessions.domain.model.exceptions.AssistantNotFoundException;
-import com.orientation.backend.sessions.domain.model.exceptions.InvalidCancellationReasonException;
-import com.orientation.backend.sessions.domain.model.exceptions.PersonNotFoundException;
-import com.orientation.backend.sessions.domain.model.exceptions.SessionAlreadyInactiveException;
-import com.orientation.backend.sessions.domain.model.exceptions.SessionNotFoundException;
+import com.orientation.backend.sessions.domain.model.exceptions.*;
 import com.orientation.backend.shared.domain.model.query.PageResult;
+import com.orientation.backend.users.application.exceptions.advisors.AdvisorNotFoundException;
+import com.orientation.backend.users.domain.model.valueobjects.Dni;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -379,6 +377,101 @@ class SessionControllerTest {
         mockMvc.perform(delete("/api/v1/sessions/" + sessionId + "/assistants/" + dni)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404));
+    }
+
+    // Advisor tests
+
+    @Test
+    void shouldAddAdvisor() throws Exception{
+        // ARRANGE
+        UUID sessionId = UUID.randomUUID();
+        doNothing().when(sessionService).addAdvisor(any());
+
+        Map<String, Object> request = Map.of("advisorDni", "00000001R");
+
+        // ACT + ASSERT
+        mockMvc.perform(post("/api/v1/sessions/" + sessionId + "/advisors")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated());
+
+        // VERIFY
+        verify(sessionService, times(1)).addAdvisor(any());
+    }
+
+    @Test
+    void shouldReturn404WhenAddingAdvisorToNonExistentSession() throws Exception {
+        // ARRANGE
+        UUID sessionId = UUID.randomUUID();
+        doThrow(new SessionNotFoundException()).when(sessionService).addAdvisor(any());
+
+        Map<String, Object> request = Map.of("advisorDni", "00000001R");
+
+        // ACT + ASSERT
+        mockMvc.perform(post("/api/v1/sessions/" + sessionId + "/advisors")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
+    void shouldReturn404WhenAddingAdvisorWithUnknownDni() throws Exception {
+        // ARRANGE
+        UUID sessionId = UUID.randomUUID();
+        doThrow(new PersonNotFoundException()).when(sessionService).addAdvisor(any());
+
+        Map<String, Object> request = Map.of("advisorDni", "00000001R");
+
+        // ACT + ASSERT
+        mockMvc.perform(post("/api/v1/sessions/" + sessionId + "/advisors")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404));
+    }
+
+    // ========== DELETE /{sessionId}/advisors/{dni} ==========
+
+    @Test
+    void shouldRemoveAdvisor() throws Exception {
+        // ARRANGE
+        UUID sessionId = UUID.randomUUID();
+        String dni = "00000001R";
+        doNothing().when(sessionService).removeAdvisor(any());
+
+        // ACT + ASSERT
+        mockMvc.perform(delete("/api/v1/sessions/" + sessionId + "/advisors/" + dni))
+                .andExpect(status().isNoContent());
+
+        // VERIFY
+        verify(sessionService, times(1)).removeAdvisor(any());
+    }
+
+    @Test
+    void shouldReturn404WhenRemovingAdvisorWithUnknownDni() throws Exception {
+        // ARRANGE
+        UUID sessionId = UUID.randomUUID();
+        String dni = "00000001R";
+        doThrow(new PersonNotFoundException()).when(sessionService).removeAdvisor(any());
+
+        // ACT + ASSERT
+        mockMvc.perform(delete("/api/v1/sessions/" + sessionId + "/advisors/" + dni))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
+    void shouldReturn404WhenRemovingAdvisorNotInSession() throws Exception {
+        // ARRANGE
+        UUID sessionId = UUID.randomUUID();
+        String dni = "00000001R";
+        doThrow(new AdvisorInSessionNotFoundException()).when(sessionService).removeAdvisor(any());
+
+        // ACT + ASSERT
+        mockMvc.perform(delete("/api/v1/sessions/" + sessionId + "/advisors/" + dni))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404));
     }

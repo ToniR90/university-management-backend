@@ -1,22 +1,14 @@
 package com.orientation.backend.sessions.application.services;
 
-import com.orientation.backend.sessions.application.commands.AddAssistantCommand;
-import com.orientation.backend.sessions.application.commands.CancelSessionCommand;
-import com.orientation.backend.sessions.application.commands.CreateSessionCommand;
-import com.orientation.backend.sessions.application.commands.RemoveAssistantCommand;
+import com.orientation.backend.sessions.application.commands.*;
+import com.orientation.backend.sessions.domain.model.entities.AdvisorInSession;
 import com.orientation.backend.sessions.domain.model.entities.Assistant;
 import com.orientation.backend.sessions.domain.model.entities.Session;
 import com.orientation.backend.sessions.domain.model.enums.SessionOrigin;
 import com.orientation.backend.sessions.domain.model.enums.SessionType;
-import com.orientation.backend.sessions.domain.model.exceptions.AssistantNotFoundException;
-import com.orientation.backend.sessions.domain.model.exceptions.InvalidCancellationReasonException;
-import com.orientation.backend.sessions.domain.model.exceptions.PersonNotFoundException;
-import com.orientation.backend.sessions.domain.model.exceptions.SessionAlreadyInactiveException;
-import com.orientation.backend.sessions.domain.model.exceptions.SessionNotFoundException;
+import com.orientation.backend.sessions.domain.model.exceptions.*;
 import com.orientation.backend.sessions.domain.model.query.SessionSearchCriteria;
-import com.orientation.backend.sessions.domain.repository.AssistantRepository;
-import com.orientation.backend.sessions.domain.repository.PersonLookupPort;
-import com.orientation.backend.sessions.domain.repository.SessionRepository;
+import com.orientation.backend.sessions.domain.repository.*;
 import com.orientation.backend.shared.domain.model.query.PageResult;
 import com.orientation.backend.shared.domain.model.query.Pagination;
 import org.junit.jupiter.api.Test;
@@ -40,6 +32,12 @@ class SessionServiceTest {
 
     @Mock
     private SessionRepository sessionRepository;
+
+    @Mock
+    private AdvisorInSessionRepository advisorInSessionRepository;
+
+    @Mock
+    private AdvisorLookupPort advisorLookupPort;
 
     @Mock
     private PersonLookupPort personLookupPort;
@@ -316,7 +314,7 @@ class SessionServiceTest {
                 .sessionOrigin(SessionOrigin.OFFERED)
                 .allWelcome(true)
                 .startDateTime(LocalDateTime.now().plusDays(1))
-                .cancelledAt(LocalDateTime.now().minusDays(1)) // already cancelled in the past
+                .cancelledAt(LocalDateTime.now().minusDays(1)) // already canceled in the past
                 .cancelledReason("Previously cancelled")
                 .build();
 
@@ -537,5 +535,137 @@ class SessionServiceTest {
         verify(personLookupPort, times(1)).findIdByDni("12345678Z");
         verify(assistantRepository, times(1)).findBySessionId(sessionId);
         verify(assistantRepository, never()).remove(any(UUID.class), any(UUID.class));
+    }
+
+    // =====================================================
+    // ADD ADVISORS TESTS
+    // =====================================================
+
+    @Test
+    void shouldAddAdvisorSuccessfully() {
+        // ARRANGE
+        UUID sessionId = UUID.randomUUID();
+        UUID advisorId = UUID.randomUUID();
+        Session session = createCancellableTestSession(sessionId);
+        AddAdvisorToSessionCommand command = new AddAdvisorToSessionCommand(sessionId, "12345678Z");
+
+        when(sessionRepository.findById(sessionId)).thenReturn(Optional.of(session));
+        when(advisorLookupPort.findIdByDni("12345678Z")).thenReturn(Optional.of(advisorId));
+
+        // ACT
+        sessionService.addAdvisor(command);
+
+        // ASSERT + VERIFY
+        ArgumentCaptor<AdvisorInSession> captor = ArgumentCaptor.forClass(AdvisorInSession.class);
+        verify(advisorInSessionRepository, times(1)).add(captor.capture());
+
+        AdvisorInSession savedAdvisor = captor.getValue();
+        assertEquals(sessionId, savedAdvisor.getSessionId());
+        assertEquals(advisorId, savedAdvisor.getAdvisorId());
+
+        verify(sessionRepository, times(1)).findById(sessionId);
+        verify(advisorLookupPort, times(1)).findIdByDni("12345678Z");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenAddingAdvisorToNonExistingSession() {
+        // ARRANGE
+        UUID sessionId = UUID.randomUUID();
+        AddAdvisorToSessionCommand command = new AddAdvisorToSessionCommand(sessionId, "12345678Z");
+
+        when(sessionRepository.findById(sessionId)).thenReturn(Optional.empty());
+
+        // ACT + ASSERT
+        assertThrows(SessionNotFoundException.class, () -> sessionService.addAdvisor(command));
+
+        // VERIFY
+        verify(sessionRepository, times(1)).findById(sessionId);
+        verify(advisorLookupPort, never()).findIdByDni(any());
+        verify(advisorInSessionRepository, never()).add(any(AdvisorInSession.class));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenAddingAdvisorWithUnknownDni() {
+        // ARRANGE
+        UUID sessionId = UUID.randomUUID();
+        Session session = createCancellableTestSession(sessionId);
+        AddAdvisorToSessionCommand command = new AddAdvisorToSessionCommand(sessionId, "00000099F");
+
+        when(sessionRepository.findById(sessionId)).thenReturn(Optional.of(session));
+        when(advisorLookupPort.findIdByDni("00000099F")).thenReturn(Optional.empty());
+
+        // ACT + ASSERT
+        assertThrows(PersonNotFoundException.class, () -> sessionService.addAdvisor(command));
+
+        // VERIFY
+        verify(sessionRepository, times(1)).findById(sessionId);
+        verify(advisorLookupPort, times(1)).findIdByDni("00000099F");
+        verify(advisorInSessionRepository, never()).add(any(AdvisorInSession.class));
+    }
+
+    // =====================================================
+    // REMOVE ADVISOR TESTS
+    // =====================================================
+
+    @Test
+    void shouldRemoveAdvisorSuccessfully() {
+        // ARRANGE
+        UUID sessionId = UUID.randomUUID();
+        UUID advisorId = UUID.randomUUID();
+        RemoveAdvisorFromSessionCommand command = new RemoveAdvisorFromSessionCommand(sessionId, "12345678Z");
+
+        // This represents the existing row in the table
+        AdvisorInSession advisor = AdvisorInSession.builder()
+                .sessionId(sessionId)
+                .advisorId(advisorId)
+                .build();
+
+        when(advisorLookupPort.findIdByDni("12345678Z")).thenReturn(Optional.of(advisorId));
+        when(advisorInSessionRepository.findBySessionId(sessionId)).thenReturn(List.of(advisor));
+
+        // ACT
+        sessionService.removeAdvisor(command);
+
+        // VERIFY
+        verify(advisorLookupPort, times(1)).findIdByDni("12345678Z");
+        verify(advisorInSessionRepository, times(1)).findBySessionId(sessionId);
+        verify(advisorInSessionRepository, times(1)).remove(sessionId, advisorId);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenRemovingAdvisorWithUnknownDni() {
+        // ARRANGE
+        UUID sessionId = UUID.randomUUID();
+        RemoveAdvisorFromSessionCommand command = new RemoveAdvisorFromSessionCommand(sessionId, "00000099F");
+
+        when(advisorLookupPort.findIdByDni("00000099F")).thenReturn(Optional.empty());
+
+        // ACT + ASSERT
+        assertThrows(PersonNotFoundException.class, () -> sessionService.removeAdvisor(command));
+
+        // VERIFY
+        verify(advisorLookupPort, times(1)).findIdByDni("00000099F");
+        verify(advisorInSessionRepository, never()).findBySessionId(any(UUID.class));
+        verify(advisorInSessionRepository, never()).remove(any(UUID.class), any(UUID.class));
+
+    }
+
+    @Test
+    void shouldThrowExceptionWhenRemovingAdvisorNotInSession() {
+        // ARRANGE
+        UUID sessionId = UUID.randomUUID();
+        UUID advisorId = UUID.randomUUID();
+        RemoveAdvisorFromSessionCommand command = new RemoveAdvisorFromSessionCommand(sessionId, "12345678Z");
+
+        when(advisorLookupPort.findIdByDni("12345678Z")).thenReturn(Optional.of(advisorId));
+        when(advisorInSessionRepository.findBySessionId(sessionId)).thenReturn(List.of());
+
+        // ACT + ASSERT
+        assertThrows(AdvisorInSessionNotFoundException.class, () -> sessionService.removeAdvisor(command));
+
+        // VERIFY
+        verify(advisorLookupPort, times(1)).findIdByDni("12345678Z");
+        verify(advisorInSessionRepository, times(1)).findBySessionId(sessionId);
+        verify(advisorInSessionRepository, never()).remove(any(UUID.class), any(UUID.class));
     }
 }
